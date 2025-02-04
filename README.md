@@ -1,2 +1,2 @@
 # CollabStories
-Web platform to write collaborative stories in real time
+Web platform to write collaborative stories in real time using ASP.NET Core MVC
