@@ -1,0 +1,137 @@
+html, body{
+    font-family: arial;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    display: flex;
+    gap: 5px;
+}
+
+button:hover{
+    cursor: pointer;
+}
+
+textarea:focus{
+    outline: none;
+}
+
+input:focus{
+    outline: none;
+}
+
+/*Menu Lateral*/
+.MenuLateral{
+    height: 100%;
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.B-Menu{
+    background-color: ghostwhite;
+    width: 85%;
+    height: 15%;
+    border: none;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    font-size: 20px;
+    font-weight: bold;
+    transition: 1s;
+}
+
+.B-Menu:hover{
+    width: 100%;
+    transition: 1s;
+    background-color: aliceblue;
+}
+
+/*Galeria de Notas*/
+.GaleriaDeHistoria{
+    height: 100%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.Galeria{
+    height: 90%;
+    width: 100%;
+    margin-left: 40px;
+    border: solid black 2px;
+    border-radius: 20px;
+}
+
+/*Pop-up*/
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.popup-conteudo {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.popup input {
+    margin: 10px 0;
+    padding: 10px;
+    width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+.popup input:focus {
+    outline: none;
+}
+
+.popup button {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.popup button:hover {
+    transform: scale(1.05);
+}
+
+#fecharPopup {
+    background-color: #dc3545;
+}
+
+#fecharPopup:hover {
+    background-color: #c82333;
+}
+
+#salvarNome {
+    background-color: #28a745;
+}
+
+#salvarNome:hover {
+    background-color: #218838;
+}
