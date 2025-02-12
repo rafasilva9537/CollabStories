@@ -1,0 +1,242 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+body {
+    display: flex;
+}
+
+/* Menu Lateral*/
+.MenuL-Hist {
+    width: 20%;
+    height: 100vh;
+    background-color: rgb(164, 164, 187);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.user {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.foto-user {
+    width: 150px;
+    height: 150px;
+    margin-top: 25px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.material-icons{
+    color: black;
+}
+
+.nome-user {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.sair {
+    height: 60px;
+    width: 140px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    position: absolute;
+    bottom: 20px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sair:hover {
+    background-color: #cc0000;
+    transform: scale(1.05);
+}
+
+/* Bloco Principal */
+.hist-colab-block {
+    height: 100%;
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.titulo-tema {
+    width: 90%;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 25px;
+    border-radius: 20px;
+    background-color: rgb(164, 164, 187);
+}
+
+.bloco-historias {
+    width: 90%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    border: solid black 2px;
+    border-radius: 20px;
+    background-color: white;
+}
+
+.actions-hist {
+    width: 65%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    border-radius: 10px;
+    position: absolute;
+    bottom: 8%;
+}
+
+.historias-contadas {
+    height: 75%;
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-top: 10px;
+    overflow-y: auto;
+}
+
+.balao-p {
+    width: auto;
+    min-width: 50px;
+    max-width: 80%;
+    padding: 10px 20px;
+    margin-top: 15px;
+    display: inline-block;
+    font-weight: bold;
+    border-bottom-right-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    border: 2px solid black;
+    background-color: white;
+    word-wrap: break-word;
+}
+
+/* Barra de rolar*/
+
+.historias-contadas::-webkit-scrollbar {
+    width: 12px; 
+}
+
+.historias-contadas::-webkit-scrollbar-thumb {
+    background-color: rgb(164, 164, 187);
+    border-radius: 10px;
+    border: 3px solid #f5f5f5; 
+}
+
+.historias-contadas::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(164, 164, 187);
+}
+
+.historias-contadas::-webkit-scrollbar-track {
+    background-color: #f1f1f1; 
+    border-radius: 10px;
+}
+/* Input e Button */
+.input-hist {
+    width: 60%;
+    height: 40px;
+    font-size: 15px;
+    border-radius: 10px;
+    padding-left: 20px;
+}
+
+.enviar-hist {
+    width: 8%;
+    height: 45px;
+    margin-left: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.enviar-hist:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Timer */
+.timer {
+    height: 100px;
+    width: 200px;
+    margin-top: 40%;
+    margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    border-radius: 20px;
+    border: solid black 2px;
+    background-color: white;
+    color: black;
+    font-weight: bolder;
+    position: absolute;
+    bottom: 20px;
+}
+
+/* Players Section */
+.players {
+    height: 15%;
+    width: 20%;
+    display: flex;
+    border: solid black 2px;
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+    margin-top: 20px;
+}
+
+.p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-p {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    margin-left: 10px;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 50%;
+}
+
+.nome-p {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 10px;
+}
