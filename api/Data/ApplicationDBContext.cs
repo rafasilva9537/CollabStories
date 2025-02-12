@@ -15,5 +15,18 @@ namespace api.Data
 
         public DbSet<Story> Story { get; set; }
         public DbSet<StoryPart> StoryPart { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Story Model Builders
+            modelBuilder.Entity<Story>()
+                .Property(s => s.MaximumAuthors)
+                .HasDefaultValue(6);
+            modelBuilder.Entity<Story>()
+                .Property(s => s.TurnDurationSeconds)
+                .HasDefaultValue(300);
+
+            // StoryPart Model Builders   
+        }
     }
 }
