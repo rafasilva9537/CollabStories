@@ -1,4 +1,5 @@
 using api.Data;
+using api.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
 var app = builder.Build();
 

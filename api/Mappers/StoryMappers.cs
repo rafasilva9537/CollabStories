@@ -22,5 +22,18 @@ namespace api.Mappers
                 TurnDurationSeconds = storyModel.TurnDurationSeconds,
             };
         }
+
+        public static StoryMainInfoDto ToStoryMainInfoDto(this Story storyModel)
+        {
+            return new StoryMainInfoDto
+            {
+                Id = storyModel.Id,
+                Title = storyModel.Title,
+                Description = storyModel.Title,
+                CreatedDate = storyModel.CreatedDate,
+                UpdatedDate = storyModel.UpdatedDate,
+                MaximumAuthors = storyModel.MaximumAuthors,
+            };
+        }
     }
 }

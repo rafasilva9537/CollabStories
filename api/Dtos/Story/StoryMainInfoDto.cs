@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace api.Dtos.Story
 {
-    public class StoryDto
+    public class StoryMainInfoDto
     {
         public int Id { get; set; }
         public required string Title { get; set; }
@@ -13,6 +13,5 @@ namespace api.Dtos.Story
         public DateTimeOffset CreatedDate { get; init; }
         public DateTimeOffset UpdatedDate { get; set; }
         public int MaximumAuthors { get; set; }
-        public int TurnDurationSeconds { get; set; }
     }
 }
