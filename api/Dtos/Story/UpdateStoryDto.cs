@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace api.Dtos.Story
 {
-    public class CreateStoryDto
+    public class UpdateStoryDto
     {
         [Required]
         [MaxLength(90)]

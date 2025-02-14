@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using api.Dtos.Story;
 using api.Models;
@@ -23,18 +24,15 @@ namespace api.Mappers
             };
         }
 
-        public static StoryMainInfoDto ToStoryMainInfoDto(this Story storyModel)
+        public static Expression<Func<Story, StoryMainInfoDto>> ToStoryMainInfoDto = (storyModel) => new StoryMainInfoDto
         {
-            return new StoryMainInfoDto
-            {
-                Id = storyModel.Id,
-                Title = storyModel.Title,
-                Description = storyModel.Title,
-                CreatedDate = storyModel.CreatedDate,
-                UpdatedDate = storyModel.UpdatedDate,
-                MaximumAuthors = storyModel.MaximumAuthors,
-            };
-        }
+            Id = storyModel.Id,
+            Title = storyModel.Title,
+            Description = storyModel.Description,
+            CreatedDate = storyModel.CreatedDate,
+            UpdatedDate = storyModel.UpdatedDate,
+            MaximumAuthors = storyModel.MaximumAuthors,
+        };
 
 
         public static Story ToCreateStoryModel(this CreateStoryDto storyDto)

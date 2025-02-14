@@ -57,7 +57,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Story");
+                    b.ToTable("Story", (string)null);
                 });
 
             modelBuilder.Entity("api.Models.StoryPart", b =>
@@ -85,7 +85,7 @@ namespace api.Migrations
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("StoryPart");
+                    b.ToTable("StoryPart", (string)null);
                 });
 
             modelBuilder.Entity("api.Models.StoryPart", b =>

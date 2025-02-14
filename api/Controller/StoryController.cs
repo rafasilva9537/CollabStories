@@ -52,7 +52,17 @@ namespace api.Controller
         {
             StoryDto newStory = await _repository.CreateStoryAsync(createStory);
 
-            return CreatedAtAction(nameof(this.GetStory), new { id= newStory.Id }, newStory);
+            return CreatedAtAction(nameof(this.GetStory), new { id = newStory.Id }, newStory);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteStory([FromRoute] int id)
+        {
+            bool isDeleted = await _repository.DeleteStoryAsync(id);
+
+            if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story doesn't exist" });
+
+            return Ok( new {Message = "Story was successfully deleted!"} );
         }
     }
 }

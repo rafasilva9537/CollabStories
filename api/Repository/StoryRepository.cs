@@ -15,6 +15,7 @@ namespace api.Repository
         Task<IList<StoryMainInfoDto>> GetStoriesAsync();
         Task<StoryDto?> GetStoryAsync(int id);
         Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto);
+        Task<bool> DeleteStoryAsync(int id);
     }
 
     public class StoryRepository : IStoryRepository
@@ -27,8 +28,8 @@ namespace api.Repository
         }
 
         public async Task<IList<StoryMainInfoDto>> GetStoriesAsync()
-        {
-            return await _context.Story.Select(s => s.ToStoryMainInfoDto()).ToListAsync();
+        {   
+            return await _context.Story.Select(StoryMappers.ToStoryMainInfoDto).ToListAsync();
         }
 
         public async Task<StoryDto?> GetStoryAsync(int id)
@@ -42,6 +43,20 @@ namespace api.Repository
             await _context.AddAsync(storyModel);
             await _context.SaveChangesAsync();
             return storyModel.ToStoryDto();
+        }
+
+        public async Task<bool> DeleteStoryAsync(int id)
+        {
+            Story? deletedStory = await _context.Story.Where(story => story.Id == id).FirstOrDefaultAsync();
+
+            if(deletedStory == null)
+            {
+                return false;
+            }
+
+            _context.Story.Remove(deletedStory);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
