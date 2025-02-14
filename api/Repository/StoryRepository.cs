@@ -14,6 +14,7 @@ namespace api.Repository
     {
         Task<IList<StoryMainInfoDto>> GetStoriesAsync();
         Task<StoryDto?> GetStoryAsync(int id);
+        Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto);
     }
 
     public class StoryRepository : IStoryRepository
@@ -33,6 +34,14 @@ namespace api.Repository
         public async Task<StoryDto?> GetStoryAsync(int id)
         {
             return await _context.Story.Where(s => s.Id == id).Select(s => s.ToStoryDto()).FirstOrDefaultAsync();
+        }
+
+        public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto)
+        {
+            Story storyModel = createStoryDto.ToCreateStoryModel();
+            await _context.AddAsync(storyModel);
+            await _context.SaveChangesAsync();
+            return storyModel.ToStoryDto();
         }
     }
 }

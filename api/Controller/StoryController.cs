@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.Dtos.Story;
 using api.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace api.Controller
 {
@@ -22,7 +24,7 @@ namespace api.Controller
         [HttpGet]
         public async Task<IActionResult> GetAllStories()
         {
-            var stories = await _repository.GetStoriesAsync();
+            IList<StoryMainInfoDto> stories = await _repository.GetStoriesAsync();
 
             if(stories.Count == 0)
             {
@@ -35,7 +37,7 @@ namespace api.Controller
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetStory(int id)
         {
-            var story = await _repository.GetStoryAsync(id);
+            StoryDto? story = await _repository.GetStoryAsync(id);
 
             if(story == null)
             {
@@ -43,6 +45,14 @@ namespace api.Controller
             }
 
             return Ok(story);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateStory([FromBody] CreateStoryDto createStory)
+        {
+            StoryDto newStory = await _repository.CreateStoryAsync(createStory);
+
+            return CreatedAtAction(nameof(this.GetStory), new { id= newStory.Id }, newStory);
         }
     }
 }

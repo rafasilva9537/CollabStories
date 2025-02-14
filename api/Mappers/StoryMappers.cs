@@ -35,5 +35,17 @@ namespace api.Mappers
                 MaximumAuthors = storyModel.MaximumAuthors,
             };
         }
+
+
+        public static Story ToCreateStoryModel(this CreateStoryDto storyDto)
+        {
+            return new Story
+            {
+                Title = storyDto.Title,
+                Description = storyDto.Title,
+                MaximumAuthors = storyDto.MaximumAuthors,
+                TurnDurationSeconds = storyDto.TurnDurationSeconds,
+            };
+        }
     }
 }
