@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using api.Data;
 using api.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
-
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
 var app = builder.Build();

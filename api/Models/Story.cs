@@ -22,6 +22,6 @@ namespace api.Models
         [Range(30,3600, ErrorMessage = "Turn duration should be at least 30 seconds and at maximum 1 hour")]
         public int TurnDurationSeconds { get; set; } = 300;
 
-        public ICollection<StoryPart> StoryParts = new List<StoryPart>();
+        public ICollection<StoryPart> StoryParts { get; }= new List<StoryPart>();
     }
 }

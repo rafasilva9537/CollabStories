@@ -1,19 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace api.Models
+namespace api.Dtos.StoryPart
 {
-    public class StoryPart
+    public class StoryPartDto
     {
         public int Id { get; set; }
         public required string Text { get; set; }
-        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
-
+        public DateTimeOffset CreatedDate { get; set; }
         public int StoryId { get; set; }
-        public Story Story { get; set; } = null!;
-        
     }
 }
