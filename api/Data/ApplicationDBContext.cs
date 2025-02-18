@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using api.Models;
+using System.Reflection;
 
 namespace api.Data
 {
@@ -18,15 +19,7 @@ namespace api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Story Model Builders
-            modelBuilder.Entity<Story>()
-                .Property(s => s.MaximumAuthors)
-                .HasDefaultValue(6);
-            modelBuilder.Entity<Story>()
-                .Property(s => s.TurnDurationSeconds)
-                .HasDefaultValue(300);
-
-            // StoryPart Model Builders   
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }

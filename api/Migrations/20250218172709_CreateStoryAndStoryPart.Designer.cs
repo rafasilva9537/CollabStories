@@ -12,8 +12,8 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250216144122_RemoveStoryPartUpdateDate")]
-    partial class RemoveStoryPartUpdateDate
+    [Migration("20250218172709_CreateStoryAndStoryPart")]
+    partial class CreateStoryAndStoryPart
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,7 +34,9 @@ namespace api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetimeoffset");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GetUtcDate()");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -57,11 +59,13 @@ namespace api.Migrations
                         .HasDefaultValue(300);
 
                     b.Property<DateTimeOffset>("UpdatedDate")
-                        .HasColumnType("datetimeoffset");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GetUtcDate()");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Story");
+                    b.ToTable("Story", (string)null);
                 });
 
             modelBuilder.Entity("api.Models.StoryPart", b =>
@@ -73,20 +77,23 @@ namespace api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetimeoffset");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GetUtcDate()");
 
                     b.Property<int>("StoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("StoryPart");
+                    b.ToTable("StoryPart", (string)null);
                 });
 
             modelBuilder.Entity("api.Models.StoryPart", b =>
