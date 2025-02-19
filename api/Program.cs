@@ -2,6 +2,11 @@ using System.Text.Json.Serialization;
 using api.Data;
 using api.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using api.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +19,43 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+
+// Auth configs
+builder.Services.AddIdentityCore<AppUser>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+builder.Services.AddAuthentication(options => 
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options => 
+{
+    var secret = builder.Configuration["JwtConfig:Secret"];
+    var issuer = builder.Configuration["JwtConfig:ValidIssuer"];
+    var audience = builder.Configuration["JwtConfig:ValidAudiences"];
+
+    if(secret is null || issuer is null || audience is null)
+    {
+        throw new ApplicationException("Jwt is not set in the configuration");
+    }
+
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false; // TODO: change back to true in deploy
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidAudience = audience,
+        ValidIssuer = issuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+    };
+});
 
 var app = builder.Build();
 
@@ -30,5 +69,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

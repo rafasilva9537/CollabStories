@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using api.Data;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
 using api.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace api.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("collab-stories/")]
     public class StoryController : ControllerBase
@@ -22,6 +21,7 @@ namespace api.Controller
             _storyRepository = repository;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllStories()
         {
@@ -29,12 +29,13 @@ namespace api.Controller
 
             if(stories.Count == 0)
             {
-                return NotFound();
+                return Ok(new { Message = "No story exists." });
             }
 
             return Ok(stories);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetStory(int id)
         {
@@ -79,6 +80,7 @@ namespace api.Controller
             return Ok( new {Message = "Story was successfully deleted!"} );
         }
 
+        [AllowAnonymous]
         [HttpGet("{storyId:int}/story-parts")]
         public async Task<IActionResult> GetCompleteStory([FromRoute] int storyId)
         {

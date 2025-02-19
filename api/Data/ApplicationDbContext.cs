@@ -7,6 +7,7 @@ using api.Models;
 using System.Reflection;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
+
 namespace api.Data
 {
     public class ApplicationDbContext : IdentityDbContext<AppUser>
@@ -20,6 +21,7 @@ namespace api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
