@@ -11,7 +11,7 @@ using api.Data;
 
 namespace api.Migrations
 {
-    [DbContext(typeof(ApplicationDBContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20250218172709_CreateStoryAndStoryPart")]
     partial class CreateStoryAndStoryPart
     {

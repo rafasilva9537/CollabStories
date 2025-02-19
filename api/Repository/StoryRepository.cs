@@ -27,9 +27,9 @@ namespace api.Repository
 
     public class StoryRepository : IStoryRepository
     {
-        private readonly ApplicationDBContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public StoryRepository(ApplicationDBContext context)
+        public StoryRepository(ApplicationDbContext context)
         {
             _context = context;
         }

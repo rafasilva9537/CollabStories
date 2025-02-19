@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using api.Models;
 using System.Reflection;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace api.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContextoptions) : base(dbContextoptions)
         {
