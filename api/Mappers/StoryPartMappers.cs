@@ -1,45 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using api.Dtos.StoryPart;
 using api.Models;
 
-namespace api.Mappers
+namespace api.Mappers;
+
+public static class StoryPartMappers
 {
-    public static class StoryPartMappers
+    // Dto to Model
+    public static StoryPart ToStoryPartModel(this StoryPartDto storyPartDto)
     {
-        // Dto to Model
-        public static StoryPart ToStoryPartModel(this StoryPartDto storyPartDto)
+        return new StoryPart
         {
-            return new StoryPart
-            {
-                Id = storyPartDto.Id,
-                Text = storyPartDto.Text,
-                CreatedDate = storyPartDto.CreatedDate,
-                StoryId = storyPartDto.StoryId,
-            };
-        }
+            Id = storyPartDto.Id,
+            Text = storyPartDto.Text,
+            CreatedDate = storyPartDto.CreatedDate,
+            StoryId = storyPartDto.StoryId,
+        };
+    }
 
-        public static StoryPart ToStoryPartModel(this CreateStoryPartDto storyPartDto)
+    public static StoryPart ToStoryPartModel(this CreateStoryPartDto storyPartDto)
+    {
+        return new StoryPart
         {
-            return new StoryPart
-            {
-                Text = storyPartDto.Text,
-            };
-        }
+            Text = storyPartDto.Text,
+        };
+    }
 
 
-        // Model to Dto
-        public static StoryPartDto ToStoryPartDto(this StoryPart storyPart)
+    // Model to Dto
+    public static StoryPartDto ToStoryPartDto(this StoryPart storyPart)
+    {
+        return new StoryPartDto
         {
-            return new StoryPartDto
-            {
-                Id = storyPart.Id,
-                Text = storyPart.Text,
-                CreatedDate = storyPart.CreatedDate,
-                StoryId = storyPart.StoryId,
-            };
-        }
+            Id = storyPart.Id,
+            Text = storyPart.Text,
+            CreatedDate = storyPart.CreatedDate,
+            StoryId = storyPart.StoryId,
+        };
     }
 }
