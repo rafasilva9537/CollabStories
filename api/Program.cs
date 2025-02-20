@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
