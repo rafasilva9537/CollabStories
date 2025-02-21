@@ -33,7 +33,6 @@ public class TokenService : ITokenService
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        // TODO: remove possible null reference of user properties
         Claim[] claims = [
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Name, user.Email),
