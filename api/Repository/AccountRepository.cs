@@ -15,7 +15,7 @@ public struct RegisterResult
 {
     public string Token { get; init; }
     public bool Succeeded { get; init; }
-    public IEnumerable<string>? Errors { get; set; }
+    public IEnumerable<string> ErrorMessages { get; set; }
 }
 
 public class AccountRepository : IAccountRepository
@@ -35,16 +35,16 @@ public class AccountRepository : IAccountRepository
 
         if(existedUser is not null)
         {
-            return new RegisterResult { Succeeded = false, Errors = new List<string> { "User already exists" }};
+            return new RegisterResult { Succeeded = false, ErrorMessages = new List<string> { "User already exists" }};
         }
 
         AppUser newUser = registerUserDto.ToAppUserModel();
         newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
-        var result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
+        IdentityResult result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
 
         if(!result.Succeeded)
         {
-            return new RegisterResult { Succeeded = true, Errors = result.Errors.Select(e => e.Description) };
+            return new RegisterResult { Succeeded = true, ErrorMessages = result.Errors.Select(e => e.Description) };
         }
 
         string token = _tokenService.GenerateToken(newUser);

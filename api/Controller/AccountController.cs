@@ -17,20 +17,18 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUser)
     {
-        var registerResult = await _accountRepository.RegisterAsync(registerUser);
+        RegisterResult registerResult = await _accountRepository.RegisterAsync(registerUser);
         
-        var token = registerResult.Token;
+        string token = registerResult.Token;
 
-        if(registerResult.Errors is not null)
+        if(registerResult.ErrorMessages is not null)
         {
-            foreach(var errorDescription in registerResult.Errors)
+            foreach(string errorDescription in registerResult.ErrorMessages)
             {
-                ModelState.AddModelError(String.Empty, errorDescription);
+                ModelState.AddModelError("Error Message", errorDescription);
             }
             return BadRequest(ModelState);
         }
-
-        if(token == null) return StatusCode(500, new { Message = "Server was unable to create token." });
 
         return Ok(new { token });
     }
