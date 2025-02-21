@@ -3,12 +3,18 @@ using api.Models;
 using api.Dtos.AppUser;
 using api.Mappers;
 using api.Services;
+using api.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository;
 
 public interface IAccountRepository
 {
-    Task<RegisterResult> RegisterAsync(RegisterUserDto registerUser);
+    Task<IList<UserMainInfoDto>> GetUsersAsync();
+    Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto);
+    Task<string?> LoginAsync(LoginUserDto loginUserDto);
+    Task<bool> DeleteUserAsync(string username);
+    Task<AppUserDto?> GetUserAsync(string username);
 }
 
 public struct RegisterResult
@@ -20,13 +26,16 @@ public struct RegisterResult
 
 public class AccountRepository : IAccountRepository
 {
+    private readonly ApplicationDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
-    public AccountRepository(UserManager<AppUser> userManager, ITokenService tokenService)
+    public AccountRepository(ApplicationDbContext context, UserManager<AppUser> userManager, ITokenService tokenService)
     {
+        _context = context;
         _userManager = userManager;
         _tokenService = tokenService;
     }
+
 
     public async Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto)
     {
@@ -49,5 +58,44 @@ public class AccountRepository : IAccountRepository
 
         string token = _tokenService.GenerateToken(newUser);
         return new RegisterResult { Succeeded = true, Token = token};
+    }
+
+    public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
+    {
+        AppUser? loggedUser = await _userManager.FindByNameAsync(loginUserDto.UserName);
+
+        if(loggedUser is null) return null;
+
+        string password = loginUserDto.Password;
+        if(!await _userManager.CheckPasswordAsync(loggedUser, password))
+        {
+            return null;
+        }
+        
+        string token = _tokenService.GenerateToken(loggedUser);
+        return token;
+    }
+
+    public async Task<IList<UserMainInfoDto>> GetUsersAsync()
+    {
+        var usersDto = await _context.AppUser.Select(AppUserMappers.ProjetToUserMainInfoDto).ToListAsync();
+        return usersDto;
+    }
+
+    public async Task<bool> DeleteUserAsync(string username)
+    {
+        AppUser? user = await _userManager.FindByNameAsync(username);
+        
+        if(user is null) return false;
+        
+        await _userManager.DeleteAsync(user);
+        return true;
+    }
+
+    public async Task<AppUserDto?> GetUserAsync(string username)
+    {
+        AppUser? appUserModel = await _userManager.FindByNameAsync(username);
+        if(appUserModel is null) return null;
+        return appUserModel.ToAppUserDto();
     }
 }

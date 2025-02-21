@@ -41,11 +41,8 @@ public class StoryController : ControllerBase
     {
         StoryDto? story = await _storyRepository.GetStoryAsync(id);
 
-        if(story == null)
-        {
-            return NotFound();
-        }
-
+        if(story is null) return NotFound();
+        
         return Ok(story);
     }
 
