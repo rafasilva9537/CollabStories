@@ -15,6 +15,7 @@ public static class AppUserMappers
             Nickname = appUser.Nickname,
             CreatedDate = appUser.CreatedDate,
             Email = appUser.Email,
+            Description = appUser.Description,
         };
     }
 

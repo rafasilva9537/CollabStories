@@ -11,4 +11,5 @@ public class AppUserDto
     public required string UserName { get; set; }
     public required string Email { get; set; }
     public required DateTimeOffset CreatedDate { get; set; }
+    public required string Description { get; set; }
 }

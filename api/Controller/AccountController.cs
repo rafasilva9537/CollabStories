@@ -69,13 +69,17 @@ public class AccountController : ControllerBase
         return Ok(appUser);
     }
     
-    //[HttpGet("{username}/update")]
-    //public async Task<IActionResult> UpdateUser([FromBody] )
+    [HttpPut("{username}/update")]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateUserData)
+    {
+        AppUserDto updatedUser = await _userManager.UpdateUserAsync(updateUserData);
+        return CreatedAtAction(nameof(GetUser), new { username = updatedUser.UserName }, updatedUser);
+    } 
 
     [HttpDelete("{username}/delete")]
     public async Task<IActionResult> DeleteUser([FromRoute] string username)
     {
-        bool isDeleted = await _userManager.DeleteUserAsync(username);
+        bool isDeleted = await _userManager.DeleteByNameAsync(username);
         
         if(!isDeleted) return BadRequest("Impossible to delete user");
         return Ok("User was successfully deleted!");

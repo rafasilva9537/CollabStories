@@ -21,12 +21,12 @@ public interface IUserManagerExtension
     Task<IList<UserMainInfoDto>> GetUsersAsync();
     Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto);
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
-    Task<bool> DeleteUserAsync(string username);
+    Task<bool> DeleteByNameAsync(string username);
     Task<AppUserDto?> GetUserAsync(string username);
     Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
 }
 
-public class AppUserManager : UserManager<AppUser>
+public class AppUserManager : UserManager<AppUser>, IUserManagerExtension
 {
     private readonly ApplicationDbContext _context;
     private readonly ITokenService _tokenService;
@@ -77,13 +77,13 @@ public class AppUserManager : UserManager<AppUser>
         return usersDto;
     }
 
-    public async Task<bool> DeleteUserAsync(string username)
+    public async Task<bool> DeleteByNameAsync(string username)
     {
-        AppUser? user = await FindByNameAsync(username);
+        AppUser? userModel = await FindByNameAsync(username);
         
-        if(user is null) return false;
+        if(userModel is null) return false;
         
-        await DeleteAsync(user);
+        await DeleteAsync(userModel);
         return true;
     }
 
@@ -102,29 +102,19 @@ public class AppUserManager : UserManager<AppUser>
         string newPassword = updatedUserDto.NewPassword;
         bool passwordIsChanged = currentPassword != String.Empty && newPassword != String.Empty;
 
-        bool userNameIsChanged = updatedUserDto.UserName == String.Empty;
-        bool descriptionIsChanged = updatedUserDto.UserName == String.Empty;
-        bool emailIsChanged = updatedUserDto.Email == String.Empty;
+        bool userNameIsChanged = updatedUserDto.UserName != String.Empty;
+        bool descriptionIsChanged = updatedUserDto.UserName != String.Empty;
+        bool emailIsChanged = updatedUserDto.Email != String.Empty;
 
         if(passwordIsChanged)
         {
             await ChangePasswordAsync(updatedUser, currentPassword, newPassword);
         }
-        if(userNameIsChanged)
-        {
-            await SetUserNameAsync(updatedUser, updatedUserDto.UserName);
-        }
-        if(descriptionIsChanged)
-        {
-            updatedUser.Description = updatedUserDto.Description;
-            await _context.SaveChangesAsync();
-        }
-        if(emailIsChanged)
-        {
-            // TODO: change to ChangeEmailAsync()
-            await SetEmailAsync(updatedUser, updatedUserDto.Email);
-        }
+        if(userNameIsChanged) updatedUser.UserName = updatedUser.UserName;
+        if(descriptionIsChanged) updatedUser.Description = updatedUserDto.Description;
+        if(emailIsChanged) updatedUser.Email = updatedUserDto.Email;
 
+        await UpdateUserAsync(updatedUser);
         return updatedUser.ToAppUserDto();
     }
 }
