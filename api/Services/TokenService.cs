@@ -35,7 +35,7 @@ public class TokenService : ITokenService
 
         Claim[] claims = [
             new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Email, user.Email),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor {

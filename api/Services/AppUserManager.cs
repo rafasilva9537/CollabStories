@@ -26,7 +26,7 @@ public interface IUserManagerExtension
     Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
 }
 
-public class AppUserManager : UserManager<AppUser>
+public class AppUserManager : UserManager<AppUser>, IUserManagerExtension
 {
     private readonly ApplicationDbContext _context;
     private readonly ITokenService _tokenService;
@@ -37,18 +37,25 @@ public class AppUserManager : UserManager<AppUser>
         _tokenService = tokenService;
     }
 
-
     public async Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto)
     {
         AppUser? existedUser = await FindByNameAsync(registerUserDto.UserName);
 
         AppUser newUser = registerUserDto.ToAppUserModel();
         newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
-        IdentityResult result = await CreateAsync(newUser, registerUserDto.Password);
+        IdentityResult userResult = await CreateAsync(newUser, registerUserDto.Password);
+        IdentityResult roleResult = await AddToRoleAsync(newUser, AppRoles.User);
 
-        if(!result.Succeeded)
+        if(!userResult.Succeeded || !roleResult.Succeeded)
         {
-            return new RegisterResult { Succeeded = true, ErrorMessages = result.Errors.Select(e => e.Description) };
+            var resultDescription = userResult.Errors.Select(e => e.Description).ToList();
+            var roleDescription = roleResult.Errors.Select(e => e.Description).ToList();
+
+            List<string> descriptions = [];
+            descriptions.AddRange(resultDescription);
+            descriptions.AddRange(roleDescription);
+
+            return new RegisterResult { Succeeded = false, ErrorMessages =  descriptions};
         }
 
         string token = _tokenService.GenerateToken(newUser);
@@ -73,7 +80,7 @@ public class AppUserManager : UserManager<AppUser>
 
     public async Task<IList<UserMainInfoDto>> GetUsersAsync()
     {
-        var usersDto = await _context.AppUser.Select(AppUserMappers.ProjetToUserMainInfoDto).ToListAsync();
+        IList<UserMainInfoDto> usersDto = await _context.AppUser.Select(AppUserMappers.ProjetToUserMainInfoDto).ToListAsync();
         return usersDto;
     }
 

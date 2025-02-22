@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
 using api.Services;
+using api.Models;
 
 namespace api.Controller;
 
@@ -73,6 +74,7 @@ public class AccountController : ControllerBase
     //public async Task<IActionResult> UpdateUser([FromBody] )
 
     [HttpDelete("{username}/delete")]
+    [Authorize(Roles = AppRoles.Administrator)]
     public async Task<IActionResult> DeleteUser([FromRoute] string username)
     {
         bool isDeleted = await _userManager.DeleteUserAsync(username);

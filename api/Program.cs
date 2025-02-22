@@ -49,9 +49,11 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
     .AddUserManager<AppUserManager>();
+
 builder.Services.AddAuthentication(options => 
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -80,7 +82,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(options => 
+{
+    options.AddPolicy("RequiredAdminRole", policy => policy.RequireRole(AppRoles.Administrator));
+    options.AddPolicy("RequireUserOrAdminRole", policy => policy.RequireRole(AppRoles.Administrator, AppRoles.User));
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -95,5 +104,25 @@ app.MapControllers();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+//Roles
+using (var serviceScope = app.Services.CreateScope())
+{
+    var services = serviceScope.ServiceProvider;
+
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.EnsureCreated();
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    if(!await roleManager.RoleExistsAsync(AppRoles.Administrator))
+    {
+        await roleManager.CreateAsync(new IdentityRole(AppRoles.Administrator));
+    }
+    if(!await roleManager.RoleExistsAsync(AppRoles.User))
+    {
+        await roleManager.CreateAsync(new IdentityRole(AppRoles.Administrator));
+    }
+}
 
 app.Run();
