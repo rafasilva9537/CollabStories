@@ -19,4 +19,7 @@ public class Story
     public int TurnDurationSeconds { get; set; } = 300;
 
     public ICollection<StoryPart> StoryParts { get; }= new List<StoryPart>();
+
+    public string? OwnerUserId { get; set; }
+    public AppUser OwnerUser { get; set; } = null!;
 }
