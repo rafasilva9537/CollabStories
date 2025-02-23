@@ -1,10 +1,8 @@
-
 using api.Data;
-using api.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using api.Dtos.AppUser;
 using api.Mappers;
+using api.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
@@ -16,7 +14,7 @@ public struct RegisterResult
     public IEnumerable<string> ErrorMessages { get; set; }
 }
 
-public interface IUserManagerExtension
+public interface IAuthService
 {
     Task<IList<UserMainInfoDto>> GetUsersAsync();
     Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto);
@@ -26,25 +24,26 @@ public interface IUserManagerExtension
     Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
 }
 
-public class AppUserManager : UserManager<AppUser>, IUserManagerExtension
+public class AuthService : IAuthService
 {
+    // TODO: remove db context and pass to repository
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
-
-    public AppUserManager(ApplicationDbContext context, ITokenService tokenService, IUserStore<AppUser> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<AppUser> passwordHasher, IEnumerable<IUserValidator<AppUser>> userValidators, IEnumerable<IPasswordValidator<AppUser>> passwordValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services, ILogger<UserManager<AppUser>> logger) : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
+    public AuthService(ApplicationDbContext context, UserManager<AppUser> userManager, ITokenService tokenService)
     {
-        _context = context;
+        _userManager = userManager;
         _tokenService = tokenService;
+        _context = context;
     }
-
 
     public async Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto)
     {
-        AppUser? existedUser = await FindByNameAsync(registerUserDto.UserName);
+        AppUser? existedUser = await _userManager.FindByNameAsync(registerUserDto.UserName);
 
         AppUser newUser = registerUserDto.ToAppUserModel();
         newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
-        IdentityResult result = await CreateAsync(newUser, registerUserDto.Password);
+        IdentityResult result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
 
         if(!result.Succeeded)
         {
@@ -57,12 +56,12 @@ public class AppUserManager : UserManager<AppUser>, IUserManagerExtension
 
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
     {
-        AppUser? loggedUser = await FindByNameAsync(loginUserDto.UserName);
+        AppUser? loggedUser = await _userManager.FindByNameAsync(loginUserDto.UserName);
 
         if(loggedUser is null) return null;
 
         string password = loginUserDto.Password;
-        if(!await CheckPasswordAsync(loggedUser, password))
+        if(!await _userManager.CheckPasswordAsync(loggedUser, password))
         {
             return null;
         }
@@ -73,23 +72,24 @@ public class AppUserManager : UserManager<AppUser>, IUserManagerExtension
 
     public async Task<IList<UserMainInfoDto>> GetUsersAsync()
     {
+        // Use UserManager to get users here
         var usersDto = await _context.AppUser.Select(AppUserMappers.ProjetToUserMainInfoDto).ToListAsync();
         return usersDto;
     }
 
     public async Task<bool> DeleteByNameAsync(string username)
     {
-        AppUser? userModel = await FindByNameAsync(username);
+        AppUser? userModel = await _userManager.FindByNameAsync(username);
         
         if(userModel is null) return false;
         
-        await DeleteAsync(userModel);
+        await _userManager.DeleteAsync(userModel);
         return true;
     }
 
     public async Task<AppUserDto?> GetUserAsync(string username)
     {
-        AppUser? appUserModel = await FindByNameAsync(username);
+        AppUser? appUserModel = await _userManager.FindByNameAsync(username);
         if(appUserModel is null) return null;
         return appUserModel.ToAppUserDto();
     }
@@ -108,13 +108,13 @@ public class AppUserManager : UserManager<AppUser>, IUserManagerExtension
 
         if(passwordIsChanged)
         {
-            await ChangePasswordAsync(updatedUser, currentPassword, newPassword);
+            await _userManager.ChangePasswordAsync(updatedUser, currentPassword, newPassword);
         }
         if(userNameIsChanged) updatedUser.UserName = updatedUser.UserName;
         if(descriptionIsChanged) updatedUser.Description = updatedUserDto.Description;
         if(emailIsChanged) updatedUser.Email = updatedUserDto.Email;
 
-        await UpdateUserAsync(updatedUser);
+        await _userManager.UpdateAsync(updatedUser);
         return updatedUser.ToAppUserDto();
     }
 }

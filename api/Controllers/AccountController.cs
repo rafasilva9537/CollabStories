@@ -2,25 +2,27 @@ using Microsoft.AspNetCore.Mvc;
 using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
 using api.Services;
+using Microsoft.AspNetCore.Identity;
+using api.Models;
 
-namespace api.Controller;
+namespace api.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("accounts")]
 public class AccountController : ControllerBase
 {
-    private readonly AppUserManager _userManager;
-    public AccountController(AppUserManager userManager)
+    private readonly IAuthService _authService;
+    public AccountController(IAuthService authService)
     {
-        _userManager = userManager;
+        _authService = authService;
     }
 
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
-        IList<UserMainInfoDto> users = await _userManager.GetUsersAsync();
+        IList<UserMainInfoDto> users = await _authService.GetUsersAsync();
         return Ok(users);
     }
 
@@ -28,7 +30,7 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUser)
     {
-        RegisterResult registerResult = await _userManager.RegisterAsync(registerUser);
+        RegisterResult registerResult = await _authService.RegisterAsync(registerUser);
         
         string token = registerResult.Token;
 
@@ -48,7 +50,7 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto loginUser)
     {
-        string? token = await _userManager.LoginAsync(loginUser);
+        string? token = await _authService.LoginAsync(loginUser);
 
         if(token is null)
         {
@@ -62,7 +64,7 @@ public class AccountController : ControllerBase
     [HttpGet("{username}")]
     public async Task<IActionResult> GetUser([FromRoute] string username)
     {
-        AppUserDto? appUser = await _userManager.GetUserAsync(username);
+        AppUserDto? appUser = await _authService.GetUserAsync(username);
 
         if(appUser is null) return NotFound();
         
@@ -72,14 +74,14 @@ public class AccountController : ControllerBase
     [HttpPut("{username}/update")]
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateUserData)
     {
-        AppUserDto updatedUser = await _userManager.UpdateUserAsync(updateUserData);
+        AppUserDto updatedUser = await _authService.UpdateUserAsync(updateUserData);
         return CreatedAtAction(nameof(GetUser), new { username = updatedUser.UserName }, updatedUser);
     } 
 
     [HttpDelete("{username}/delete")]
     public async Task<IActionResult> DeleteUser([FromRoute] string username)
     {
-        bool isDeleted = await _userManager.DeleteByNameAsync(username);
+        bool isDeleted = await _authService.DeleteByNameAsync(username);
         
         if(!isDeleted) return BadRequest("Impossible to delete user");
         return Ok("User was successfully deleted!");

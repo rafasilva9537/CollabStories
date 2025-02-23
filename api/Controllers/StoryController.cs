@@ -8,7 +8,7 @@ using api.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace api.Controller;
+namespace api.Controllers;
 
 [Authorize]
 [ApiController]
