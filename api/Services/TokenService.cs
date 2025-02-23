@@ -18,6 +18,7 @@ public class TokenService : ITokenService
     public TokenService(IConfiguration configuration)
     {
         _configuration = configuration;
+        
     }
 
     public string GenerateToken(AppUser user)
@@ -35,7 +36,7 @@ public class TokenService : ITokenService
 
         Claim[] claims = [
             new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Email, user.Email),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor {
