@@ -63,6 +63,7 @@ builder.Services.Configure<IdentityOptions>(options => {
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
+    options.Password.RequireNonAlphanumeric = false;
     options.User.RequireUniqueEmail = false;
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 });

@@ -12,7 +12,7 @@ namespace api.Repository
     {
         Task<IList<StoryMainInfoDto>> GetStoriesAsync();
         Task<StoryDto?> GetStoryAsync(int id);
-        Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto);
+        Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username);
         Task<bool> DeleteStoryAsync(int id);
         Task<StoryDto?> UpdateStoryAsync(int id, UpdateStoryDto updateStoryDto);
         Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId);
@@ -40,12 +40,18 @@ namespace api.Repository
             return await _context.Story.Where(s => s.Id == id).Select(StoryMappers.ProjectToStoryDto).FirstOrDefaultAsync();
         }
 
-        public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto)
+        public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username)
         {
             Story storyModel = createStoryDto.ToCreateStoryModel();
+
+            AppUser creatorUser = await _context.AppUser.FirstAsync(au => au.UserName == username);
+            storyModel.UserId = creatorUser.Id;
+            
             await _context.AddAsync(storyModel);
             await _context.SaveChangesAsync();
-            return storyModel.ToStoryDto();
+
+            StoryDto storyDto = storyModel.ToStoryDto();
+            return storyDto;
         }
 
         public async Task<StoryDto?> UpdateStoryAsync(int id, UpdateStoryDto updateStoryDto)

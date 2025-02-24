@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using api.Constants;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
 using api.Repository;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
 
-[Authorize]
+[Authorize(Roles = RoleConstants.User)]
 [ApiController]
 [Route("collab-stories/")]
 public class StoryController : ControllerBase
@@ -49,7 +50,13 @@ public class StoryController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateStory([FromBody] CreateStoryDto createStory)
     {
-        StoryDto newStory = await _storyRepository.CreateStoryAsync(createStory);
+        string? username = User.FindFirstValue(ClaimTypes.Name);
+        if(username is null)
+        {
+            return BadRequest("Unable to find logged user");
+        } 
+
+        StoryDto newStory = await _storyRepository.CreateStoryAsync(createStory, username);
 
         return CreatedAtAction(nameof(this.GetStory), new { id = newStory.Id }, newStory);
     }

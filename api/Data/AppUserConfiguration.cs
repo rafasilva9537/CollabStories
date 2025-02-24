@@ -15,14 +15,14 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.Property(au => au.Description).HasMaxLength(200);
 
         builder.HasMany(au => au.Stories)
-            .WithOne(s => s.OwnerUser)
-            .HasForeignKey(s => s.OwnerUserId)
+            .WithOne(s => s.User)
+            .HasForeignKey(s => s.UserId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);;
 
         builder.HasMany(au => au.StoryParts)
-            .WithOne(sp => sp.OwnerUser)
-            .HasForeignKey(sp => sp.OwnerUserId)
+            .WithOne(sp => sp.User)
+            .HasForeignKey(sp => sp.UserId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
     }

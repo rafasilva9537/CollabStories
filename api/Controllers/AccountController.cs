@@ -7,7 +7,7 @@ using api.Constants;
 
 namespace api.Controllers;
 
-[Authorize]
+[Authorize(Roles = RoleConstants.User)]
 [ApiController]
 [Route("accounts")]
 public class AccountController : ControllerBase
@@ -30,7 +30,7 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUser)
     {
-        RegisterResult registerResult = await _authService.RegisterAsync(registerUser);
+        AuthenticationResult registerResult = await _authService.RegisterAsync(registerUser);
         
         string token = registerResult.Token;
 
@@ -61,6 +61,7 @@ public class AccountController : ControllerBase
         return Ok(token);
     }
 
+    [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
     [HttpGet("{username}")]
     public async Task<IActionResult> GetUser([FromRoute] string username)
     {
@@ -78,6 +79,7 @@ public class AccountController : ControllerBase
         return CreatedAtAction(nameof(GetUser), new { username = updatedUser.UserName }, updatedUser);
     } 
 
+    [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
     [HttpDelete("{username}/delete")]
     public async Task<IActionResult> DeleteUser([FromRoute] string username)
     {

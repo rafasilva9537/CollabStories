@@ -20,6 +20,6 @@ public class Story
 
     public ICollection<StoryPart> StoryParts { get; }= new List<StoryPart>();
 
-    public string? OwnerUserId { get; set; }
-    public AppUser OwnerUser { get; set; } = null!;
+    public string? UserId { get; set; }
+    public AppUser User { get; set; } = null!;
 }

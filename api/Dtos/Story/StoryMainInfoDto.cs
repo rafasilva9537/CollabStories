@@ -8,4 +8,5 @@ public class StoryMainInfoDto
     public DateTimeOffset CreatedDate { get; init; }
     public DateTimeOffset UpdatedDate { get; set; }
     public int MaximumAuthors { get; set; }
+    public string? UserName { get; set; }
 }

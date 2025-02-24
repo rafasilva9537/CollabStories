@@ -11,39 +11,39 @@ namespace api.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "OwnerUserId",
+                name: "UserId",
                 table: "StoryPart",
                 type: "nvarchar(450)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "OwnerUserId",
+                name: "UserId",
                 table: "Story",
                 type: "nvarchar(450)",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_StoryPart_OwnerUserId",
+                name: "IX_StoryPart_UserId",
                 table: "StoryPart",
-                column: "OwnerUserId");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Story_OwnerUserId",
+                name: "IX_Story_UserId",
                 table: "Story",
-                column: "OwnerUserId");
+                column: "UserId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Story_AppUser_OwnerUserId",
+                name: "FK_Story_AppUser_UserId",
                 table: "Story",
-                column: "OwnerUserId",
+                column: "UserId",
                 principalTable: "AppUser",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.SetNull);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_StoryPart_AppUser_OwnerUserId",
+                name: "FK_StoryPart_AppUser_UserId",
                 table: "StoryPart",
-                column: "OwnerUserId",
+                column: "UserId",
                 principalTable: "AppUser",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.SetNull);
@@ -53,27 +53,27 @@ namespace api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Story_AppUser_OwnerUserId",
+                name: "FK_Story_AppUser_UserId",
                 table: "Story");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_StoryPart_AppUser_OwnerUserId",
+                name: "FK_StoryPart_AppUser_UserId",
                 table: "StoryPart");
 
             migrationBuilder.DropIndex(
-                name: "IX_StoryPart_OwnerUserId",
+                name: "IX_StoryPart_UserId",
                 table: "StoryPart");
 
             migrationBuilder.DropIndex(
-                name: "IX_Story_OwnerUserId",
+                name: "IX_Story_UserId",
                 table: "Story");
 
             migrationBuilder.DropColumn(
-                name: "OwnerUserId",
+                name: "UserId",
                 table: "StoryPart");
 
             migrationBuilder.DropColumn(
-                name: "OwnerUserId",
+                name: "UserId",
                 table: "Story");
         }
     }

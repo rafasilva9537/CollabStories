@@ -9,6 +9,6 @@ public class StoryPart
     public int StoryId { get; set; }
     public Story Story { get; set; } = null!;
     
-    public string? OwnerUserId { get; set; }
-    public AppUser OwnerUser { get; set; } = null!;
+    public string? UserId { get; set; }
+    public AppUser User { get; set; } = null!;
 }

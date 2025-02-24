@@ -6,5 +6,6 @@ namespace api.Dtos.StoryPart
         public required string Text { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
         public int StoryId { get; set; }
+        public string? UserName { get; set; }
     }
 }

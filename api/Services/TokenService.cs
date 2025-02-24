@@ -3,25 +3,27 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using api.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace api.Services;
 
 public interface ITokenService
 {
-    string GenerateToken(AppUser user);
+    Task<string> GenerateToken(AppUser user);
 }
 
 public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
+    private readonly UserManager<AppUser> _userManager;
 
-    public TokenService(IConfiguration configuration)
+    public TokenService(IConfiguration configuration, UserManager<AppUser> userManager)
     {
         _configuration = configuration;
-        
+        _userManager = userManager;
     }
 
-    public string GenerateToken(AppUser user)
+    public async Task<string> GenerateToken(AppUser user)
     {
         String? secret = _configuration["JwtConfig:Secret"];
         String? issuer = _configuration["JwtConfig:ValidIssuer"];
@@ -34,10 +36,14 @@ public class TokenService : ITokenService
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        Claim[] claims = [
+        var userRoles = await _userManager.GetRolesAsync(user);
+
+        List<Claim> claims = [
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Email, user.Email),
         ];
+
+        claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var tokenDescriptor = new SecurityTokenDescriptor {
             Subject = new ClaimsIdentity(claims),

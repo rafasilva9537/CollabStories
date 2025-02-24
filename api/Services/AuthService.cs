@@ -1,3 +1,4 @@
+using api.Constants;
 using api.Data;
 using api.Dtos.AppUser;
 using api.Mappers;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
 
-public struct RegisterResult
+public struct AuthenticationResult
 {
     public string Token { get; init; }
     public bool Succeeded { get; init; }
@@ -17,7 +18,7 @@ public struct RegisterResult
 public interface IAuthService
 {
     Task<IList<UserMainInfoDto>> GetUsersAsync();
-    Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto);
+    Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto);
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     Task<bool> DeleteByNameAsync(string username);
     Task<AppUserDto?> GetUserAsync(string username);
@@ -37,21 +38,26 @@ public class AuthService : IAuthService
         _context = context;
     }
 
-    public async Task<RegisterResult> RegisterAsync(RegisterUserDto registerUserDto)
+    public async Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto)
     {
-        AppUser? existedUser = await _userManager.FindByNameAsync(registerUserDto.UserName);
-
         AppUser newUser = registerUserDto.ToAppUserModel();
         newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
-        IdentityResult result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
 
-        if(!result.Succeeded)
+        IdentityResult resultUser = await _userManager.CreateAsync(newUser, registerUserDto.Password);
+
+        if(!resultUser.Succeeded)
         {
-            return new RegisterResult { Succeeded = true, ErrorMessages = result.Errors.Select(e => e.Description) };
+            return new AuthenticationResult { Succeeded = false, ErrorMessages = resultUser.Errors.Select(e => e.Description) };
         }
 
-        string token = _tokenService.GenerateToken(newUser);
-        return new RegisterResult { Succeeded = true, Token = token};
+        var resultRole = await _userManager.AddToRoleAsync(newUser, RoleConstants.User);
+        if(!resultRole.Succeeded)
+        {
+            return new AuthenticationResult { Succeeded = false, ErrorMessages = resultRole.Errors.Select(e => e.Description) };
+        }
+
+        string token = await _tokenService.GenerateToken(newUser);
+        return new AuthenticationResult { Succeeded = true, Token = token};
     }
 
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
@@ -66,7 +72,7 @@ public class AuthService : IAuthService
             return null;
         }
         
-        string token = _tokenService.GenerateToken(loggedUser);
+        string token = await _tokenService.GenerateToken(loggedUser);
         return token;
     }
 

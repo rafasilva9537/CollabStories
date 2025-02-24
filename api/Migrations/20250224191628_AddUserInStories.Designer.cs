@@ -12,7 +12,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250222051119_AddUserInStories")]
+    [Migration("20250224191628_AddUserInStories")]
     partial class AddUserInStories
     {
         /// <inheritdoc />
@@ -261,9 +261,6 @@ namespace api.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(6);
 
-                    b.Property<string>("OwnerUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(90)
@@ -279,9 +276,12 @@ namespace api.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("GetUtcDate()");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Story", (string)null);
                 });
@@ -299,9 +299,6 @@ namespace api.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("GetUtcDate()");
 
-                    b.Property<string>("OwnerUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("StoryId")
                         .HasColumnType("int");
 
@@ -310,11 +307,14 @@ namespace api.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerUserId");
-
                     b.HasIndex("StoryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("StoryPart", (string)null);
                 });
@@ -372,30 +372,30 @@ namespace api.Migrations
 
             modelBuilder.Entity("api.Models.Story", b =>
                 {
-                    b.HasOne("api.Models.AppUser", "OwnerUser")
+                    b.HasOne("api.Models.AppUser", "User")
                         .WithMany("Stories")
-                        .HasForeignKey("OwnerUserId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("OwnerUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("api.Models.StoryPart", b =>
                 {
-                    b.HasOne("api.Models.AppUser", "OwnerUser")
-                        .WithMany("StoryParts")
-                        .HasForeignKey("OwnerUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("api.Models.Story", "Story")
                         .WithMany("StoryParts")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("OwnerUser");
+                    b.HasOne("api.Models.AppUser", "User")
+                        .WithMany("StoryParts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Story");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("api.Models.AppUser", b =>

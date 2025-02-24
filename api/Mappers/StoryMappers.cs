@@ -20,6 +20,7 @@ public static class StoryMappers
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
             TurnDurationSeconds = storyModel.TurnDurationSeconds,
+            UserName = storyModel.User.UserName
         };
     }
 
@@ -31,6 +32,7 @@ public static class StoryMappers
         CreatedDate = storyModel.CreatedDate,
         UpdatedDate = storyModel.UpdatedDate,
         MaximumAuthors = storyModel.MaximumAuthors,
+        UserName = storyModel.User.UserName
     };
 
     public static StoryMainInfoDto ToStoryMainInfoDto(this Story storyModel)
@@ -39,10 +41,11 @@ public static class StoryMappers
         {
             Id = storyModel.Id,
             Title = storyModel.Title,
-            Description = storyModel.Title,
+            Description = storyModel.Description,
             CreatedDate = storyModel.CreatedDate,
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
+            UserName = storyModel.User.UserName,
         };
     }
 
@@ -54,6 +57,7 @@ public static class StoryMappers
         CreatedDate = storyModel.CreatedDate,
         UpdatedDate = storyModel.UpdatedDate,
         MaximumAuthors = storyModel.MaximumAuthors,
+        UserName = storyModel.User.UserName,
     };
 
     public static CompleteStoryDto ToCompleteStoryDto(this Story storyModel)
