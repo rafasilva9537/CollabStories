@@ -3,7 +3,7 @@ using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
-using api.Models;
+using api.Constants;
 
 namespace api.Controllers;
 

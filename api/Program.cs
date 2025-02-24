@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using api.Services;
+using api.Constants;
+using api.Data.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,10 +50,23 @@ builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+// TODO: change to more secure configs after
+builder.Services.Configure<IdentityOptions>(options => {
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 1;
+    options.User.RequireUniqueEmail = false;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+});
+
 builder.Services.AddAuthentication(options => 
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -80,7 +95,22 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PolicyConstants.RequiredAdminRole, options =>
+        options.RequireRole(RoleConstants.Admin)
+    );
+});
+
+
 var app = builder.Build();
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedRoles.InitializeAsync(services);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
