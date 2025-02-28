@@ -56,7 +56,7 @@ namespace api.Repository
 
         public async Task<StoryDto?> UpdateStoryAsync(int id, UpdateStoryDto updateStoryDto)
         {
-            Story? storyModel = await _context.Story.FirstOrDefaultAsync(story => story.Id == id);
+            Story? storyModel = await _context.Story.FirstOrDefaultAsync(s => s.Id == id);
             
             if(storyModel == null) return null;
 
@@ -64,7 +64,10 @@ namespace api.Repository
             _context.Entry(storyModel).CurrentValues.SetValues(updateStoryDto);
             await _context.SaveChangesAsync();
 
-            return storyModel.ToStoryDto();
+            StoryDto storyDto = storyModel.ToStoryDto();
+            storyDto.UserName = _context.AppUser.Select(au => au.UserName).FirstOrDefault();
+
+            return storyDto;
         }
 
         public async Task<bool> DeleteStoryAsync(int id)
