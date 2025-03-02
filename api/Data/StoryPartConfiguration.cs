@@ -12,5 +12,11 @@ public class StoryPartConfiguration : IEntityTypeConfiguration<StoryPart>
         builder.HasKey(sp => sp.Id);
         builder.Property(sp => sp.Text).HasMaxLength(4000);
         builder.Property(sp => sp.CreatedDate).HasDefaultValueSql("GetUtcDate()");
+
+        builder.HasOne(sp => sp.User)
+            .WithMany(au => au.StoryParts)
+            .HasForeignKey(sp => sp.UserId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

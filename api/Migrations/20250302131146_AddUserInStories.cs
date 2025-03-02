@@ -38,7 +38,7 @@ namespace api.Migrations
                 column: "UserId",
                 principalTable: "AppUser",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_StoryPart_AppUser_UserId",

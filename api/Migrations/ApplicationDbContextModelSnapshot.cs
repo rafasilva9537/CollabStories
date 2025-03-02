@@ -372,7 +372,7 @@ namespace api.Migrations
                     b.HasOne("api.Models.AppUser", "User")
                         .WithMany("Stories")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });

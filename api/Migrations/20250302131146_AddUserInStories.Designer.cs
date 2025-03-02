@@ -12,7 +12,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250224191628_AddUserInStories")]
+    [Migration("20250302131146_AddUserInStories")]
     partial class AddUserInStories
     {
         /// <inheritdoc />
@@ -375,7 +375,7 @@ namespace api.Migrations
                     b.HasOne("api.Models.AppUser", "User")
                         .WithMany("Stories")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });

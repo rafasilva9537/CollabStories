@@ -16,5 +16,11 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
         builder.Property(s => s.UpdatedDate).HasDefaultValueSql("GetUtcDate()");;
         builder.Property(s => s.MaximumAuthors).HasDefaultValue(6);
         builder.Property(s => s.TurnDurationSeconds).HasDefaultValue(300);
+
+        builder.HasOne(s => s.User)
+            .WithMany(au => au.Stories)
+            .HasForeignKey(s => s.UserId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
