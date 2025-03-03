@@ -61,47 +61,152 @@ input:focus{
 .Galeria{
     height: 90%;
     width: 100%;
-    margin-left: 40px;
+    display: flex;
+    justify-content: center;
+    margin-left: 50px;
     border: solid black 2px;
     border-radius: 20px;
 }
 
-/*Pop-up*/
-.popup {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
+.story{
+    height: 45%;
+    width: 45%;
+    background-color: white;
+    margin: 15px;
+    border: solid black 2px;
+    border-radius: 10px;
+    transition: 1s;
+}
+
+.story:hover{
+    height: 50%;
+    width: 50%;
+    transition: 1s;
+}
+
+.cabecalho {
+    height: 15%;
     width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    border-radius: 10px;
+    background-color: ghostwhite;
+}
+
+.img-story{
+    height: 40%;
+    width: 100%;
+}
+
+.infs-story{
+    height: 45%;
+    width: 100%;
+    background-color: ghostwhite;
+    border-radius: 10px;
+}
+
+.img-profile-story{
+    height: 50px;
+    width: 50px;
+    margin-left: 10px;
+    border-radius: 50px;
+    background-color: black;
+}
+
+.id-1{
+    height: 50%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.id-2{
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    width: 30%;
+    display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+}
+
+.data-create{
+    font-weight: bold;
+    float: left;
+}
+
+.creator{
+    height: 100%;
+    width: 70%;
+    display: flex;
+    align-items: center;
+}
+
+.name-creator{
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 15px;
+}
+
+.description-story{
+    height: 45%;
+    width: 90%;
+    margin-left: 5%;
+    border: solid black 2px;
+    border-radius: 10px;
+}
+
+.description-text{
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.title-story-g{
+    height: 100%;
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-in-story{
+    height: 100%;
+    width: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/*Pop-up criar história*/
+.popup {
+    height: 85%;
+    width: 45%;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-45%, -50%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    z-index: 1000;
 }
 
 .popup-conteudo {
-    background: #fff;
-    padding: 30px;
+    height: 100%;
+    width: 100%;
     border-radius: 12px;
     text-align: center;
-    width: 300px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .popup input {
     margin: 10px 0;
     padding: 10px;
-    width: 100%;
-    border: 2px solid #ccc;
+    width: 80%;
+    border: 2px solid gray;
     border-radius: 8px;
     box-sizing: border-box;
     font-size: 16px;
     transition: border 0.3s ease;
-}
-
-.popup input:focus {
-    outline: none;
 }
 
 .popup button {
@@ -116,11 +221,23 @@ input:focus{
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+.description-box{
+    height: 30%;
+    width: 85%;
+    margin-top: 35%;
+    font-size: 20px;
+    padding-top: 20px;
+    padding-left: 20px;
+    border: solid gray 2px;
+    border-radius: 10px;
+}
+
 .popup button:hover {
     transform: scale(1.05);
 }
 
 #fecharPopup {
+    width: 45%;
     background-color: #dc3545;
 }
 
@@ -129,9 +246,72 @@ input:focus{
 }
 
 #salvarNome {
+    width: 45%;
     background-color: #28a745;
 }
 
 #salvarNome:hover {
     background-color: #218838;
+}
+
+.buttons-create{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+/*Pop-up usuário*/
+.pop-user {
+    height: 85%;
+    width: 45%;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-45%, -50%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.user-block{
+    height: 40%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.infs-user{
+    height: 40%;
+    width: 100%;
+}
+
+.name-user-block{
+    height: 10%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.fechar-user{
+    height: 10%;
+    width: 80%;
+    margin-left: 10%;
+    border: solid black 2px;
+    border-radius: 20px;
+    font-size: 20px;
+}
+
+.photo-profile{
+    height: 180px;
+    width: 180px;
+    border: solid black 2px;
+    border-radius: 100px;
+}
+
+.name-user{
+    font-size: 40px;
+    font-weight: bold;
 }
