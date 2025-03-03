@@ -1,46 +1,99 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="inicial.css">
-    <title>Galeria de histórias</title>
-
+    <title>Galeria de Histórias</title>
 </head>
 
 <body>
     
+    <!-- Menu Lateral -->
     <section class="MenuLateral">
-
-        <button class="B-Menu">
-            Perfil
-        </button>
-        <button class="B-Menu" id="criarHistoriaBtn">
-            Criar História +
-        </button>
-        <button class="B-Menu">
-            Configurações
-        </button>
-
+        <button id="open-user" class="B-Menu">Perfil</button>
+        <button class="B-Menu" id="criarHistoriaBtn">Criar História +</button>
+        <button class="B-Menu">Configurações</button>
     </section>
     
+    <!-- Galeria de Histórias -->
     <section class="GaleriaDeHistoria">
-        <section class="Galeria"></section>
+        <section class="Galeria">
+            
+            <!-- História 1 -->
+            <button class="story">
+                <section class="cabecalho">
+                    <div class="title-story-g">One Piece</div>
+                    <div class="user-in-story">2</div>
+                </section>
+                <div class="img-story"></div>
+                <section class="infs-story">
+                    <section class="description-story">
+                        <div class="description-text">Era uma vez...</div>
+                    </section>
+                    <section class="id-1">
+                        <section class="creator">
+                            <div class="img-profile-story"></div>
+                            <div class="name-creator">Rafael</div>
+                        </section>
+                        <section class="id-2">
+                            <div class="data-create">02/03/25</div>
+                        </section>
+                    </section>
+                </section>
+            </button>
+            
+            <!-- História 2 -->
+            <button class="story">
+                <section class="cabecalho">
+                    <div class="title-story-g">Pinoquio</div>
+                    <div class="user-in-story">1</div>
+                </section>
+                <div class="img-story"></div>
+                <section class="infs-story">
+                    <section class="description-story">
+                        <div class="description-text">Era uma vez...</div>
+                    </section>
+                    <section class="id-1">
+                        <section class="creator">
+                            <div class="img-profile-story"></div>
+                            <div class="name-creator">Henrique</div>
+                        </section>
+                        <section class="id-2">
+                            <div class="data-create">02/03/25</div>
+                        </section>
+                    </section>
+                </section>
+            </button>
+            
+        </section>
     </section>
 
+    <!-- Popup de Criação de História -->
     <div id="popup" class="popup">
         <div class="popup-conteudo">
-            <label for="nomeHistoria">Título da História:</label>
             <input type="text" id="nomeHistoria" placeholder="Digite um título">
-            <button id="salvarNome">Salvar</button>
-            <button id="fecharPopup">Fechar</button>
+            <textarea class="description-box" id="description" placeholder="Era uma vez..."></textarea>
+            <div class="buttons-create">
+                <button id="salvarNome">Salvar</button>
+                <button id="fecharPopup">Fechar</button>
+            </div>
         </div>
     </div>
-    
 
+    <!-- Popup de Usuário -->
+    <div id="pop-user" class="pop-user">
+        <section class="user-block">
+            <div class="photo-profile"></div>
+        </section>
+        <section class="name-user-block">
+            <div class="name-user">Henrique</div>
+        </section>
+        <section class="infs-user"></section>
+        <button class="fechar-user">Fechar</button>
+    </div>
+    
     <script src="inicial.js"></script>
 
 </body>
