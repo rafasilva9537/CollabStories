@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using api.Dtos.Story;
+using api.Dtos.StoryPart;
 using api.Models;
 
 namespace api.Mappers;
@@ -71,7 +72,7 @@ public static class StoryMappers
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
             TurnDurationSeconds = storyModel.TurnDurationSeconds,
-            StoryParts = storyModel.StoryParts.Select(storyPart => storyPart.ToStoryPartDto()).ToList(),
+            StoryParts = new List<StoryPartInListDto>(),
         };
     }
 

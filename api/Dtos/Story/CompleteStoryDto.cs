@@ -11,5 +11,5 @@ public class CompleteStoryDto
     public DateTimeOffset UpdatedDate { get; set; }
     public int MaximumAuthors { get; set; }
     public int TurnDurationSeconds { get; set; }
-    public ICollection<StoryPartDto> StoryParts { get; set; } = new List<StoryPartDto>();
+    public ICollection<StoryPartInListDto> StoryParts { get; set; } = new List<StoryPartInListDto>();
 }

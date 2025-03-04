@@ -58,16 +58,21 @@ public class StoryController : ControllerBase
         return CreatedAtAction(nameof(this.GetStory), new { id = newStory.Id }, newStory);
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateStory(int id, [FromBody] UpdateStoryDto updateStory)
+    [HttpPut("{storyId:int}")]
+    public async Task<IActionResult> UpdateStory(int storyId, [FromBody] UpdateStoryDto updateStory)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
         if(loggedUser is null)
         {
-            return BadRequest("Unable to find logged user");
-        } 
+            return Forbid();
+        }
 
-        StoryDto? updatedStory = await _storyService.UpdateStoryAsync(id, updateStory, loggedUser);
+        if(!await _storyService.IsStoryCreator(loggedUser, storyId))
+        {
+            return Forbid();
+        }
+
+        StoryDto? updatedStory = await _storyService.UpdateStoryAsync(storyId, updateStory);
 
         if(updatedStory == null)
         {
@@ -77,10 +82,21 @@ public class StoryController : ControllerBase
         return CreatedAtAction(nameof(this.GetStory), new { id = updatedStory.Id }, updatedStory);
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteStory([FromRoute] int id)
+    [HttpDelete("{storyId:int}")]
+    public async Task<IActionResult> DeleteStory([FromRoute] int storyId)
     {
-        bool isDeleted = await _storyService.DeleteStoryAsync(id);
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        if(!await _storyService.IsStoryCreator(loggedUser, storyId))
+        {
+            return Forbid();
+        }
+
+        bool isDeleted = await _storyService.DeleteStoryAsync(storyId);
 
         if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story doesn't exist." });
 
@@ -101,7 +117,13 @@ public class StoryController : ControllerBase
     [HttpPost("{storyId:int}/story-parts")]
     public async Task<IActionResult> CreateStoryPart([FromRoute] int storyId, [FromBody] CreateStoryPartDto storyPartDto)
     {
-        StoryPartDto newStoryPart = await _storyService.CreateStoryPartAsync(storyId, storyPartDto);
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        StoryPartDto newStoryPart = await _storyService.CreateStoryPartAsync(storyId, loggedUser, storyPartDto);
 
         return Ok(newStoryPart);
     }
@@ -109,6 +131,17 @@ public class StoryController : ControllerBase
     [HttpDelete("{storyId:int}/story-parts/{storyPartId:int}")]
     public async Task<IActionResult> DeleteStoryPart([FromRoute] int storyId, [FromRoute] int storyPartId)
     {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        if(!await _storyService.IsStoryPartCreator(loggedUser, storyPartId))
+        {
+            return Forbid();
+        }
+
         bool isDeleted = await _storyService.DeleteStoryPart(storyId, storyPartId);
 
         if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story part doesn't exist in specified Story." });

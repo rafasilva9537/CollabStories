@@ -13,11 +13,14 @@ namespace api.Services;
         Task<StoryDto?> GetStoryAsync(int id);
         Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username);
         Task<bool> DeleteStoryAsync(int id);
-        Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto, string loggedUser);
+        // TODO: possible addition of logged user parameter when service to controller validation is implemented
+        Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
+        Task<bool> IsStoryCreator(string username, int storyId);
         Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId);
 
-        Task<StoryPartDto> CreateStoryPartAsync(int StoryId, CreateStoryPartDto storyPartDto);
+        Task<StoryPartDto> CreateStoryPartAsync(int StoryId, string username, CreateStoryPartDto storyPartDto);
         Task<bool> DeleteStoryPart(int storyId, int storyPartId);
+        Task<bool> IsStoryPartCreator(string username, int storyPartId);
     }
 
     public class StoryService : IStoryService
@@ -53,27 +56,21 @@ namespace api.Services;
             return storyDto;
         }
 
-        public async Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto, string loggedUser)
+        public async Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto)
         {
             Story? storyModel = await _context.Story.FirstOrDefaultAsync(s => s.Id == storyId);
             
             if(storyModel == null) return null;
-
-            string? storyUsername = _context.AppUser.Where(au => au.Id == storyModel.UserId)
-                                        .Select(au => au.UserName)
-                                        .FirstOrDefault();
-
-            if(loggedUser != storyUsername)
-            {
-                return null;
-            }
 
             storyModel.UpdatedDate = DateTimeOffset.UtcNow;
             _context.Entry(storyModel).CurrentValues.SetValues(updateStoryDto);
             await _context.SaveChangesAsync();
 
             StoryDto storyDto = storyModel.ToStoryDto();
-            storyDto.UserName = storyUsername;
+            storyDto.UserName = _context.AppUser
+                                    .Where(au => au.Id == storyModel.UserId)
+                                    .Select(au => au.UserName)
+                                    .FirstOrDefault();
 
             return storyDto;
         }
@@ -92,10 +89,32 @@ namespace api.Services;
             return true;
         }
 
-        public async Task<StoryPartDto> CreateStoryPartAsync(int StoryId, CreateStoryPartDto storyPartDto)
+        // TODO: temporary solution, this method add unnecessary round trips to the database
+        // this is will be used until service to controller validation is implemeneted
+        public async Task<bool> IsStoryCreator(string username, int storyId)
+        {
+            string userId =  await _context.AppUser
+                                    .Where(au => au.UserName == username)
+                                    .Select(au => au.Id)
+                                    .FirstAsync();
+
+            bool IsStoryCreator = await _context.Story
+                                            .Where(s => s.Id == storyId)
+                                            .AnyAsync(s => s.UserId == userId);
+            return IsStoryCreator;
+        }
+
+
+        public async Task<StoryPartDto> CreateStoryPartAsync(int StoryId, string username, CreateStoryPartDto storyPartDto)
         {
             StoryPart newStoryPart = storyPartDto.ToStoryPartModel();
             newStoryPart.StoryId = StoryId;
+
+            AppUser creatorUser = await _context.AppUser
+                                    .Where(au => au.UserName == username)
+                                    .FirstAsync();
+            newStoryPart.UserId = creatorUser.Id;
+
             await _context.AddAsync(newStoryPart);
             await _context.SaveChangesAsync();
             return newStoryPart.ToStoryPartDto();
@@ -103,11 +122,23 @@ namespace api.Services;
 
         public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId)
         {
-            Story? completeStory =  await _context.Story.Where(story => story.Id == StoryId).Include(story => story.StoryParts).FirstOrDefaultAsync();
+            Story? completeStory =  await _context.Story
+                                            .Where(story => story.Id == StoryId)
+                                            .Include(story => story.StoryParts)
+                                            .FirstOrDefaultAsync();
             
             if(completeStory == null) return null;
 
-            return completeStory.ToCompleteStoryDto();
+            CompleteStoryDto completeStoryDto = completeStory.ToCompleteStoryDto();
+
+            IList<StoryPartInListDto> storyPartsDto = await _context.StoryPart
+                                            .Where(sp => sp.StoryId == StoryId)
+                                            .Include(sp => sp.User)
+                                            .Select(StoryPartMappers.ProjectToStoryPartInListDto)
+                                            .ToListAsync();
+            completeStoryDto.StoryParts = storyPartsDto;
+
+            return completeStoryDto;
         }
 
         public async Task<bool> DeleteStoryPart(int storyId, int storyPartId)
@@ -119,5 +150,20 @@ namespace api.Services;
             _context.Remove(deletedStoryPart);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // TODO: temporary solution, this method add unnecessary round trips to the database
+        // this is will be used until service to controller validation is implemeneted
+        public async Task<bool> IsStoryPartCreator(string username, int storyPartId)
+        {
+            string userId =  await _context.AppUser
+                                    .Where(au => au.UserName == username)
+                                    .Select(au => au.Id)
+                                    .FirstAsync();
+
+            bool isStoryPartCreator = await _context.StoryPart
+                                            .Where(s => s.Id == storyPartId)
+                                            .AnyAsync(s => s.UserId == userId);
+            return isStoryPartCreator;
         }
     }

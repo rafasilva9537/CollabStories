@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using api.Dtos.StoryPart;
 using api.Models;
 
@@ -35,6 +36,15 @@ public static class StoryPartMappers
             Text = storyPart.Text,
             CreatedDate = storyPart.CreatedDate,
             StoryId = storyPart.StoryId,
+            UserName = storyPart.User.UserName,
         };
     }
+    
+    public static Expression<Func<StoryPart, StoryPartInListDto>> ProjectToStoryPartInListDto = (storyPartModel) => new StoryPartInListDto 
+    {
+        Id = storyPartModel.Id,
+        UserName = storyPartModel.User.UserName,
+        Text = storyPartModel.Text,
+        CreatedDate = storyPartModel.CreatedDate,
+    };
 }
