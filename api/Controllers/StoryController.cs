@@ -6,7 +6,9 @@ using api.Constants;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
 using api.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
@@ -64,7 +66,13 @@ public class StoryController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateStory(int id, [FromBody] UpdateStoryDto updateStory)
     {
-        StoryDto? updatedStory = await _storyRepository.UpdateStoryAsync(id, updateStory);
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null)
+        {
+            return BadRequest("Unable to find logged user");
+        } 
+
+        StoryDto? updatedStory = await _storyRepository.UpdateStoryAsync(id, updateStory, loggedUser);
 
         if(updatedStory == null)
         {

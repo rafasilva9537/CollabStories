@@ -14,7 +14,7 @@ namespace api.Repository
         Task<StoryDto?> GetStoryAsync(int id);
         Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username);
         Task<bool> DeleteStoryAsync(int id);
-        Task<StoryDto?> UpdateStoryAsync(int id, UpdateStoryDto updateStoryDto);
+        Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto, string loggedUser);
         Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId);
 
         Task<StoryPartDto> CreateStoryPartAsync(int StoryId, CreateStoryPartDto storyPartDto);
@@ -54,18 +54,27 @@ namespace api.Repository
             return storyDto;
         }
 
-        public async Task<StoryDto?> UpdateStoryAsync(int id, UpdateStoryDto updateStoryDto)
+        public async Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto, string loggedUser)
         {
-            Story? storyModel = await _context.Story.FirstOrDefaultAsync(s => s.Id == id);
+            Story? storyModel = await _context.Story.FirstOrDefaultAsync(s => s.Id == storyId);
             
             if(storyModel == null) return null;
+
+            string? storyUsername = _context.AppUser.Where(au => au.Id == storyModel.UserId)
+                                        .Select(au => au.UserName)
+                                        .FirstOrDefault();
+
+            if(loggedUser != storyUsername)
+            {
+                return null;
+            }
 
             storyModel.UpdatedDate = DateTimeOffset.UtcNow;
             _context.Entry(storyModel).CurrentValues.SetValues(updateStoryDto);
             await _context.SaveChangesAsync();
 
             StoryDto storyDto = storyModel.ToStoryDto();
-            storyDto.UserName = _context.AppUser.Select(au => au.UserName).FirstOrDefault();
+            storyDto.UserName = storyUsername;
 
             return storyDto;
         }
