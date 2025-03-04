@@ -5,10 +5,9 @@ using api.Mappers;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
+namespace api.Services;
 
-namespace api.Repository
-{
-    public interface IStoryRepository
+    public interface IStoryService
     {
         Task<IList<StoryMainInfoDto>> GetStoriesAsync();
         Task<StoryDto?> GetStoryAsync(int id);
@@ -21,11 +20,11 @@ namespace api.Repository
         Task<bool> DeleteStoryPart(int storyId, int storyPartId);
     }
 
-    public class StoryRepository : IStoryRepository
+    public class StoryService : IStoryService
     {
         private readonly ApplicationDbContext _context;
 
-        public StoryRepository(ApplicationDbContext context)
+        public StoryService(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -122,4 +121,3 @@ namespace api.Repository
             return true;
         }
     }
-}

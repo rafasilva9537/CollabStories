@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using api.Constants;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
-using api.Repository;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
@@ -18,17 +13,17 @@ namespace api.Controllers;
 [Route("collab-stories/")]
 public class StoryController : ControllerBase
 {
-    private readonly IStoryRepository _storyRepository;
-    public StoryController(IStoryRepository repository)
+    private readonly IStoryService _storyService;
+    public StoryController(IStoryService storyService)
     {
-        _storyRepository = repository;
+        _storyService = storyService;
     }
 
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAllStories()
     {
-        IList<StoryMainInfoDto> stories = await _storyRepository.GetStoriesAsync();
+        IList<StoryMainInfoDto> stories = await _storyService.GetStoriesAsync();
 
         if(stories.Count == 0)
         {
@@ -42,7 +37,7 @@ public class StoryController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetStory(int id)
     {
-        StoryDto? story = await _storyRepository.GetStoryAsync(id);
+        StoryDto? story = await _storyService.GetStoryAsync(id);
 
         if(story is null) return NotFound();
         
@@ -58,7 +53,7 @@ public class StoryController : ControllerBase
             return BadRequest("Unable to find logged user");
         } 
 
-        StoryDto newStory = await _storyRepository.CreateStoryAsync(createStory, username);
+        StoryDto newStory = await _storyService.CreateStoryAsync(createStory, username);
 
         return CreatedAtAction(nameof(this.GetStory), new { id = newStory.Id }, newStory);
     }
@@ -72,7 +67,7 @@ public class StoryController : ControllerBase
             return BadRequest("Unable to find logged user");
         } 
 
-        StoryDto? updatedStory = await _storyRepository.UpdateStoryAsync(id, updateStory, loggedUser);
+        StoryDto? updatedStory = await _storyService.UpdateStoryAsync(id, updateStory, loggedUser);
 
         if(updatedStory == null)
         {
@@ -85,7 +80,7 @@ public class StoryController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteStory([FromRoute] int id)
     {
-        bool isDeleted = await _storyRepository.DeleteStoryAsync(id);
+        bool isDeleted = await _storyService.DeleteStoryAsync(id);
 
         if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story doesn't exist." });
 
@@ -96,7 +91,7 @@ public class StoryController : ControllerBase
     [HttpGet("{storyId:int}/story-parts")]
     public async Task<IActionResult> GetCompleteStory([FromRoute] int storyId)
     {
-        CompleteStoryDto? completeStory = await _storyRepository.GetCompleteStoryAsync(storyId);
+        CompleteStoryDto? completeStory = await _storyService.GetCompleteStoryAsync(storyId);
 
         if(completeStory == null) return NotFound();
 
@@ -106,7 +101,7 @@ public class StoryController : ControllerBase
     [HttpPost("{storyId:int}/story-parts")]
     public async Task<IActionResult> CreateStoryPart([FromRoute] int storyId, [FromBody] CreateStoryPartDto storyPartDto)
     {
-        StoryPartDto newStoryPart = await _storyRepository.CreateStoryPartAsync(storyId, storyPartDto);
+        StoryPartDto newStoryPart = await _storyService.CreateStoryPartAsync(storyId, storyPartDto);
 
         return Ok(newStoryPart);
     }
@@ -114,7 +109,7 @@ public class StoryController : ControllerBase
     [HttpDelete("{storyId:int}/story-parts/{storyPartId:int}")]
     public async Task<IActionResult> DeleteStoryPart([FromRoute] int storyId, [FromRoute] int storyPartId)
     {
-        bool isDeleted = await _storyRepository.DeleteStoryPart(storyId, storyPartId);
+        bool isDeleted = await _storyService.DeleteStoryPart(storyId, storyPartId);
 
         if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story part doesn't exist in specified Story." });
 

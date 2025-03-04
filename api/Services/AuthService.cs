@@ -27,7 +27,6 @@ public interface IAuthService
 
 public class AuthService : IAuthService
 {
-    // TODO: remove db context and pass to repository
     private readonly ApplicationDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
