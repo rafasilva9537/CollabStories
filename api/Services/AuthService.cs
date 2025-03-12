@@ -61,6 +61,7 @@ public class AuthService : IAuthService
 
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
     {
+        // TODO: change to use CheckPasswordSignInAsync(), eliminating one round trip
         AppUser? loggedUser = await _userManager.FindByNameAsync(loginUserDto.UserName);
 
         if(loggedUser is null) return null;
