@@ -6,18 +6,18 @@ namespace api.Data.Seed;
 public class SeedRoles {
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
     {
-        RoleManager<IdentityRole> _roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        RoleManager<IdentityRole<int>> _roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-        IdentityRole? adminRole = await _roleManager.FindByNameAsync(RoleConstants.Admin);
+        IdentityRole<int>? adminRole = await _roleManager.FindByNameAsync(RoleConstants.Admin);
         if(adminRole is null)
         {
-            await _roleManager.CreateAsync(new IdentityRole(RoleConstants.Admin));
+            await _roleManager.CreateAsync(new IdentityRole<int>(RoleConstants.Admin));
         }
 
-        IdentityRole? userRole = await _roleManager.FindByNameAsync(RoleConstants.User);
+        IdentityRole<int>? userRole = await _roleManager.FindByNameAsync(RoleConstants.User);
         if(userRole is null)
         {
-            await _roleManager.CreateAsync(new IdentityRole(RoleConstants.User));
+            await _roleManager.CreateAsync(new IdentityRole<int>(RoleConstants.User));
         }
     }
 }

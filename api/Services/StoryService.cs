@@ -93,7 +93,7 @@ namespace api.Services;
         // this is will be used until service to controller validation is implemeneted
         public async Task<bool> IsStoryCreator(string username, int storyId)
         {
-            string userId =  await _context.AppUser
+            int userId =  await _context.AppUser
                                     .Where(au => au.UserName == username)
                                     .Select(au => au.Id)
                                     .FirstAsync();
@@ -156,7 +156,7 @@ namespace api.Services;
         // this is will be used until service to controller validation is implemeneted
         public async Task<bool> IsStoryPartCreator(string username, int storyPartId)
         {
-            string userId =  await _context.AppUser
+            int userId =  await _context.AppUser
                                     .Where(au => au.UserName == username)
                                     .Select(au => au.Id)
                                     .FirstAsync();
