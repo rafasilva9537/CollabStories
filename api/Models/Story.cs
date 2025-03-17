@@ -1,25 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace api.Models;
 
 public class Story
 {
     public int Id { get; set; }
-    public required string Title { get; set; }
-    public string Description { get; set; } = String.Empty;
+    public int? UserId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public DateTimeOffset CreatedDate { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.UtcNow;
     public int MaximumAuthors { get; set; } = 6;
     public int TurnDurationSeconds { get; set; } = 300;
 
-    public ICollection<StoryPart> StoryParts { get; }= new List<StoryPart>();
-
-    public string? UserId { get; set; }
+    public ICollection<StoryPart> StoryParts { get; }= [];
     public AppUser User { get; set; } = null!;
+    public ICollection<AuthorInStory> AuthorInStory { get; set; } = [];
 }

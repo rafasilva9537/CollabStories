@@ -52,7 +52,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
-    .AddRoles<IdentityRole>()
+    .AddRoles<IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 // TODO: change to more secure configs after

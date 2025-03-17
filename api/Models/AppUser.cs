@@ -1,20 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 namespace api.Models;
 
-public class AppUser : IdentityUser
+// TODO: change UserId to INT type or add a new unique autoincrement column to be used internally
+public class AppUser : IdentityUser<int>
 {
-    public override required string UserName { get; set; }
-    public override required string Email { get; set; }
+    public override string UserName { get; set; } = string.Empty;
+    public override string Email { get; set; } = string.Empty;
 
-    public string Nickname { get; set; } = String.Empty;
+    public string Nickname { get; set; } = string.Empty;
     public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
-    public string Description { get; set; } = String.Empty;
+    public string Description { get; set; } = string.Empty;
 
-    public ICollection<Story> Stories { get; set; } = new List<Story>();
-    public ICollection<StoryPart> StoryParts { get; set; } = new List<StoryPart>();
+    public ICollection<Story> Stories { get; set; } = [];
+    public ICollection<StoryPart> StoryParts { get; set; } = [];
+    public ICollection<AuthorInStory> AuthorInStory { get; set; } = [];
 }

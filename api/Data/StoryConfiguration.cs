@@ -10,7 +10,7 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
     {
         builder.ToTable("Story");
         builder.HasKey(s => s.Id);
-        builder.Property(s => s.Title).HasMaxLength(90);
+        builder.Property(s => s.Title).HasMaxLength(90).IsRequired();
         builder.Property(s => s.Description).HasMaxLength(200);
         builder.Property(s => s.CreatedDate).HasDefaultValueSql("GetUtcDate()");
         builder.Property(s => s.UpdatedDate).HasDefaultValueSql("GetUtcDate()");;
