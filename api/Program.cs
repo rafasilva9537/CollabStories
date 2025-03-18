@@ -10,6 +10,9 @@ using Microsoft.OpenApi.Models;
 using api.Services;
 using api.Constants;
 using api.Data.Seed;
+using api.Hubs;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.Extensions.Primitives;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +96,21 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            StringValues accessToken = context.HttpContext.Request.Query["access_token"];
+            PathString path = context.HttpContext.Request.Path;
+
+            if(!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/story-hub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization(options =>
@@ -102,6 +120,24 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
+//TODO: improve security
+string allowSpecificOrigins = "allowSpecificOrigins";
+CorsPolicy corsPolicy = new CorsPolicyBuilder()
+    .WithOrigins(
+        "http://localhost:3002", 
+        "http://localhost:3001", 
+        "http://localhost:3000"
+    )
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .Build();
+
+builder.Services.AddCors(options => {
+    options.AddPolicy(allowSpecificOrigins, corsPolicy);
+});
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -121,6 +157,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(allowSpecificOrigins);
+
+app.MapHub<StoryHub>("/story-hub");
 app.MapControllers();
 
 app.UseAuthentication();

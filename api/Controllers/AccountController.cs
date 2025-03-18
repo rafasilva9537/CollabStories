@@ -29,6 +29,8 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUser)
     {
+        // TODO: remove user
+        var user = await _authService.GetUserAsync(registerUser.UserName);
         AuthenticationResult registerResult = await _authService.RegisterAsync(registerUser);
         
         string token = registerResult.Token;
@@ -42,14 +44,17 @@ public class AccountController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        return Ok(new { token });
+        // TODO: remove username
+        return Ok(new { token, username = user.UserName }); 
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto loginUser)
     {
-        string? token = await _authService.LoginAsync(loginUser);
+        // TODO: remove user
+        var user = await _authService.GetUserAsync(loginUser.UserName);
+        string? token = await _authService.LoginAsync(loginUser); // TODO: remove
 
         if(token is null)
         {
@@ -57,7 +62,8 @@ public class AccountController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        return Ok(token);
+        // TODO: remove username
+        return Ok(new { token, username = user.UserName }); 
     }
 
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
