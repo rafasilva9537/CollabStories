@@ -1,3 +1,4 @@
+using api.Dtos.AuthorInStory;
 using api.Dtos.StoryPart;
 
 namespace api.Dtos.Story;
@@ -11,5 +12,6 @@ public class CompleteStoryDto
     public DateTimeOffset UpdatedDate { get; set; }
     public int MaximumAuthors { get; set; }
     public int TurnDurationSeconds { get; set; }
-    public ICollection<StoryPartInListDto> StoryParts { get; set; } = new List<StoryPartInListDto>();
+    public ICollection<StoryPartInListDto> StoryParts { get; set; } = [];
+    public ICollection<AuthorFromStoryInListDto> StoryAuthors { get; set; } = [];
 }
