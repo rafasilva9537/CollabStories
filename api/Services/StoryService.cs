@@ -1,4 +1,5 @@
 using api.Data;
+using api.Dtos.AuthorInStory;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
 using api.Mappers;
@@ -122,6 +123,7 @@ namespace api.Services;
 
         public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId)
         {
+            //TODO: improve, reduce roundtrips
             Story? completeStory =  await _context.Story
                                             .Where(story => story.Id == StoryId)
                                             .Include(story => story.StoryParts)
@@ -136,7 +138,19 @@ namespace api.Services;
                                             .Include(sp => sp.User)
                                             .Select(StoryPartMappers.ProjectToStoryPartInListDto)
                                             .ToListAsync();
+
+            IList<AuthorFromStoryInListDto> storyAuthors = await _context.AuthorInStory
+                                                .Where(ais => ais.StoryId == StoryId)
+                                                .Include(ais => ais.Author)
+                                                .Select(ais => new AuthorFromStoryInListDto
+                                                {
+                                                    AuthorUserName = ais.Author.UserName,
+                                                    EntryDate = ais.EntryDate,
+                                                })
+                                                .ToListAsync();
+
             completeStoryDto.StoryParts = storyPartsDto;
+            completeStoryDto.StoryAuthors = storyAuthors;
 
             return completeStoryDto;
         }
