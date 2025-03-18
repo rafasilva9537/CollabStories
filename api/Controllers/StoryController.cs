@@ -103,6 +103,39 @@ public class StoryController : ControllerBase
         return Ok( new {Message = "Story was successfully deleted!"} );
     }
 
+
+    [HttpPost("{storyId:int}/join")]
+    public async Task<IActionResult> JoinStory([FromRoute] int storyId)
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        bool joinedStory = await _storyService.JoinStoryAsync(loggedUser, storyId);
+
+        if(joinedStory == false) return Forbid();
+        
+        return Ok(new {Message = "User joined story."});
+    }
+
+    [HttpPost("{storyId:int}/leave")]
+    public async Task<IActionResult> LeaveStory([FromRoute] int storyId)
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        bool leftStory = await _storyService.LeaveStoryAsync(loggedUser, storyId);
+        if(leftStory == false) return Forbid();
+
+        return Ok(new {Message = "User left story."});
+    }
+
+
     [AllowAnonymous]
     [HttpGet("{storyId:int}/story-parts")]
     public async Task<IActionResult> GetCompleteStory([FromRoute] int storyId)
@@ -123,7 +156,9 @@ public class StoryController : ControllerBase
             return Forbid();
         }
 
-        StoryPartDto newStoryPart = await _storyService.CreateStoryPartAsync(storyId, loggedUser, storyPartDto);
+        StoryPartDto? newStoryPart = await _storyService.CreateStoryPartAsync(storyId, loggedUser, storyPartDto);
+
+        if(newStoryPart is null) return Forbid();
 
         return Ok(newStoryPart);
     }
