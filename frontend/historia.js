@@ -10,6 +10,8 @@ document.querySelector('.enviar-hist').addEventListener('click', function() {
         const historiasContadas = document.querySelector('.historias-contadas');
         historiasContadas.appendChild(balao);
 
+        historiasContadas.scrollTop = historiasContadas.scrollHeight;
+
         inputHist.value = '';
     }
 });
