@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
 
+// TODO: remove this and change to exception
 public struct AuthenticationResult
 {
     public string Token { get; init; }

@@ -51,7 +51,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<IImageService, ImageService>();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()

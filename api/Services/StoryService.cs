@@ -143,6 +143,7 @@ public class StoryService : IStoryService
         IList<AuthorFromStoryInListDto> storyAuthors = await _context.AuthorInStory
                                             .Where(ais => ais.StoryId == StoryId)
                                             .Include(ais => ais.Author)
+                                            // TODO: create mapper for projection here
                                             .Select(ais => new AuthorFromStoryInListDto
                                             {
                                                 AuthorUserName = ais.Author.UserName,
