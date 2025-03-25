@@ -1,11 +1,9 @@
-using api.Data;
-
 namespace api.Services;
 
 public interface IImageService
 {
     Task<string> SaveImageAsync(IFormFile image, string directoryName);
-    string DeleteImage(IFormFile image, string directoryName);
+    void DeleteImage(string imageName, string directoryName);
 }
 
 public class ImageService : IImageService
@@ -22,7 +20,8 @@ public class ImageService : IImageService
 
     public async Task<string> SaveImageAsync(IFormFile image, string directoryName)
     {
-        string imageDirectoryPath = Path.Combine(_imagesPath, directoryName);
+        var rootPath = _environment.ContentRootPath;
+        string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
 
         if(!Directory.Exists(imageDirectoryPath))
         {
@@ -40,7 +39,7 @@ public class ImageService : IImageService
         string imageName = $"{Guid.NewGuid()}{extension}";
         string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
 
-        // TODO: handle ff the file already exists (IOException)
+        // TODO: handle if the file already exists (IOException)
         using(FileStream imageStream = new FileStream(imageNameWithPath, FileMode.CreateNew))
         {
             await image.CopyToAsync(imageStream);
@@ -49,9 +48,19 @@ public class ImageService : IImageService
         return imageName;
     }
 
-    public string DeleteImage(IFormFile image, string directoryName)
+    public void DeleteImage(string imageName, string directoryName)
     {
-        throw new NotImplementedException();
+        var rootPath = _environment.ContentRootPath;
+        string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
+        string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
+
+        // TODO: hide file path
+        if(!File.Exists(imageNameWithPath))
+        {
+            throw new FileNotFoundException($"File {imageNameWithPath} does not exists. Unable to delete.");
+        }
+        
+        File.Delete(imageNameWithPath);
     }
 
 }
