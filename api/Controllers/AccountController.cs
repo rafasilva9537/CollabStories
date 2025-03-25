@@ -3,6 +3,7 @@ using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
 using api.Services;
 using api.Constants;
+using System.Security.Claims;
 
 namespace api.Controllers;
 
@@ -94,5 +95,36 @@ public class AccountController : ControllerBase
         
         if(!isDeleted) return BadRequest("Impossible to delete user");
         return Ok("User was successfully deleted!");
+    }
+
+    [HttpPut("{username}/profile-image")]
+    public async Task<IActionResult> UpdateProfileImage(IFormFile image)
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        await _authService.UpdateProfileImageAsync(loggedUser, image, "ProfileImage");
+
+        return Ok();
+    }
+
+    // TODO: remove username in route parameter?
+    [HttpDelete("{username}/profile-image")]
+    public async Task<IActionResult> DeleteProfileImage()
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+
+        if(loggedUser is null)
+        {
+            return Forbid();
+        }
+
+        await _authService.DeleteProfileImageAsync(loggedUser, "ProfileImage");
+
+        return Ok();
     }
 }

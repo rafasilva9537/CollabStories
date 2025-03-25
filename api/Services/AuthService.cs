@@ -24,6 +24,8 @@ public interface IAuthService
     Task<bool> DeleteByNameAsync(string username);
     Task<AppUserDto?> GetUserAsync(string username);
     Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
+    Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName);
+    Task DeleteProfileImageAsync(string username, string directoryName);
 }
 
 public class AuthService : IAuthService
@@ -31,11 +33,13 @@ public class AuthService : IAuthService
     private readonly ApplicationDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
-    public AuthService(ApplicationDbContext context, UserManager<AppUser> userManager, ITokenService tokenService)
+    private readonly IImageService _imageService;
+    public AuthService(ApplicationDbContext context, UserManager<AppUser> userManager, ITokenService tokenService, IImageService imageService)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _context = context;
+        _imageService = imageService;
     }
 
     public async Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto)
@@ -123,5 +127,25 @@ public class AuthService : IAuthService
 
         await _userManager.UpdateAsync(updatedUser);
         return updatedUser.ToAppUserDto();
+    }
+
+    public async Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName)
+    {
+        AppUser user = await _context.AppUser.FirstAsync(au => au.UserName == username);
+        
+        string savedImage = await _imageService.SaveImageAsync(image, directoryName);
+        
+        user.ProfileImage = savedImage;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteProfileImageAsync(string username, string directoryName)
+    {
+        AppUser user = await _context.AppUser.FirstAsync(au => au.UserName == username);
+
+        _imageService.DeleteImage(user.ProfileImage, directoryName);
+
+        user.ProfileImage = string.Empty;
+        await _context.SaveChangesAsync();
     }
 }

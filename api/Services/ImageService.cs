@@ -9,12 +9,13 @@ public interface IImageService
 public class ImageService : IImageService
 {
     // TODO: change to some immutable collection
-    private string[] _imgExtensions = [ ".jpg", ".png", "jpeg" ];
+    private string[] _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
     private readonly string _imagesPath = Path.Combine("Media", "Images");
     private readonly IWebHostEnvironment _environment;
 
     public ImageService(IWebHostEnvironment environment)
     {
+
         _environment = environment;
     }
 
@@ -31,7 +32,7 @@ public class ImageService : IImageService
         string untrustedFileName = image.FileName;
         string extension = Path.GetExtension(untrustedFileName);
 
-        if(_imgExtensions.Contains(extension))
+        if(!_imgExtensions.Contains(extension))
         {
             throw new ArgumentOutOfRangeException($"Only files with extensions {string.Join(", ", _imgExtensions)}are allowed");
         }
@@ -54,10 +55,9 @@ public class ImageService : IImageService
         string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
         string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
 
-        // TODO: hide file path
         if(!File.Exists(imageNameWithPath))
         {
-            throw new FileNotFoundException($"File {imageNameWithPath} does not exists. Unable to delete.");
+            throw new FileNotFoundException($"File does not exists. Unable to delete.");
         }
         
         File.Delete(imageNameWithPath);
