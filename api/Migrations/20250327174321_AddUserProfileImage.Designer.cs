@@ -12,7 +12,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250325182601_AddUserProfileImage")]
+    [Migration("20250327174321_AddUserProfileImage")]
     partial class AddUserProfileImage
     {
         /// <inheritdoc />
@@ -219,7 +219,8 @@ namespace api.Migrations
 
                     b.Property<string>("ProfileImage")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
