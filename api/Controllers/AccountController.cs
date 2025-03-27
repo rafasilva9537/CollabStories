@@ -47,8 +47,7 @@ public class AccountController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // TODO: remove username
-        return Ok(new { token, username = user.UserName }); 
+        return Ok(new { token }); 
     }
 
     [AllowAnonymous]
@@ -66,7 +65,7 @@ public class AccountController : ControllerBase
         }
 
         // TODO: remove username
-        return Ok(new { token, username = user.UserName }); 
+        return Ok(new { token }); 
     }
 
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
