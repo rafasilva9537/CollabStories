@@ -13,11 +13,9 @@ namespace api.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly IAuthService _authService;
-    private readonly IImageService _imageService;
-    public AccountController(IAuthService authService, IImageService imageService)
+    public AccountController(IAuthService authService)
     {
-        _authService = authService;
-        _imageService = imageService;
+        _authService = authService;;
     }
 
     [AllowAnonymous]
