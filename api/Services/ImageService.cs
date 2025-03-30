@@ -1,3 +1,5 @@
+using api.Constants;
+
 namespace api.Services;
 
 public interface IImageService
@@ -10,7 +12,7 @@ public class ImageService : IImageService
 {
     // TODO: change to some immutable collection
     private string[] _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
-    private readonly string _imagesPath = Path.Combine("Media", "Images");
+    private readonly string _imagesPath = Path.Combine(DirectoryPathConstants.Media, DirectoryPathConstants.Images);
     private readonly IWebHostEnvironment _environment;
 
     public ImageService(IWebHostEnvironment environment)

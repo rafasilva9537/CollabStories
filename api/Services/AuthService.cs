@@ -83,7 +83,6 @@ public class AuthService : IAuthService
 
     public async Task<IList<UserMainInfoDto>> GetUsersAsync()
     {
-        // Use UserManager to get users here
         var usersDto = await _context.AppUser.Select(AppUserMappers.ProjetToUserMainInfoDto).ToListAsync();
         return usersDto;
     }
