@@ -1,7 +1,6 @@
 using api.Services;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
-using Bogus;
 using Xunit.Abstractions;
 using Microsoft.AspNetCore.Identity;
 using api.Models;
@@ -13,7 +12,6 @@ public class TokenServiceTests
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly IConfiguration _configuration;
     private readonly UserManager<AppUser> _userManagerMock;
-    private readonly Faker _faker = new Faker("pt_BR");
 
     public TokenServiceTests(ITestOutputHelper testOutputHelper)
     {
@@ -34,18 +32,22 @@ public class TokenServiceTests
     }
     
     [Fact]
-    public async void GenerateToken_CreatingTwoDifferentTokens_DoesNotReturnIdenticalTokens()
+    public async void GenerateToken_ForTwoDifferentUsers_DoesNotReturnIdenticalTokens()
     {
         // Arrange
-        AppUser appUser = new AppUser();
-        appUser.UserName = "test_user";
-        appUser.Email = "user@example.com";
+        AppUser firstAppUser = new AppUser();
+        firstAppUser.UserName = "test_user1";
+        firstAppUser.Email = "user@example1.com";
+
+        AppUser secondAppUser = new AppUser();
+        secondAppUser.UserName = "test_user2";
+        secondAppUser.Email = "user@example2.com";
 
         TokenService tokenService = new TokenService(_configuration, _userManagerMock);
 
         // Act
-        string firstToken = await tokenService.GenerateToken(appUser);
-        string secondToken = await tokenService.GenerateToken(appUser);
+        string firstToken = await tokenService.GenerateToken(firstAppUser);
+        string secondToken = await tokenService.GenerateToken(secondAppUser);
 
         // Assert
         Assert.False(firstToken == secondToken);
