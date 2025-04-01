@@ -30,7 +30,7 @@ public class TokenService : ITokenService
         String? audience = _configuration["JwtConfig:ValidAudiences"];
         if(secret is null || issuer is null || audience is null)
         {
-            throw new ApplicationException("Jwt is not set in the configuration");
+            throw new ArgumentNullException("Jwt is not set in the configuration");
         }
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
@@ -50,7 +50,7 @@ public class TokenService : ITokenService
             Subject = new ClaimsIdentity(claims),
             Issuer = issuer,
             Audience = audience,
-            Expires = DateTime.UtcNow.AddHours(6),
+            Expires = DateTime.UtcNow.AddDays(7), // TODO: decrease time in production
             SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256Signature)
         };
 
