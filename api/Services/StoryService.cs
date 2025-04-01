@@ -32,12 +32,10 @@ public interface IStoryService
 public class StoryService : IStoryService
 {
     private readonly ApplicationDbContext _context;
-    private readonly IHubContext<StoryHub, IStoryClient> _storyHubContext;
 
-    public StoryService(ApplicationDbContext context, IHubContext<StoryHub, IStoryClient> storyHubContext)
+    public StoryService(ApplicationDbContext context)
     {
         _context = context;
-        _storyHubContext = storyHubContext;
     }
 
     public async Task<IList<StoryMainInfoDto>> GetStoriesAsync()
@@ -170,7 +168,7 @@ public class StoryService : IStoryService
                             .AnyAsync();
 
         bool authorInStoryExists = await _context.AuthorInStory
-                                            .AnyAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
+                                        .AnyAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
         if(!storyExists || authorInStoryExists) return false;
 
         AuthorInStory authorInStory = new AuthorInStory 
@@ -264,8 +262,8 @@ public class StoryService : IStoryService
                         .FirstAsync();
 
         bool isStoryPartCreator = await _context.StoryPart
-                                            .Where(s => s.Id == storyPartId)
-                                            .AnyAsync(s => s.UserId == userId);
+                                    .Where(s => s.Id == storyPartId)
+                                    .AnyAsync(s => s.UserId == userId);
         return isStoryPartCreator;
     }
 
