@@ -54,7 +54,7 @@ public class AuthService : IAuthService
             return new AuthenticationResult { Succeeded = false, ErrorMessages = resultUser.Errors.Select(e => e.Description) };
         }
 
-        var resultRole = await _userManager.AddToRoleAsync(newUser, RoleConstants.User);
+        IdentityResult resultRole = await _userManager.AddToRoleAsync(newUser, RoleConstants.User);
         if(!resultRole.Succeeded)
         {
             return new AuthenticationResult { Succeeded = false, ErrorMessages = resultRole.Errors.Select(e => e.Description) };
