@@ -46,7 +46,7 @@ public static class StoryMappers
             CreatedDate = storyModel.CreatedDate,
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
-            UserName = storyModel.User.UserName,
+            UserName = storyModel?.User?.UserName,
         };
     }
 

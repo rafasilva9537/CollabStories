@@ -1,11 +1,9 @@
-using System.Reflection;
 using api.Data;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
-namespace api.IntegrationTests.Services;
+namespace api.IntegrationTests.Services.Data;
 
 // Fixture used when only db connection is needed,
 // not the whole Program under test
