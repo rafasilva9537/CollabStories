@@ -49,28 +49,60 @@ public class TestDatabaseFixture
     {
         using var dbContext = CreateDbContext();
 
+        // TODO: remove db deletion after implementing whole database seed
         dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
+        bool dbCreated = dbContext.Database.EnsureCreated();
 
-        List<AppUser> newUsers = [
-            new AppUser
+        if(dbCreated)
+        {
+            List<AppUser> newUsers = [
+                new AppUser
                 {
                     UserName = "bob",
-                    Email = "user@email.example"
+                    Email = "user@email1.example"
                 },
                 new AppUser
                 {
                     UserName = "joe",
-                    Email = "user@email.example"
+                    Email = "user@email2.example"
                 },
                 new AppUser
                 {
                     UserName = "dude_25",
-                    Email = "user@email.example"
+                    Email = "user@email3.example"
                 },
             ];
 
-        dbContext.AppUser.AddRange(newUsers);
-        dbContext.SaveChanges();
+            List<Story> newStories = [
+                new Story
+                {
+                    Title = "Story1",
+                    Description = "Story1 description",
+                    MaximumAuthors = 4,
+                    TurnDurationSeconds = 120,
+                    UserId = 1,
+                },
+                new Story
+                {
+                    Title = "Story2",
+                    Description = "Story2 description",
+                    MaximumAuthors = 4,
+                    TurnDurationSeconds = 120,
+                    UserId = 1,
+                },
+                new Story
+                {
+                    Title = "Story3",
+                    Description = "Story3 description",
+                    MaximumAuthors = 4,
+                    TurnDurationSeconds = 120,
+                    UserId = 2,
+                },
+            ];
+
+            dbContext.AppUser.AddRange(newUsers);
+            dbContext.Story.AddRange(newStories);
+            dbContext.SaveChanges();
+        }
     }
 }

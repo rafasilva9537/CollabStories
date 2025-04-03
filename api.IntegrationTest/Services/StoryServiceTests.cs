@@ -55,8 +55,10 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         Assert.NotEmpty(actualStories);
     }
 
-    [Fact]
-    public async Task GetStoriesAsync_WhenOnlyOneStoryExists_ReturnsExpectedStoryValue()
+    [Theory]
+    [InlineData("Test story", "This is a test story")]
+    [InlineData("Story without description", "")]
+    public async Task GetStoriesAsync_WhenOnlyOneStoryExists_ReturnsExpectedStoryValue(string title, string description)
     {
         //Arrange 
         using ApplicationDbContext context = _testDatabase.CreateDbContext();
@@ -65,8 +67,8 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         await context.Database.BeginTransactionAsync();
         await context.Story.ExecuteDeleteAsync();
         Story newStory = new Story {
-            Title = "Test story",
-            Description = "This is a test story",
+            Title = title,
+            Description = description,
         };
         StoryMainInfoDto expectedStory = newStory.ToStoryMainInfoDto();
 
@@ -88,4 +90,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         Assert.Equal(expectedStory.CreatedDate, actualStories[0].CreatedDate);
         Assert.Equal(expectedStory.UpdatedDate, actualStories[0].UpdatedDate);
     }
+
+
+    
 }
