@@ -45,7 +45,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("JWT_SECRET");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IStoryService, StoryService>();
@@ -77,9 +77,9 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options => 
 {
-    var secret = builder.Configuration["JwtConfig:Secret"];
-    var issuer = builder.Configuration["JwtConfig:ValidIssuer"];
-    var audience = builder.Configuration["JwtConfig:ValidAudiences"];
+    var secret = builder.Configuration["JwtConfig:Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET");
+    var issuer = builder.Configuration["JwtConfig:ValidIssuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER");
+    var audience = builder.Configuration["JwtConfig:ValidAudiences"] ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
     if(secret is null || issuer is null || audience is null)
     {
@@ -92,6 +92,7 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidateAudience = true,
+        RequireAudience = true,
         ValidAudience = audience,
         ValidIssuer = issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
@@ -141,6 +142,12 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+using(var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
+
 // Seed data
 using (var scope = app.Services.CreateScope())
 {
@@ -159,10 +166,10 @@ app.UseHttpsRedirection();
 
 app.UseCors(allowSpecificOrigins);
 
-app.MapHub<StoryHub>("/story-hub");
-app.MapControllers();
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<StoryHub>("/story-hub");
+app.MapControllers();
 
 app.Run();
