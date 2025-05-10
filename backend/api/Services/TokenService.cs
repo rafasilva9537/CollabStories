@@ -25,9 +25,9 @@ public class TokenService : ITokenService
 
     public async Task<string> GenerateToken(AppUser user)
     {
-        String? secret = _configuration["JwtConfig:Secret"];
-        String? issuer = _configuration["JwtConfig:ValidIssuer"];
-        String? audience = _configuration["JwtConfig:ValidAudiences"];
+        String? secret = _configuration["JwtConfig:Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET");
+        String? issuer = _configuration["JwtConfig:ValidIssuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER");
+        String? audience = _configuration["JwtConfig:ValidAudiences"] ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE");
         if(secret is null || issuer is null || audience is null)
         {
             throw new ArgumentNullException("Jwt is not set in the configuration");

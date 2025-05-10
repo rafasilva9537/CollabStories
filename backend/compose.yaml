@@ -1,0 +1,36 @@
+services:
+  api:
+    build:
+      context: ./api
+      target: release
+    ports:
+      - 5000:8080
+    container_name: collabstories_api
+    hostname: collabstories_host
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_SECRET=${JWT_SECRET}
+      - MSSQL_CONNECTION_STRING=${MSSQL_CONNECTION_STRING}
+    depends_on:
+      db:
+        condition: service_started
+        restart: true
+    restart: on-failure:10
+
+  db:
+    image: mcr.microsoft.com/mssql/server
+    ports:
+      - 1433:1433
+    container_name: collabstories_mssql
+    hostname: mssql_host
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
+      - MSSQL_SA_PASSWORD=${MSSQL_PASSWORD}
+    volumes:
+      - collabstories_db:/var/opt/mssql
+
+volumes:
+  collabstories_db:
