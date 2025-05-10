@@ -12,6 +12,7 @@ services:
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_SECRET=${JWT_SECRET}
+      - MSSQL_CONNECTION_STRING=${MSSQL_CONNECTION_STRING}
     depends_on:
       db:
         condition: service_started
