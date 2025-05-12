@@ -11,7 +11,6 @@ public class TestDatabaseFixture
 {
     private static readonly object _lock = new();
     private static bool _databaseInitialized;
-    //private readonly IConfiguration _configuration;
 
     public TestDatabaseFixture()
     {
@@ -33,7 +32,7 @@ public class TestDatabaseFixture
 
         string? connectionString = _configuration["ConnectionStrings:DbTestConnection"];
 
-        if(connectionString is null)
+        if(string.IsNullOrEmpty(connectionString))
         {
             throw new ArgumentNullException("DbTestConnection connection string is not set in configuration");
         }
