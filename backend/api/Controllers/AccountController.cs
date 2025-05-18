@@ -104,7 +104,7 @@ public class AccountController : ControllerBase
             return Forbid();
         }
 
-        await _authService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImage);
+        await _authService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
 
         return Ok();
     }
@@ -120,7 +120,7 @@ public class AccountController : ControllerBase
             return Forbid();
         }
 
-        await _authService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImage);
+        await _authService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
 
         return Ok();
     }
