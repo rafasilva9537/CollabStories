@@ -13,8 +13,8 @@ namespace api.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "ProfileImage",
                 table: "AppUser",
-                type: "nvarchar(40)",
-                maxLength: 40,
+                type: "nvarchar(400)",
+                maxLength: 400,
                 nullable: false,
                 defaultValue: "");
         }

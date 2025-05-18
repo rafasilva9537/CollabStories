@@ -216,8 +216,8 @@ namespace api.Migrations
 
                     b.Property<string>("ProfileImage")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
