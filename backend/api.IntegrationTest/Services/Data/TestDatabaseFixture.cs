@@ -2,6 +2,7 @@ using api.Data;
 using api.IntegrationTest.Services.Data;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 
 namespace api.IntegrationTests.Services.Data;
@@ -48,18 +49,40 @@ public class TestDatabaseFixture
     public void InitializeDatabase()
     {
         using var dbContext = CreateDbContext();
-        FakeDataGenerator fakeData = new();
 
         // TODO: remove db deletion after implementing whole database seed
         dbContext.Database.EnsureDeleted();
         bool dbCreated = dbContext.Database.EnsureCreated();
 
-        if(dbCreated)
+        if (dbCreated)
         {
-            List<AppUser> newUsers = fakeData.GenerateAppUsersWithAllRelatedTables(100);
+            FakeDataGenerator fakeData = new();
 
-            dbContext.AppUser.AddRange(newUsers);;
+            int totalUsers = 300;
+            int totalStories = 1000;
+            int totalStoryParts = totalStories * 50;
+
+            IDbContextTransaction seedTransaction = dbContext.Database.BeginTransaction();
+
+            List<AppUser> newUsers = fakeData.GenerateAppUsers(totalUsers);
+            dbContext.AppUser.AddRange(newUsers);
             dbContext.SaveChanges();
+            newUsers = dbContext.AppUser.ToList();
+
+            List<Story> newStories = fakeData.GenerateStories(totalStories, newUsers);
+            dbContext.Story.AddRange(newStories);
+            List<Story> storiesWithoutUser = fakeData.GenerateStories(totalStories/10);
+            dbContext.Story.AddRange(storiesWithoutUser);
+            dbContext.SaveChanges();
+            newStories = dbContext.Story.ToList();
+
+            List<StoryPart> storyParts = fakeData.GenerateStoryParts(totalStoryParts, newStories, newUsers);
+            dbContext.StoryPart.AddRange(storyParts);
+            List<StoryPart> storyPartsWithoutUsers = fakeData.GenerateStoryParts(totalStoryParts/100, newStories);
+            dbContext.StoryPart.AddRange(storyPartsWithoutUsers);
+            dbContext.SaveChanges();
+
+            seedTransaction.Commit();
         }
     }
 }
