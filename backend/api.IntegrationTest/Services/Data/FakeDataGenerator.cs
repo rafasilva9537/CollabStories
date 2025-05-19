@@ -46,7 +46,7 @@ public class FakeDataGenerator
 
     public List<Story> GenerateStories(int quantity, List<AppUser>? possibleUsers = null)
     {
-        Faker<Story> _fakeStory = new Faker<Story>()
+        Faker<Story> fakeStory = new Faker<Story>()
             .RuleFor(s => s.Title, f => f.Lorem.Sentence(2, 6))
             .RuleFor(s => s.Description, f => f.Lorem.Sentence(8, 12))
             .RuleFor(s => s.MaximumAuthors, f => f.Random.Int(2, 16))
@@ -60,7 +60,23 @@ public class FakeDataGenerator
                 return randomUser.Id;
             });
 
-        List<Story> stories = _fakeStory.GenerateForever().Take(quantity).ToList();
+        if (!possibleUsers.IsNullOrEmpty())
+        {
+            fakeStory = fakeStory.RuleFor(s => s.AuthorInStory, (f, s) =>
+            {
+                // FIXME: generating non-unique composite key (AuthorId, StoryId) => (1,1), (1,1), (1,2)
+                List<AuthorInStory> newAuthors = GenerateAuthorsInStory(f.Random.Int(1, 7), s.Id, possibleUsers);
+
+                foreach (var newAuthor in newAuthors)
+                {
+                    s.AuthorInStory.Add(newAuthor);
+                }
+
+                return s.AuthorInStory;
+            });
+        }
+
+        List<Story> stories = fakeStory.GenerateForever().Take(quantity).ToList();
         return stories;
     }
 
@@ -85,10 +101,16 @@ public class FakeDataGenerator
         return storyParts;
     }
 
-    public List<AuthorInStory> GenerateAuthorInStory(int quantity)
+    public List<AuthorInStory> GenerateAuthorsInStory(int quantity, int storyId, List<AppUser> possibleAuthors)
     {
         Faker<AuthorInStory> _fakeAuthorInStory = new Faker<AuthorInStory>()
-            .RuleFor(ais => ais.EntryDate, (f, ais) => f.Date.BetweenOffset(_storyStartDate, _storyEndDate));
+            .RuleFor(ais => ais.EntryDate, (f, ais) => f.Date.BetweenOffset(_storyStartDate, _storyEndDate))
+            .RuleFor(ais => ais.StoryId, f => storyId)
+            .RuleFor(ais => ais.AuthorId, f =>
+            {
+                AppUser randomAuthor = f.PickRandom(possibleAuthors);
+                return randomAuthor.Id;
+            });
 
         return _fakeAuthorInStory.GenerateForever().Take(quantity).ToList();
     }
