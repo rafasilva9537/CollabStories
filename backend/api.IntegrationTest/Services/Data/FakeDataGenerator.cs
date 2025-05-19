@@ -65,10 +65,10 @@ public class FakeDataGenerator
         return stories;
     }
 
-    public List<StoryPart> GenerateStoryParts(int quantity, int storyId)
+    public List<StoryPart> GenerateStoryParts(int quantity, int userRangeId)
     {
         Faker<StoryPart> extendedFakeStoryPart = _fakeStoryPart
-            .CustomInstantiator(f => new StoryPart { UserId = f.Random.Int(1, 100) });
+            .CustomInstantiator(f => new StoryPart { UserId = f.Random.Int(1, userRangeId) });
 
         List<StoryPart> storyParts = extendedFakeStoryPart.GenerateForever().Take(quantity).ToList();
         return storyParts;
@@ -79,7 +79,7 @@ public class FakeDataGenerator
         Faker<Story> extendedFakeStory = _fakeStory
             .RuleFor(s => s.StoryParts, (f, s) =>
             {
-                foreach (var storyPart in GenerateStoryParts(20, s.Id))
+                foreach (StoryPart storyPart in GenerateStoryParts(20, s.Id))
                 {
                     s.StoryParts.Add(storyPart);
                 }
@@ -95,7 +95,14 @@ public class FakeDataGenerator
         var storyPart = GenerateStoryParts(2, 3);
 
         Faker<AppUser> extendedFakeAppUser = _fakeAppUser
-            .RuleFor(au => au.Stories, (f, au) => GenerateStoriesWithStoryParts(f.Random.Int(1, 20), au.Id));
+            .RuleFor(au => au.Stories, (f, au) =>
+            {
+                foreach (Story story in GenerateStoriesWithStoryParts(f.Random.Int(1, 50), au.Id))
+                {
+                    au.Stories.Add(story);
+                }
+                return au.Stories;
+            });
 
         List<AppUser> users = extendedFakeAppUser.GenerateForever().Take(quantity).ToList();
         return users;

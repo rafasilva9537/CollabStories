@@ -11,7 +11,7 @@ public class AppUser : IdentityUser<int>
     public string Description { get; set; } = string.Empty;
     public string ProfileImage { get; set; } = string.Empty;
 
-    public ICollection<Story> Stories { get; set; } = [];
-    public ICollection<StoryPart> StoryParts { get; set; } = [];
-    public ICollection<AuthorInStory> AuthorInStory { get; set; } = [];
+    public ICollection<Story> Stories { get;} = [];
+    public ICollection<StoryPart> StoryParts { get; } = [];
+    public ICollection<AuthorInStory> AuthorInStory { get; } = [];
 }
