@@ -1,4 +1,5 @@
 using api.Data;
+using api.IntegrationTest.Services.Data;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -47,6 +48,7 @@ public class TestDatabaseFixture
     public void InitializeDatabase()
     {
         using var dbContext = CreateDbContext();
+        FakeDataGenerator fakeData = new();
 
         // TODO: remove db deletion after implementing whole database seed
         dbContext.Database.EnsureDeleted();
@@ -54,53 +56,9 @@ public class TestDatabaseFixture
 
         if(dbCreated)
         {
-            List<AppUser> newUsers = [
-                new AppUser
-                {
-                    UserName = "bob",
-                    Email = "user@email1.example"
-                },
-                new AppUser
-                {
-                    UserName = "joe",
-                    Email = "user@email2.example"
-                },
-                new AppUser
-                {
-                    UserName = "dude_25",
-                    Email = "user@email3.example"
-                },
-            ];
+            List<AppUser> newUsers = fakeData.GenerateAppUsersWithAllRelatedTables(100);
 
-            List<Story> newStories = [
-                new Story
-                {
-                    Title = "Story1",
-                    Description = "Story1 description",
-                    MaximumAuthors = 4,
-                    TurnDurationSeconds = 120,
-                    UserId = 1,
-                },
-                new Story
-                {
-                    Title = "Story2",
-                    Description = "Story2 description",
-                    MaximumAuthors = 4,
-                    TurnDurationSeconds = 120,
-                    UserId = 1,
-                },
-                new Story
-                {
-                    Title = "Story3",
-                    Description = "Story3 description",
-                    MaximumAuthors = 4,
-                    TurnDurationSeconds = 120,
-                    UserId = 2,
-                },
-            ];
-
-            dbContext.AppUser.AddRange(newUsers);
-            dbContext.Story.AddRange(newStories);
+            dbContext.AppUser.AddRange(newUsers);;
             dbContext.SaveChanges();
         }
     }

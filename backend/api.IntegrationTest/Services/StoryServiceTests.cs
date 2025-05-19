@@ -26,6 +26,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         StoryService storyService = new StoryService(context);
 
         //Act
+        var t = context.AppUser.Where(au => au.Id == 2);
         IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync();
 
         //Assert
