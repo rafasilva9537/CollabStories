@@ -64,8 +64,9 @@ public class FakeDataGenerator
         {
             fakeStory = fakeStory.RuleFor(s => s.AuthorInStory, (f, s) =>
             {
-                // FIXME: generating non-unique composite key (AuthorId, StoryId) => (1,1), (1,1), (1,2)
-                List<AuthorInStory> newAuthors = GenerateAuthorsInStory(f.Random.Int(1, 7), s.Id, possibleUsers);
+                List<AuthorInStory> newAuthors = GenerateAuthorsInStory(f.Random.Int(1, 7), s.Id, possibleUsers)
+                    .DistinctBy(ais => (ais.AuthorId, ais.StoryId))
+                    .ToList();
 
                 foreach (var newAuthor in newAuthors)
                 {
