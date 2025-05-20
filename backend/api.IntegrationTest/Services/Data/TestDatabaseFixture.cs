@@ -50,8 +50,6 @@ public class TestDatabaseFixture
     {
         using var dbContext = CreateDbContext();
 
-        // TODO: remove db deletion after implementing whole database seed
-        dbContext.Database.EnsureDeleted();
         bool dbCreated = dbContext.Database.EnsureCreated();
 
         if (dbCreated)
