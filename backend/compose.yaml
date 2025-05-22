@@ -22,7 +22,7 @@ services:
   db:
     image: mcr.microsoft.com/mssql/server
     ports:
-      - 1433:1433
+      - 1434:1433
     container_name: collabstories_mssql
     hostname: mssql_host
     environment:
