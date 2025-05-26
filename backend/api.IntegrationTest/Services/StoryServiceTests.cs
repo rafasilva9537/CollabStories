@@ -27,7 +27,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
 
         //Act
         var t = context.AppUser.Where(au => au.Id == 2);
-        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync();
+        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(0);
 
         //Assert
         Assert.Empty(actualStories);
@@ -50,7 +50,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
 
         //Act
         // TODO: see if ef tracker is caching data
-        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync();
+        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(0);
 
         //Assert
         Assert.NotEmpty(actualStories);
@@ -79,7 +79,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         //Act
         // TODO: see if ef tracker is caching data
         context.ChangeTracker.Clear();
-        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync();
+        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(0);
 
         //Assert
         Assert.True(actualStories.Count == 1);
