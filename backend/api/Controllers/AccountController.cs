@@ -20,9 +20,9 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<ActionResult<List<UserMainInfoDto>>> GetUsers([FromRoute] int lastId)
     {
-        IList<UserMainInfoDto> users = await _authService.GetUsersAsync();
+        List<UserMainInfoDto> users = await _authService.GetUsersAsync(lastId);
         return Ok(users);
     }
 

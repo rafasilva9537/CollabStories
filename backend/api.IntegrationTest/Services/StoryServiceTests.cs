@@ -91,7 +91,4 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         Assert.Equal(expectedStory.CreatedDate, actualStories[0].CreatedDate);
         Assert.Equal(expectedStory.UpdatedDate, actualStories[0].UpdatedDate);
     }
-
-
-    
 }

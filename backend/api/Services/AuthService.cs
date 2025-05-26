@@ -18,7 +18,7 @@ public struct AuthenticationResult
 
 public interface IAuthService
 {
-    Task<IList<UserMainInfoDto>> GetUsersAsync();
+    Task<List<UserMainInfoDto>> GetUsersAsync(int lastId);
     Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto);
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     Task<bool> DeleteByNameAsync(string username);
@@ -81,9 +81,15 @@ public class AuthService : IAuthService
         return token;
     }
 
-    public async Task<IList<UserMainInfoDto>> GetUsersAsync()
+    public async Task<List<UserMainInfoDto>> GetUsersAsync(int lastId)
     {
-        var usersDto = await _context.AppUser.Select(AppUserMappers.ProjetToUserMainInfoDto).ToListAsync();
+        int pageSize = 15;
+
+        var usersDto = await _context.AppUser
+            .Where(au => lastId > au.Id)
+            .Take(pageSize)
+            .Select(AppUserMappers.ProjetToUserMainInfoDto)
+            .ToListAsync();
         return usersDto;
     }
 
