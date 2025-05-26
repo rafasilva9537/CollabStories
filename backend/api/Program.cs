@@ -13,7 +13,6 @@ using api.Data.Seed;
 using api.Hubs;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Primitives;
-using Microsoft.EntityFrameworkCore.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -146,7 +145,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
+    // dbContext.Database.Migrate(); // TODO: 
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
     await SeedRoles.InitializeAsync(roleManager);
@@ -181,3 +180,5 @@ app.MapHub<StoryHub>("/story-hub");
 app.MapControllers();
 
 app.Run();
+
+public partial class Program {  }
