@@ -10,7 +10,7 @@ namespace api.Services;
 
 public interface IStoryService
 {
-    Task<IList<StoryMainInfoDto>> GetStoriesAsync();
+    Task<IList<StoryMainInfoDto>> GetStoriesAsync(int lastId);
     Task<StoryDto?> GetStoryAsync(int id);
     Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username);
     Task<bool> DeleteStoryAsync(int id);
@@ -36,14 +36,27 @@ public class StoryService : IStoryService
         _context = context;
     }
 
-    public async Task<IList<StoryMainInfoDto>> GetStoriesAsync()
-    {   
-        return await _context.Story.Select(StoryMappers.ProjectToStoryMainInfoDto).ToListAsync();
+    public async Task<IList<StoryMainInfoDto>> GetStoriesAsync(int lastId)
+    {
+        int pageSize = 15;
+
+        IList<StoryMainInfoDto> storyDto = await _context.Story
+            .OrderBy(s => s.Id)
+            .Where(s => s.Id > lastId)
+            .Take(pageSize)
+            .Select(StoryMappers.ProjectToStoryMainInfoDto)
+            .ToListAsync();
+
+        return storyDto;
     }
 
     public async Task<StoryDto?> GetStoryAsync(int id)
     {
-        return await _context.Story.Where(s => s.Id == id).Select(StoryMappers.ProjectToStoryDto).FirstOrDefaultAsync();
+        StoryDto? storyDto = await _context.Story.Where(s => s.Id == id)
+            .Select(StoryMappers.ProjectToStoryDto)
+            .FirstOrDefaultAsync();
+
+        return storyDto;
     }
 
     public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username)
@@ -82,9 +95,9 @@ public class StoryService : IStoryService
 
         StoryDto storyDto = storyModel.ToStoryDto();
         storyDto.UserName = _context.AppUser
-                                .Where(au => au.Id == storyModel.UserId)
-                                .Select(au => au.UserName)
-                                .FirstOrDefault();
+            .Where(au => au.Id == storyModel.UserId)
+            .Select(au => au.UserName)
+            .FirstOrDefault();
 
         return storyDto;
     }
@@ -108,13 +121,13 @@ public class StoryService : IStoryService
     public async Task<bool> IsStoryCreator(string username, int storyId)
     {
         int userId =  await _context.AppUser
-                        .Where(au => au.UserName == username)
-                        .Select(au => au.Id)
-                        .FirstAsync();
+            .Where(au => au.UserName == username)
+            .Select(au => au.Id)
+            .FirstAsync();
 
         bool IsStoryCreator = await _context.Story
-                                .Where(s => s.Id == storyId)
-                                .AnyAsync(s => s.UserId == userId);
+            .Where(s => s.Id == storyId)
+            .AnyAsync(s => s.UserId == userId);
         return IsStoryCreator;
     }
 

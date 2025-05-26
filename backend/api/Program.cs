@@ -13,6 +13,7 @@ using api.Data.Seed;
 using api.Hubs;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Primitives;
+using Microsoft.EntityFrameworkCore.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -142,22 +143,29 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-using(var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
-}
-
-// Seed data
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    await SeedRoles.InitializeAsync(services);
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    await SeedRoles.InitializeAsync(roleManager);
 }
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    // Seed database
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        if (!await dbContext.AppUser.AnyAsync())
+        {
+            SeedDatabase.Initialize(dbContext, 1000);
+        }
+    }
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }
