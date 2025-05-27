@@ -27,7 +27,7 @@ public class StoryController : ControllerBase
 
         if(stories.Count == 0)
         {
-            return Ok(new { Message = "No story exists." });
+            return Ok(new { message = "No story exists." });
         }
 
         return Ok(stories);
@@ -39,7 +39,7 @@ public class StoryController : ControllerBase
     {
         StoryDto? story = await _storyService.GetStoryAsync(id);
 
-        if(story is null) return NotFound();
+        if(story is null) return NotFound(new { message = "No story exists." });
         
         return Ok(story);
     }
@@ -98,9 +98,9 @@ public class StoryController : ControllerBase
 
         bool isDeleted = await _storyService.DeleteStoryAsync(storyId);
 
-        if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story doesn't exist." });
+        if(!isDeleted) return NotFound(new { message = "Impossible to delete. Story doesn't exist." });
 
-        return Ok( new {Message = "Story was successfully deleted!"} );
+        return Ok( new { message = "Story was successfully deleted!" } );
     }
 
 
@@ -117,7 +117,7 @@ public class StoryController : ControllerBase
 
         if(joinedStory == false) return Forbid();
         
-        return Ok(new {Message = "User joined story."});
+        return Ok(new { message = "User joined story." });
     }
 
     [HttpPost("{storyId:int}/leave")]
@@ -132,7 +132,7 @@ public class StoryController : ControllerBase
         bool leftStory = await _storyService.LeaveStoryAsync(loggedUser, storyId);
         if(leftStory == false) return Forbid();
 
-        return Ok(new {Message = "User left story."});
+        return Ok(new { message = "User left story." });
     }
 
 
@@ -179,8 +179,8 @@ public class StoryController : ControllerBase
 
         bool isDeleted = await _storyService.DeleteStoryPart(storyId, storyPartId);
 
-        if(!isDeleted) return NotFound(new { Message = "Impossible to delete. Story part doesn't exist in specified Story." });
+        if(!isDeleted) return NotFound(new { message = "Impossible to delete. Story part doesn't exist in specified Story." });
 
-        return Ok( new {Message = "Story part was successfully deleted!"} );
+        return Ok( new { message = "Story part was successfully deleted!" } );
     }
 }
