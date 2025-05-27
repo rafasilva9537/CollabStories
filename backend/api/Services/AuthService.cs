@@ -86,7 +86,7 @@ public class AuthService : IAuthService
         int pageSize = 15;
 
         var usersDto = await _context.AppUser
-            .Where(au => lastId > au.Id)
+            .Where(au => au.Id > lastId)
             .Take(pageSize)
             .Select(AppUserMappers.ProjetToUserMainInfoDto)
             .ToListAsync();
