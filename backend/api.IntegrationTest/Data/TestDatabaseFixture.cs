@@ -3,7 +3,7 @@ using api.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace api.IntegrationTests.Services.Data;
+namespace api.IntegrationTest.Data;
 
 // Fixture used when only db connection is needed,
 // not the whole Program under test
