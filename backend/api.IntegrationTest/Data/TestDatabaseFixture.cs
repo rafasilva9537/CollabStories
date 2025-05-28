@@ -9,14 +9,14 @@ namespace api.IntegrationTest.Data;
 // not the whole Program under test
 public class TestDatabaseFixture
 {
-    private static readonly object _lock = new();
+    private static readonly object Lock = new();
     private static bool _databaseInitialized;
 
     public TestDatabaseFixture()
     {
         if(!_databaseInitialized)
         {
-            lock(_lock)
+            lock(Lock)
             {
                 InitializeDatabase();
                 _databaseInitialized = true;
@@ -28,9 +28,9 @@ public class TestDatabaseFixture
     {
         var builder = new ConfigurationBuilder()
             .AddUserSecrets<Program>();
-        var _configuration = builder.Build();
+        var configuration = builder.Build();
 
-        string? connectionString = _configuration["ConnectionStrings:DbTestConnection"];
+        string? connectionString = configuration["ConnectionStrings:DbTestConnection"];
 
         if(string.IsNullOrEmpty(connectionString))
         {
@@ -44,7 +44,7 @@ public class TestDatabaseFixture
         return dbContextTest;
     }
 
-    public void InitializeDatabase()
+    private void InitializeDatabase()
     {
         using var dbContext = CreateDbContext();
 
