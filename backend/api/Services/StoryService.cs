@@ -17,7 +17,7 @@ public interface IStoryService
     // TODO: possible addition of logged user parameter when service to controller validation is implemented
     Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
     Task<bool> IsStoryCreator(string username, int storyId);
-    Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId);
+    Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId);
     Task<bool> JoinStoryAsync(string username, int storyId);
     Task<bool> LeaveStoryAsync(string username, int storyId);
     Task<bool> IsStoryAuthor(string username, int storyId);
@@ -40,7 +40,7 @@ public class StoryService : IStoryService
     {
         int pageSize = 15;
 
-        IList<StoryMainInfoDto> storyDto = await _context.Story
+        List<StoryMainInfoDto> storyDto = await _context.Story
             .OrderBy(s => s.Id)
             .Where(s => s.Id > lastId)
             .Take(pageSize)
@@ -117,7 +117,7 @@ public class StoryService : IStoryService
     }
 
     // TODO: temporary solution, this method add unnecessary round trips to the database
-    // this is will be used until service to controller validation is implemeneted
+    // this is will be used until service to controller validation is implemented
     public async Task<bool> IsStoryCreator(string username, int storyId)
     {
         int userId =  await _context.AppUser
@@ -125,17 +125,17 @@ public class StoryService : IStoryService
             .Select(au => au.Id)
             .FirstAsync();
 
-        bool IsStoryCreator = await _context.Story
+        bool isStoryCreator = await _context.Story
             .Where(s => s.Id == storyId)
             .AnyAsync(s => s.UserId == userId);
-        return IsStoryCreator;
+        return isStoryCreator;
     }
 
-    public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int StoryId)
+    public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId)
     {
         //TODO: improve, reduce roundtrips
         Story? completeStory =  await _context.Story
-                                    .Where(story => story.Id == StoryId)
+                                    .Where(story => story.Id == storyId)
                                     .Include(story => story.StoryParts)
                                     .FirstOrDefaultAsync();
         
@@ -144,13 +144,13 @@ public class StoryService : IStoryService
         CompleteStoryDto completeStoryDto = completeStory.ToCompleteStoryDto();
 
         IList<StoryPartInListDto> storyPartsDto = await _context.StoryPart
-                                        .Where(sp => sp.StoryId == StoryId)
+                                        .Where(sp => sp.StoryId == storyId)
                                         .Include(sp => sp.User)
                                         .Select(StoryPartMappers.ProjectToStoryPartInListDto)
                                         .ToListAsync();
 
         IList<AuthorFromStoryInListDto> storyAuthors = await _context.AuthorInStory
-                                            .Where(ais => ais.StoryId == StoryId)
+                                            .Where(ais => ais.StoryId == storyId)
                                             .Include(ais => ais.Author)
                                             // TODO: create mapper for projection here
                                             .Select(ais => new AuthorFromStoryInListDto

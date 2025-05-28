@@ -21,7 +21,7 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
 
         // Act
         //HttpResponseMessage? response = await client.GetAsync($"/accounts/{lastId}");
-        //var users = await response.Content.ReadFromJsonAsync<List<UserMainInfoDto>>();
+        //var users = await response.Content.ReadFromJsonAsync<IList<UserMainInfoDto>>();
 
         // Assert
         //Assert.True(!users.IsNullOrEmpty());

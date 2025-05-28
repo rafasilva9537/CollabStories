@@ -18,7 +18,7 @@ public struct AuthenticationResult
 
 public interface IAuthService
 {
-    Task<List<UserMainInfoDto>> GetUsersAsync(int lastId);
+    Task<IList<UserMainInfoDto>> GetUsersAsync(int lastId);
     Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto);
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     Task<bool> DeleteByNameAsync(string username);
@@ -81,7 +81,7 @@ public class AuthService : IAuthService
         return token;
     }
 
-    public async Task<List<UserMainInfoDto>> GetUsersAsync(int lastId)
+    public async Task<IList<UserMainInfoDto>> GetUsersAsync(int lastId)
     {
         int pageSize = 15;
 

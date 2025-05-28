@@ -2,12 +2,14 @@ using api.Data;
 using api.Services;
 using api.Dtos.Story;
 using api.Models;
-using api.IntegrationTests.Services.Data;
 using Microsoft.EntityFrameworkCore;
 using api.Mappers;
+using api.IntegrationTest.Data;
+using api.IntegrationTest;
 
 namespace api.IntegrationTests.Services;
 
+[Collection(CollectionConstants.IntegrationTestsDatabase)]
 public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
 {
     private readonly TestDatabaseFixture _testDatabase;
@@ -26,7 +28,6 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         StoryService storyService = new StoryService(context);
 
         //Act
-        var t = context.AppUser.Where(au => au.Id == 2);
         IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(0);
 
         //Assert
@@ -41,7 +42,8 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         StoryService storyService = new StoryService(context);
 
         await context.Database.BeginTransactionAsync();
-        Story newStory = new Story {
+        Story newStory = new Story
+        {
             Title = "Test story",
             Description = "This is a test story",
         };
@@ -67,7 +69,8 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
 
         await context.Database.BeginTransactionAsync();
         await context.Story.ExecuteDeleteAsync();
-        Story newStory = new Story {
+        Story newStory = new Story
+        {
             Title = title,
             Description = description,
         };
