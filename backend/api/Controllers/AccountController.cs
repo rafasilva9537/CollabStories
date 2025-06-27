@@ -15,7 +15,7 @@ public class AccountController : ControllerBase
     private readonly IAuthService _authService;
     public AccountController(IAuthService authService)
     {
-        _authService = authService;;
+        _authService = authService;
     }
 
     [AllowAnonymous]

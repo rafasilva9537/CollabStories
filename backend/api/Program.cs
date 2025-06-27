@@ -47,6 +47,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("MSSQL_CONNECTION_STRING");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+// , sqlOptions => sqlOptions.CommandTimeout(300)
 
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -145,7 +146,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    // dbContext.Database.Migrate(); // TODO: 
+    dbContext.Database.Migrate();
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
     await SeedRoles.InitializeAsync(roleManager);
@@ -161,7 +162,7 @@ if (app.Environment.IsDevelopment())
 
         if (!await dbContext.AppUser.AnyAsync())
         {
-            SeedDatabase.Initialize(dbContext, 1000);
+            SeedDatabase.Initialize(dbContext, 100);
         }
     }
 
