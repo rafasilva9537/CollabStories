@@ -22,6 +22,7 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
 
         string? connectionString = configuration.GetConnectionString("DbTestConnection");
 
+        builder.UseEnvironment("Test");
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));

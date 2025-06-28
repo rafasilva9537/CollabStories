@@ -157,7 +157,7 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate(); //TODO: add dev environment but remove from integration tests
+        dbContext.Database.Migrate();
 
         if (!await dbContext.AppUser.AnyAsync())
         {
@@ -167,6 +167,11 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwagger();
     app.UseSwaggerUI();
+} 
+else if (app.Environment.EnvironmentName == "Test")
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();   
 }
 
 app.UseHttpsRedirection();
