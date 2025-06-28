@@ -146,8 +146,6 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //dbContext.Database.Migrate(); //TODO: add dev environment but remove from integration tests
-
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
     await SeedRoles.InitializeAsync(roleManager);
 }
@@ -159,6 +157,7 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate(); //TODO: add dev environment but remove from integration tests
 
         if (!await dbContext.AppUser.AnyAsync())
         {
