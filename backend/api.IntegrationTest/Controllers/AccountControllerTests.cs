@@ -1,4 +1,4 @@
-namespace api.IntegrationTest.Controllers;
+namespace api.IntegrationTests.Controllers;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
 public class AccountControllerTests : IClassFixture<CustomWebAppFactory>

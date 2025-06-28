@@ -1,4 +1,4 @@
-namespace api.IntegrationTest;
+namespace api.IntegrationTests;
 
 public static class CollectionConstants
 {

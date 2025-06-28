@@ -4,8 +4,8 @@ using api.Dtos.Story;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 using api.Mappers;
-using api.IntegrationTest.Data;
-using api.IntegrationTest;
+using api.IntegrationTests.Data;
+using api.IntegrationTests;
 
 namespace api.IntegrationTests.Services;
 
