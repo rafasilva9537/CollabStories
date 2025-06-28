@@ -21,7 +21,7 @@ public class StoryController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetStories([FromRoute] int lastId)
+    public async Task<IActionResult> GetStories([FromQuery] int? lastId)
     {
         IList<StoryMainInfoDto> stories = await _storyService.GetStoriesAsync(lastId);
 

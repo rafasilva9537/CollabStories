@@ -10,7 +10,7 @@ namespace api.Services;
 
 public interface IStoryService
 {
-    Task<IList<StoryMainInfoDto>> GetStoriesAsync(int lastId);
+    Task<IList<StoryMainInfoDto>> GetStoriesAsync(int? lastId);
     Task<StoryDto?> GetStoryAsync(int id);
     Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username);
     Task<bool> DeleteStoryAsync(int id);
@@ -36,8 +36,10 @@ public class StoryService : IStoryService
         _context = context;
     }
 
-    public async Task<IList<StoryMainInfoDto>> GetStoriesAsync(int lastId)
+    public async Task<IList<StoryMainInfoDto>> GetStoriesAsync(int? lastId)
     {
+        if(lastId is null) lastId = 0;
+        
         int pageSize = 15;
 
         List<StoryMainInfoDto> storyDto = await _context.Story
@@ -45,6 +47,7 @@ public class StoryService : IStoryService
             .Where(s => s.Id > lastId)
             .Take(pageSize)
             .Select(StoryMappers.ProjectToStoryMainInfoDto)
+            .OrderByDescending(s => s.Id)
             .ToListAsync();
 
         return storyDto;
