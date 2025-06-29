@@ -15,14 +15,19 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
+        builder.UseEnvironment("Test");
 
         var configuration = new ConfigurationBuilder()
             .AddUserSecrets<Program>()
             .Build();
 
+        // Used because builder.UseEnvironment("Test"); remove Program.cs access to user secrets
+        builder.ConfigureAppConfiguration((context, configBuilder) =>
+        {
+            configBuilder.AddConfiguration(configuration);
+        });
+        
         string? connectionString = configuration.GetConnectionString("DbTestConnection");
-
-        builder.UseEnvironment("Test");
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));

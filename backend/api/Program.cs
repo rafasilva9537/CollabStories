@@ -47,7 +47,6 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("MSSQL_CONNECTION_STRING");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-// , sqlOptions => sqlOptions.CommandTimeout(300)
 
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
