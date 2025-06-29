@@ -42,7 +42,7 @@ public class StoryService : IStoryService
 
         List<StoryMainInfoDto> storyDto = await _context.Story
             .OrderByDescending(s => s.Id)
-            .Where(s => !lastId.HasValue || s.Id > lastId)
+            .Where(s => !lastId.HasValue || s.Id < lastId)
             .Take(pageSize)
             .Select(StoryMappers.ProjectToStoryMainInfoDto)
             .ToListAsync();
