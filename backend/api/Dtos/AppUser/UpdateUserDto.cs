@@ -2,11 +2,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace api.Dtos.AppUser;
 
-public class UpdateUserDto
+public record UpdateUserDto
 {
-    public required string UserName { get; set; }
-    public required string Email { get; set; }
-    public required string CurrentPassword { get; set; }
-    public required string NewPassword { get; set; }
-    public required string Description { get; set; }
+    public required string UserName { get; init; }
+    public required string Email { get; init; }
+    public required string CurrentPassword { get; init; }
+    public required string NewPassword { get; init; }
+    public required string Description { get; init; }
 }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace api.Dtos.AppUser;
 
-public class AppUserDto
+public record AppUserDto
 {
-    public required string Nickname { get; set; }
-    public required string UserName { get; set; }
-    public required string Email { get; set; }
-    public required DateTimeOffset CreatedDate { get; set; }
-    public required string Description { get; set; }
+    public required string Nickname { get; init; }
+    public required string UserName { get; init; }
+    public required string Email { get; init; }
+    public required DateTimeOffset CreatedDate { get; init; }
+    public required string Description { get; init; }
 }

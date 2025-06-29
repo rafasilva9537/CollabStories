@@ -2,5 +2,5 @@
 
 public record TokenResponse
 {
-    public required string Token { get; set; }
+    public required string Token { get; init; }
 }

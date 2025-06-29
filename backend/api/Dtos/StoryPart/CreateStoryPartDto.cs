@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace api.Dtos.StoryPart
 {
-    public class CreateStoryPartDto
+    public record CreateStoryPartDto
     {
         [Required]
-        public required string Text { get; set; }
+        public required string Text { get; init; }
     }
 }

@@ -1,13 +1,14 @@
 namespace api.Dtos.Story;
 
-public class StoryDto
+// TODO: replace UserName set with init. Solve all the conflicts generated because of the change
+public record StoryDto
 {
-    public int Id { get; set; }
-    public required string Title { get; set; }
-    public string? Description { get; set; }
+    public int Id { get; init; }
+    public required string Title { get; init; }
+    public string? Description { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
-    public DateTimeOffset UpdatedDate { get; set; }
-    public int MaximumAuthors { get; set; }
-    public int TurnDurationSeconds { get; set; }
+    public DateTimeOffset UpdatedDate { get; init; }
+    public int MaximumAuthors { get; init; }
+    public int TurnDurationSeconds { get; init; }
     public string? UserName { get; set; }
 }

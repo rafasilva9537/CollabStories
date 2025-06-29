@@ -1,6 +1,6 @@
 ﻿namespace api.Dtos.HttpResponses;
 
-public class MessageResponse
+public record MessageResponse
 {
-    public required string Message { get; set; }
+    public required string Message { get; init; }
 }

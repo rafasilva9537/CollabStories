@@ -1,9 +1,9 @@
 
 namespace api.Dtos.AuthorInStory;
 
-public class AuthorInStoryDto
+public record AuthorInStoryDto
 {
-    public required string AuthorUserName { get; set; }
-    public int StoryId { get; set; }
-    public DateTimeOffset EntryDate { get; set; }
+    public required string AuthorUserName { get; init; }
+    public int StoryId { get; init; }
+    public DateTimeOffset EntryDate { get; init; }
 }
