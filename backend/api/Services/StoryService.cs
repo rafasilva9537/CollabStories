@@ -38,16 +38,13 @@ public class StoryService : IStoryService
 
     public async Task<IList<StoryMainInfoDto>> GetStoriesAsync(int? lastId)
     {
-        if(lastId is null) lastId = 0;
-        
         int pageSize = 15;
 
         List<StoryMainInfoDto> storyDto = await _context.Story
-            .OrderBy(s => s.Id)
-            .Where(s => s.Id > lastId)
+            .OrderByDescending(s => s.Id)
+            .Where(s => !lastId.HasValue || s.Id > lastId)
             .Take(pageSize)
             .Select(StoryMappers.ProjectToStoryMainInfoDto)
-            .OrderByDescending(s => s.Id)
             .ToListAsync();
 
         return storyDto;
