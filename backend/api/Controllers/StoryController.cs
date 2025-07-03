@@ -26,11 +26,6 @@ public class StoryController : ControllerBase
     {
         IList<StoryMainInfoDto> stories = await _storyService.GetStoriesAsync(lastId);
 
-        if(stories.Count == 0)
-        {
-            return Ok(new MessageResponse { Message = "No story exists." });
-        }
-
         return Ok(stories);
     }
 
