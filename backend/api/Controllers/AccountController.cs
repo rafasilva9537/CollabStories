@@ -21,7 +21,7 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers([FromRoute] int lastId)
+    public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers([FromQuery] int? lastId)
     {
         IList<UserMainInfoDto> users = await _authService.GetUsersAsync(lastId);
         return Ok(users);

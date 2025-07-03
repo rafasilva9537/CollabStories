@@ -18,7 +18,7 @@ public struct AuthenticationResult
 
 public interface IAuthService
 {
-    Task<IList<UserMainInfoDto>> GetUsersAsync(int lastId);
+    Task<IList<UserMainInfoDto>> GetUsersAsync(int? lastId);
     Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto);
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     Task<bool> DeleteByNameAsync(string username);
@@ -81,12 +81,14 @@ public class AuthService : IAuthService
         return token;
     }
 
-    public async Task<IList<UserMainInfoDto>> GetUsersAsync(int lastId)
+    // TODO: change pagination logic, shouldn't expose user id. Pagination by (date, username) should be better.
+    public async Task<IList<UserMainInfoDto>> GetUsersAsync(int? lastId)
     {
         int pageSize = 15;
 
-        var usersDto = await _context.AppUser
-            .Where(au => au.Id > lastId)
+        IList<UserMainInfoDto> usersDto = await _context.AppUser
+            .OrderByDescending(au => au.Id)
+            .Where(au => !lastId.HasValue || au.Id < lastId)
             .Take(pageSize)
             .Select(AppUserMappers.ProjetToUserMainInfoDto)
             .ToListAsync();

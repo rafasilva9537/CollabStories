@@ -23,6 +23,7 @@ public static class AppUserMappers
     {
         return new UserMainInfoDto
         {
+            Id = appUser.Id,
             UserName = appUser.UserName,
             Nickname = appUser.Nickname,
             CreatedDate = appUser.CreatedDate,
@@ -30,6 +31,7 @@ public static class AppUserMappers
     }
 
     public static Expression<Func<AppUser, UserMainInfoDto>> ProjetToUserMainInfoDto = (appUser) => new UserMainInfoDto {
+        Id = appUser.Id,
         UserName = appUser.UserName,
         Nickname = appUser.Nickname,
         CreatedDate = appUser.CreatedDate,
