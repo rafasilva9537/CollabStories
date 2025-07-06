@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using api.Dtos.AppUser;
@@ -51,5 +52,18 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
         Assert.NotNull(users);
         Assert.Equal(expectedUsersCount, users.Count);
         Assert.Equal(containsUserWithId1, users.Any(u => u.Id == 1));
+    }
+    
+    [Fact]
+    public async Task GetUser_WhenNotAuthenticated_ReturnsUnauthorized()
+    {
+        // Arrange
+        HttpClient client = _factory.CreateClient();
+        
+        // Act
+        HttpResponseMessage response = await client.GetAsync("/accounts/neva_rosenbaum29");
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);;
     }
 }
