@@ -27,9 +27,9 @@ public class FakeDataGenerator
     {
         Faker<AppUser> fakeAppUser = new Faker<AppUser>()
             .RuleFor(au => au.Nickname, f => f.Name.FirstName())
-            .RuleFor(au => au.UserName, (f, au) => f.Internet.UserName(au.Nickname))
+            .RuleFor(au => au.UserName, (f, au) => f.Internet.UserName().ToLower())
             .RuleFor(au => au.Description, f => f.Lorem.Sentence(5, 15))
-            .RuleFor(au => au.Email, (f, au) => f.Internet.Email(au.UserName))
+            .RuleFor(au => au.Email, (f, au) => f.Internet.Email(au.UserName).ToLower())
             .RuleFor(au => au.CreatedDate, f => f.Date.BetweenOffset(_userStartDate, _userEndDate))
             .RuleFor(
                 au => au.ProfileImage, f => Path.Combine(
