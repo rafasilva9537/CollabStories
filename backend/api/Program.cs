@@ -145,6 +145,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    if(app.Environment.IsDevelopment()) dbContext.Database.Migrate();
+    
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
     await SeedRoles.InitializeAsync(roleManager);
 }
@@ -156,7 +158,6 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
 
         if (!await dbContext.AppUser.AnyAsync())
         {
