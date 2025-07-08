@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using api.Constants;
 using api.Dtos.AppUser;
 
 namespace api.IntegrationTests.Controllers;
@@ -65,5 +66,34 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
         
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);;
+    }
+    
+    [Fact]
+    public async Task GetUser_WhenAuthenticated_ReturnsExpectedUser()
+    {
+        // Arrange
+        HttpClient client = _factory.CreateClientWithAuth(
+            "neva_rosenbaum29", 
+            "neva_rosenbaum29", 
+            "neva_rosenbaum2930@hotmail.com", 
+            RoleConstants.User
+            );
+        
+        // Act
+        HttpResponseMessage response = await client.GetAsync("/accounts/neva_rosenbaum29");
+        
+        // Assert
+        MediaTypeHeaderValue? contentType = response.Content.Headers.ContentType;
+        
+        response.EnsureSuccessStatusCode();
+        Assert.NotNull(contentType);
+        Assert.Equal("utf-8", contentType.CharSet);
+        Assert.Equal("application/json", contentType.MediaType);
+        
+        string jsonResponse = await response.Content.ReadAsStringAsync();
+        AppUserDto? user = JsonSerializer.Deserialize<AppUserDto>(jsonResponse, _jsonSerializerOptions);
+        Assert.NotNull(user);
+        Assert.Equal("neva_rosenbaum29", user.UserName);
+        Assert.Equal("neva_rosenbaum2930@hotmail.com", user.Email);
     }
 }
