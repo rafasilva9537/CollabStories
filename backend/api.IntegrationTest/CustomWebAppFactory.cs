@@ -1,6 +1,7 @@
+using System.Net.Http.Headers;
 using api.Data;
-using api.Data.Seed;
 using api.IntegrationTests.Data;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -51,5 +52,33 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
                 }
             }
         });
+    }
+
+    public HttpClient CreateClientWithAuth(string userName, string nameIdentifier, string email, params string[] roles)
+    {
+        HttpClient client = WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddAuthentication(options =>
+                    {
+                        options.DefaultAuthenticateScheme = TestAuthHandler.AuthenticationScheme;
+                        options.DefaultChallengeScheme = TestAuthHandler.AuthenticationScheme;
+                        options.DefaultScheme = TestAuthHandler.AuthenticationScheme;
+                    })
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.AuthenticationScheme, options => { });
+            });
+        }).CreateClient();
+        
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.AuthenticationScheme);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.NameHeader, userName);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.NameIdentifierHeader, nameIdentifier);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.EmailHeader, email);
+        foreach (string role in roles)
+        {
+            client.DefaultRequestHeaders.Add(TestAuthHandler.RoleHeader, role);
+        }
+
+        return client;
     }
 }
