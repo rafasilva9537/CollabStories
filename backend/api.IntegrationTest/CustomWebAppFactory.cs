@@ -1,5 +1,6 @@
 using api.Data;
 using api.Data.Seed;
+using api.IntegrationTests.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -46,7 +47,7 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
 
                 if (dbCreated)
                 {
-                    SeedDatabase.Initialize(dbContext, 100);
+                    SeedTestDatabase.Initialize(dbContext, 100);
                 }
             }
         });
