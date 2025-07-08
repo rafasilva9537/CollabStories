@@ -66,8 +66,8 @@ public class AccountController : ControllerBase
         // TODO: remove username
         return Ok(new TokenResponse { Token = token }); 
     }
-
-    [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
+    
+    // TODO: return less detailed user data if not the logged user or admin
     [HttpGet("{username}")]
     public async Task<ActionResult<AppUserDto>> GetUser([FromRoute] string username)
     {
