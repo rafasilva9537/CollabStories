@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace api.Data.Seed;
 
-public class SeedDatabase
+public static class SeedDatabase
 {
     public static void Initialize(ApplicationDbContext dbContext, int totalUsers = 300)
     {
@@ -34,7 +34,7 @@ public class SeedDatabase
         List<StoryPart> storyPartsWithoutUsers = fakeData.GenerateStoryParts(totalStoryParts/100, newStories);
         dbContext.StoryPart.AddRange(storyPartsWithoutUsers);
         dbContext.SaveChanges();
-
+        
         seedTransaction.Commit();
     }
 }
