@@ -19,7 +19,7 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
         base.ConfigureWebHost(builder);
         builder.UseEnvironment("Test");
 
-        var configuration = new ConfigurationBuilder()
+        IConfigurationRoot configuration = new ConfigurationBuilder()
             .AddUserSecrets<Program>()
             .Build();
 
