@@ -181,7 +181,7 @@ app.UseCors(allowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<StoryHub>("/story-hub");
+app.MapHub<StoryHub>($"/{UrlConstants.StoryHub}");
 app.MapControllers();
 
 app.Run();
