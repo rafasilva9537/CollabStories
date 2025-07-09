@@ -1,11 +1,7 @@
-using System.Security.Claims;
-using System.Text.RegularExpressions;
 using api.Dtos.StoryPart;
-using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.VisualBasic;
 
 namespace api.Hubs;
 
@@ -34,14 +30,13 @@ public class StoryHub : Hub<IStoryClient>
 
     public async Task LeaveStorySession(int storyId)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, storyId.ToString());
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, storyId.ToString());
         await Clients.Group(storyId.ToString()).UserDisconnected(Context.User?.Identity?.Name);
     }
-
-
+    
     public async Task SendStoryPart(int storyId, string storyPartText)
     {     
-        var newStoryPart = new CreateStoryPartDto
+        CreateStoryPartDto newStoryPart = new()
         {
             Text = storyPartText
         };
