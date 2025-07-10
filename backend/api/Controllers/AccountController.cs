@@ -14,9 +14,12 @@ namespace api.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly IAuthService _authService;
-    public AccountController(IAuthService authService)
+    private readonly ILogger<AccountController> _logger;
+    
+    public AccountController(IAuthService authService, ILogger<AccountController> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -34,6 +37,7 @@ public class AccountController : ControllerBase
         // TODO: remove user
         var user = await _authService.GetUserAsync(registerUser.UserName);
         AuthenticationResult registerResult = await _authService.RegisterAsync(registerUser);
+        _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
         
         string token = registerResult.Token;
 
