@@ -20,7 +20,8 @@ public interface IStoryService
     Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId);
     Task<bool> JoinStoryAsync(string username, int storyId);
     Task<bool> LeaveStoryAsync(string username, int storyId);
-    Task<bool> IsStoryAuthor(string username, int storyId);
+    Task<bool> IsStoryAuthorAsync(string username, int storyId);
+    Task<bool> StoryExistsAsync(int storyId);
 
     Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string username, CreateStoryPartDto storyPartDto);
     Task<bool> DeleteStoryPart(int storyId, int storyPartId);
@@ -218,7 +219,7 @@ public class StoryService : IStoryService
         return true;
     }
 
-    public async Task<bool> IsStoryAuthor(string username, int storyId)
+    public async Task<bool> IsStoryAuthorAsync(string username, int storyId)
     {
         int? userId = await _context.AppUser
                         .Where(au => au.UserName == username)
@@ -230,6 +231,11 @@ public class StoryService : IStoryService
         bool isInStory = await _context.AuthorInStory
                             .AnyAsync(ais => ais.StoryId == storyId && ais.AuthorId == userId);
         return isInStory;
+    }
+
+    public async Task<bool> StoryExistsAsync(int storyId)
+    {
+        return await _context.Story.AnyAsync(s => s.Id == storyId);
     }
 
     public async Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string username, CreateStoryPartDto storyPartDto)

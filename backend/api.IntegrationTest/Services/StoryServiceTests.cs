@@ -5,7 +5,6 @@ using api.Models;
 using Microsoft.EntityFrameworkCore;
 using api.Mappers;
 using api.IntegrationTests.Data;
-using api.IntegrationTests;
 
 namespace api.IntegrationTests.Services;
 
@@ -22,7 +21,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
     public async Task GetStoriesAsync_WhenNoStoryExists_ReturnsEmptyList()
     {
         //Arrange
-        using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
         await context.Database.BeginTransactionAsync();
         await context.Story.ExecuteDeleteAsync();
         StoryService storyService = new StoryService(context);
@@ -38,7 +37,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
     public async Task GetStoriesAsync_WhenStoriesExists_ReturnsNonEmptyList()
     {
         //Arrange 
-        using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
         StoryService storyService = new StoryService(context);
 
         await context.Database.BeginTransactionAsync();
@@ -64,7 +63,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
     public async Task GetStoriesAsync_WhenOnlyOneStoryExists_ReturnsExpectedStoryValue(string title, string description)
     {
         //Arrange 
-        using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
         StoryService storyService = new StoryService(context);
 
         await context.Database.BeginTransactionAsync();
@@ -93,5 +92,39 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         Assert.Equal(expectedStory.MaximumAuthors, actualStories[0].MaximumAuthors);
         Assert.Equal(expectedStory.CreatedDate, actualStories[0].CreatedDate);
         Assert.Equal(expectedStory.UpdatedDate, actualStories[0].UpdatedDate);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(15)]
+    [InlineData(500)]
+    public async Task StoryExists_WhenStoryExists_ReturnsTrue(int storyId)
+    {
+        // Arrange 
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        StoryService storyService = new StoryService(context);
+        
+        // Act
+        bool storyExists = await storyService.StoryExistsAsync(storyId);
+        
+        // Assert
+        Assert.True(storyExists);
+    }
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10_000)]
+    [InlineData(20_000)]
+    public async Task StoryExists_WhenStoryDoesNotExist_ReturnsFalse(int storyId)
+    {
+        // Arrange 
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        StoryService storyService = new StoryService(context);
+        
+        // Act
+        bool storyExists = await storyService.StoryExistsAsync(storyId);
+        
+        // Assert
+        Assert.False(storyExists);   
     }
 }

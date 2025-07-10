@@ -40,7 +40,7 @@ public static class StoryPartMappers
         };
     }
     
-    public static Expression<Func<StoryPart, StoryPartInListDto>> ProjectToStoryPartInListDto = (storyPartModel) => new StoryPartInListDto 
+    public static readonly Expression<Func<StoryPart, StoryPartInListDto>> ProjectToStoryPartInListDto = (storyPartModel) => new StoryPartInListDto 
     {
         Id = storyPartModel.Id,
         UserName = storyPartModel.User.UserName,
