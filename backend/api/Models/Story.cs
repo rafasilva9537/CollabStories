@@ -10,8 +10,10 @@ public class Story
     public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.UtcNow;
     public int MaximumAuthors { get; set; } = 6;
     public int TurnDurationSeconds { get; set; } = 300;
+    public bool IsFinished { get; set; }
+    public int CurrentAuthorId { get; set; }
 
-    public ICollection<StoryPart> StoryParts { get; }= [];
+    public ICollection<StoryPart> StoryParts { get; } = [];
     public AppUser User { get; set; } = null!;
     public ICollection<AuthorInStory> AuthorInStory { get; } = [];
 }

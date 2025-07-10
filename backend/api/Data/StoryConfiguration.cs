@@ -16,6 +16,7 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
         builder.Property(s => s.UpdatedDate).HasDefaultValueSql("GetUtcDate()");;
         builder.Property(s => s.MaximumAuthors).HasDefaultValue(6); // TODO: put constraint of max value (8)
         builder.Property(s => s.TurnDurationSeconds).HasDefaultValue(300);
+        builder.Property(s => s.IsFinished).HasDefaultValue(false);
 
         builder.HasOne(s => s.User)
             .WithMany(au => au.Stories)
