@@ -1,0 +1,109 @@
+/*Header*/
+.header-story{
+    height: 20%;
+    width: 100%;
+    display: flex;
+    gap: 5%;
+    justify-content: center;
+}
+
+.player-card{
+    height: 100%;
+    width: 10%;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border: solid black 2px;
+}
+
+.icon-player{
+    height: 90px;
+    width: 90px;
+}
+
+.player-name{
+    font-weight: bold;
+}
+
+/*Titulo*/
+
+.titleStory{
+    height: 10%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.title{
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bolder;
+    padding: 10px;
+    border: solid black 2px;
+    border-radius: 10px;
+}
+
+/*Container das histotiras*/
+.containerBlockStory{
+    height: 70%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+
+}
+
+.blockStory{
+    height: 95%;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: solid black 2px;
+    border-radius: 10px;
+    border-top-right-radius: 0;
+}
+
+    /*Caixa da historia*/
+    .box{
+        height: 70%;
+        width: 95%;
+        background-color: blue;
+    }
+
+    .formSend{
+        height: 20%;
+        width: 100%;
+       display: flex;
+       flex-direction: row;
+    }
+
+    /*input*/
+    .InputSend{
+        height: 20px;
+        width: 70%;
+    }
+
+    /*Button*/
+    .Send{
+        height: 60px;
+        width: 15%;
+    }
+
+    /*aside*/
+.infsTime{
+    height: 50%;
+    width: 10%;
+    border: solid black 2px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
