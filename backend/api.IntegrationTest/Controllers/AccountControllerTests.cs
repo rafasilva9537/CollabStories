@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using api.Constants;
 using api.Dtos.AppUser;
+using api.IntegrationTests.Data;
 
 namespace api.IntegrationTests.Controllers;
 
@@ -62,7 +62,7 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
         HttpClient client = _factory.CreateClient();
         
         // Act
-        HttpResponseMessage response = await client.GetAsync("/accounts/neva_rosenbaum29");
+        HttpResponseMessage response = await client.GetAsync($"/accounts/{TestConstants.DefaultUserName}");
         
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);;
@@ -73,14 +73,14 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         HttpClient client = _factory.CreateClientWithAuth(
-            "neva_rosenbaum29", 
-            "neva_rosenbaum29", 
-            "neva_rosenbaum2930@hotmail.com", 
-            RoleConstants.User
-            );
+            TestConstants.DefaultUserName, 
+            TestConstants.DefaultNameIdentifier, 
+            TestConstants.DefaultEmail, 
+            TestConstants.DefaultRole
+        );
         
         // Act
-        HttpResponseMessage response = await client.GetAsync("/accounts/neva_rosenbaum29");
+        HttpResponseMessage response = await client.GetAsync($"/accounts/{TestConstants.DefaultUserName}");
         
         // Assert
         MediaTypeHeaderValue? contentType = response.Content.Headers.ContentType;
@@ -93,7 +93,7 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
         string jsonResponse = await response.Content.ReadAsStringAsync();
         AppUserDto? user = JsonSerializer.Deserialize<AppUserDto>(jsonResponse, _jsonSerializerOptions);
         Assert.NotNull(user);
-        Assert.Equal("neva_rosenbaum29", user.UserName);
-        Assert.Equal("neva_rosenbaum2930@hotmail.com", user.Email);
+        Assert.Equal(TestConstants.DefaultUserName, user.UserName);
+        Assert.Equal(TestConstants.DefaultEmail, user.Email);
     }
 }
