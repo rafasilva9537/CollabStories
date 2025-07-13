@@ -53,6 +53,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
+builder.Services.AddSingleton<IStorySessionService, StorySessionService>();
+
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
     .AddRoles<IdentityRole<int>>()

@@ -8,6 +8,7 @@ namespace api.Hubs;
 public interface IStoryClient
 {
     Task ReceiveStoryPart(int storyId, StoryPartDto createdStoryPart);
+    Task ReceiveTimerSeconds(int seconds);
     Task MessageFailed(string message);
     Task UserDisconnected(string userName);
     Task UserConnected(string userName);
@@ -18,10 +19,12 @@ public class StoryHub : Hub<IStoryClient>
 {
     private readonly IStoryService _storyService;
     private readonly ILogger<StoryHub> _logger;
-    public StoryHub(IStoryService storyService, ILogger<StoryHub> logger)
+    private readonly IStorySessionService _storySessionService;
+    public StoryHub(IStoryService storyService, ILogger<StoryHub> logger, IStorySessionService storySessionService)
     {
         _storyService = storyService;
         _logger = logger;
+        _storySessionService = storySessionService;
     }
 
     public async Task JoinStorySession(int storyId)
@@ -30,6 +33,13 @@ public class StoryHub : Hub<IStoryClient>
         if (userName is null)
         {
             _logger.LogWarning("Non logged user tried to join story {StoryId}.", userName);
+            return;
+        }
+        
+        bool storyExists = await _storyService.StoryExistsAsync(storyId);
+        if (!storyExists)
+        {
+            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that doesn't exist.", userName, storyId);
             return;       
         }
         
@@ -39,16 +49,17 @@ public class StoryHub : Hub<IStoryClient>
             _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that he is not a author of.", userName, storyId);
             return;
         }
-
-        bool storyExists = await _storyService.StoryExistsAsync(storyId);
-        if (!storyExists)
-        {
-            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that doesn't exist.", userName, storyId);
-            return;       
-        } 
         
         await Groups.AddToGroupAsync(Context.ConnectionId, storyId.ToString());
-        await Clients.Group(storyId.ToString()).UserConnected(userName);
+        string storySessionId = storyId.ToString();
+        if (!_storySessionService.SessionIsActive(storySessionId))
+        {
+            _storySessionService.AddSession(storySessionId);
+            // TODO: add timer
+        }
+        _storySessionService.AddConnectionToSession(storySessionId, Context.ConnectionId);
+        
+        await Clients.Group(storySessionId).UserConnected(userName);
     }
 
     public async Task LeaveStorySession(int storyId)
@@ -60,13 +71,6 @@ public class StoryHub : Hub<IStoryClient>
             return;       
         }
         
-        bool isStoryAuthor = await _storyService.IsStoryAuthorAsync(userName, storyId);
-        if (!isStoryAuthor)
-        {
-            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that he is not a author of.", userName, storyId);
-            return;
-        }
-        
         bool storyExists = await _storyService.StoryExistsAsync(storyId);
         if (!storyExists)
         {
@@ -74,7 +78,25 @@ public class StoryHub : Hub<IStoryClient>
             return;       
         } 
         
+        bool isStoryAuthor = await _storyService.IsStoryAuthorAsync(userName, storyId);
+        if (!isStoryAuthor)
+        {
+            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that he is not a author of.", userName, storyId);
+            return;
+        }
+        
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, storyId.ToString());
+        string storySessionId = storyId.ToString();
+        if (_storySessionService.SessionIsActive(storySessionId))
+        {
+            _storySessionService.RemoveConnectionFromSession(storySessionId, Context.ConnectionId);
+            if (_storySessionService.SessionIsEmpty(storySessionId))
+            {
+                // TODO: remove timer
+                _storySessionService.RemoveSession(storySessionId);
+            }
+        }
+        
         await Clients.Group(storyId.ToString()).UserDisconnected(userName);
     }
     
