@@ -2,8 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using api.Dtos.Story;
+using api.IntegrationTests.Constants;
+using api.IntegrationTests.WebAppFactories;
 
-namespace api.IntegrationTests.Controllers;
+namespace api.IntegrationTests.ControllersTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
 public class StoryControllerTests : IClassFixture<CustomWebAppFactory>

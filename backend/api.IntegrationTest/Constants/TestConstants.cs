@@ -1,6 +1,6 @@
 ﻿using api.Constants;
 
-namespace api.IntegrationTests.Data;
+namespace api.IntegrationTests.Constants;
 
 public static class TestConstants
 {

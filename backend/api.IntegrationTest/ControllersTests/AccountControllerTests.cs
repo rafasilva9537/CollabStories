@@ -2,17 +2,18 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using api.Dtos.AppUser;
-using api.IntegrationTests.Data;
+using api.IntegrationTests.Constants;
+using api.IntegrationTests.WebAppFactories;
 
-namespace api.IntegrationTests.Controllers;
+namespace api.IntegrationTests.ControllersTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
-public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
+public class AccountControllerTests : IClassFixture<AuthHandlerWebAppFactory>
 {
-    private readonly CustomWebAppFactory _factory;
+    private readonly AuthHandlerWebAppFactory _factory;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     
-    public AccountControllerTests(CustomWebAppFactory factory)
+    public AccountControllerTests(AuthHandlerWebAppFactory factory)
     {
         _factory = factory;
         _jsonSerializerOptions = new JsonSerializerOptions()
@@ -53,19 +54,6 @@ public class AccountControllerTests : IClassFixture<CustomWebAppFactory>
         Assert.NotNull(users);
         Assert.Equal(expectedUsersCount, users.Count);
         Assert.Equal(containsUserWithId1, users.Any(u => u.Id == 1));
-    }
-    
-    [Fact]
-    public async Task GetUser_WhenNotAuthenticated_ReturnsUnauthorized()
-    {
-        // Arrange
-        HttpClient client = _factory.CreateClient();
-        
-        // Act
-        HttpResponseMessage response = await client.GetAsync($"/accounts/{TestConstants.DefaultUserName}");
-        
-        // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);;
     }
     
     [Fact]

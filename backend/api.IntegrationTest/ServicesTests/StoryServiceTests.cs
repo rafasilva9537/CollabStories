@@ -1,12 +1,13 @@
 using api.Data;
-using api.Services;
 using api.Dtos.Story;
-using api.Models;
-using Microsoft.EntityFrameworkCore;
-using api.Mappers;
+using api.IntegrationTests.Constants;
 using api.IntegrationTests.Data;
+using api.Mappers;
+using api.Models;
+using api.Services;
+using Microsoft.EntityFrameworkCore;
 
-namespace api.IntegrationTests.Services;
+namespace api.IntegrationTests.ServicesTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
 public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
