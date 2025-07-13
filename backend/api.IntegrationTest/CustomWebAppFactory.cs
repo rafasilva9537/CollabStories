@@ -16,6 +16,11 @@ namespace api.IntegrationTests;
 
 public class CustomWebAppFactory : WebApplicationFactory<Program>
 {
+    public CustomWebAppFactory()
+    {
+        InitializeDatabase();
+    }
+    
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
@@ -39,21 +44,21 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
             {
                 options.UseSqlServer(connectionString);
             });
-
-            // Dataseed
-            using (var scope = services.BuildServiceProvider().CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                dbContext.Database.EnsureDeleted();
-                bool dbCreated = dbContext.Database.EnsureCreated();
-
-                if (dbCreated)
-                {
-                    SeedTestDatabase.Initialize(dbContext, 100);
-                }
-            }
         });
+    }
+
+    private void InitializeDatabase()
+    {
+        // Dataseed
+        using ApplicationDbContext dbContext = Services.GetRequiredService<ApplicationDbContext>();
+
+        dbContext.Database.EnsureDeleted();
+        bool dbCreated = dbContext.Database.EnsureCreated();
+
+        if (dbCreated)
+        {
+            SeedTestDatabase.Initialize(dbContext, 100);
+        }
     }
     
     public HttpClient CreateClientWithAuth(string userName, string nameIdentifier, string email, params string[] roles)
