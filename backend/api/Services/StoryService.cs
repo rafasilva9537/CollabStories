@@ -5,6 +5,7 @@ using api.Dtos.StoryPart;
 using api.Mappers;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace api.Services;
 
@@ -39,7 +40,7 @@ public class StoryService : IStoryService
 
     public async Task<IList<StoryMainInfoDto>> GetStoriesAsync(int? lastId)
     {
-        int pageSize = 15;
+        const int pageSize = 15;
 
         List<StoryMainInfoDto> storyDto = await _context.Story
             .OrderByDescending(s => s.Id)
@@ -62,11 +63,13 @@ public class StoryService : IStoryService
 
     public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username)
     {
-        // TODO: Add data atomicity. Wrap all in a single transaction
+        IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+        
         Story storyModel = createStoryDto.ToCreateStoryModel();
 
         AppUser creatorUser = await _context.AppUser.FirstAsync(au => au.UserName == username);
         storyModel.UserId = creatorUser.Id;
+        storyModel.CurrentAuthorId = creatorUser.Id;
         
         await _context.AddAsync(storyModel);
         await _context.SaveChangesAsync();
@@ -75,10 +78,12 @@ public class StoryService : IStoryService
         {
             AuthorId = creatorUser.Id, 
             StoryId = storyModel.Id, 
-            EntryDate = DateTimeOffset.UtcNow 
+            EntryDate = DateTimeOffset.UtcNow
         };
         await _context.AuthorInStory.AddAsync(authorInStory);
         await _context.SaveChangesAsync();
+        
+        await transaction.CommitAsync();
 
         StoryDto storyDto = storyModel.ToStoryDto();
         return storyDto;
