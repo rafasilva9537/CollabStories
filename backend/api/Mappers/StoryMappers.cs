@@ -29,11 +29,12 @@ public static class StoryMappers
     {
         Id = storyModel.Id,
         Title = storyModel.Title,
-        Description = storyModel.Title,
+        Description = storyModel.Description,
         CreatedDate = storyModel.CreatedDate,
         UpdatedDate = storyModel.UpdatedDate,
         MaximumAuthors = storyModel.MaximumAuthors,
-        UserName = storyModel.User.UserName
+        UserName = storyModel.User.UserName,
+        TurnDurationSeconds = storyModel.TurnDurationSeconds,
     };
 
     public static StoryMainInfoDto ToStoryMainInfoDto(this Story storyModel)
