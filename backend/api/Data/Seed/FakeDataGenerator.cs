@@ -66,7 +66,15 @@ public class FakeDataGenerator
         {
             fakeStory = fakeStory.RuleFor(s => s.AuthorInStory, (f, s) =>
             {
-                List<AuthorInStory> newAuthors = GenerateAuthorsInStory(f.Random.Int(1, 7), s.Id, possibleUsers!)
+                List<AuthorInStory> newAuthors = GenerateAuthorsInStory(f.Random.Int(1, 7), s.Id, possibleUsers!);
+                AuthorInStory storyOwner = new()
+                {
+                    AuthorId = s.UserId ?? 0,
+                    StoryId = s.Id,
+                    EntryDate = s.CreatedDate
+                };
+                if(storyOwner.AuthorId != 0) newAuthors.Add(storyOwner);
+                newAuthors = newAuthors
                     .DistinctBy(ais => (ais.AuthorId, ais.StoryId))
                     .ToList();
 
