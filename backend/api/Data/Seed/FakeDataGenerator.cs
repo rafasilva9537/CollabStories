@@ -17,7 +17,7 @@ public class FakeDataGenerator
         Randomizer.Seed = new Random(10);
 
         _userStartDate = new(2022, 1, 1, 0, 0, 0, new TimeSpan(0));
-        _userEndDate = _userStartDate.AddYears(10);
+        _userEndDate = _userStartDate.AddYears(3);
 
         _storyStartDate = _userStartDate.AddHours(1);
         _storyEndDate = _userEndDate.AddDays(40);
