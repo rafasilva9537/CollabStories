@@ -23,6 +23,8 @@ public interface IStoryService
     Task<bool> LeaveStoryAsync(string username, int storyId);
     Task<bool> IsStoryAuthorAsync(string username, int storyId);
     Task<bool> StoryExistsAsync(int storyId);
+    Task<StoryInfoForSessionDto?> GetStoryInfoForSession(int storyId);
+    Task ChangeCurrentStoryAuthor(int storyId, string username);
 
     Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string username, CreateStoryPartDto storyPartDto);
     Task<bool> DeleteStoryPart(int storyId, int storyPartId);
@@ -141,9 +143,9 @@ public class StoryService : IStoryService
     {
         //TODO: improve, reduce roundtrips
         Story? completeStory =  await _context.Story
-                                    .Where(story => story.Id == storyId)
-                                    .Include(story => story.StoryParts)
-                                    .FirstOrDefaultAsync();
+            .Where(story => story.Id == storyId)
+            .Include(story => story.StoryParts)
+            .FirstOrDefaultAsync();
         
         if(completeStory == null) return null;
 
@@ -176,16 +178,16 @@ public class StoryService : IStoryService
     {
         // TODO: decrease roundtrips
         int userId = await _context.AppUser
-                        .Where(au => au.UserName == username)
-                        .Select(au => au.Id)
-                        .FirstAsync();
+            .Where(au => au.UserName == username)
+            .Select(au => au.Id)
+            .FirstAsync();
         
         bool storyExists = await _context.Story
-                            .Where(s => s.Id == storyId)
-                            .AnyAsync();
+            .Where(s => s.Id == storyId)
+            .AnyAsync();
 
         bool authorInStoryExists = await _context.AuthorInStory
-                                        .AnyAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
+                        .AnyAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
         if(!storyExists || authorInStoryExists) return false;
 
         AuthorInStory authorInStory = new AuthorInStory 
@@ -205,17 +207,17 @@ public class StoryService : IStoryService
     {
         // TODO: decrease roundtrips
         int userId = await _context.AppUser
-                        .Where(au => au.UserName == username)
-                        .Select(au => au.Id)
-                        .FirstAsync();
+            .Where(au => au.UserName == username)
+            .Select(au => au.Id)
+            .FirstAsync();
 
         bool storyExists = await _context.Story
-                            .Where(s => s.Id == storyId)
-                            .AnyAsync();
+            .Where(s => s.Id == storyId)
+            .AnyAsync();
         if(!storyExists) return false;
 
-        AuthorInStory? authorInStory = await _context.AuthorInStory
-                                        .FirstOrDefaultAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
+        AuthorInStory? authorInStory = await _context.AuthorInStory 
+            .FirstOrDefaultAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
         if(authorInStory is null) return false;
 
         _context.Remove(authorInStory);
@@ -227,14 +229,15 @@ public class StoryService : IStoryService
     public async Task<bool> IsStoryAuthorAsync(string username, int storyId)
     {
         int? userId = await _context.AppUser
-                        .Where(au => au.UserName == username)
-                        .Select(au => au.Id)
-                        .FirstOrDefaultAsync();
+            .Where(au => au.UserName == username)
+            .Select(au => au.Id)
+            .FirstOrDefaultAsync();
 
         if(userId is null) return false;
 
         bool isInStory = await _context.AuthorInStory
-                            .AnyAsync(ais => ais.StoryId == storyId && ais.AuthorId == userId);
+            .AnyAsync(ais => ais.StoryId == storyId && ais.AuthorId == userId);
+        
         return isInStory;
     }
 
@@ -243,17 +246,40 @@ public class StoryService : IStoryService
         return await _context.Story.AnyAsync(s => s.Id == storyId);
     }
 
+    public async Task<StoryInfoForSessionDto?> GetStoryInfoForSession(int storyId)
+    {
+        StoryInfoForSessionDto? storyInfo = await _context.Story
+            .Where(s => s.Id == storyId)
+            .Select(StoryMappers.ProjectToStoryInfoForSessionDto)
+            .FirstOrDefaultAsync();
+        
+        return storyInfo;
+    }
+
+    public async Task ChangeCurrentStoryAuthor(int storyId, string username)
+    {
+        Story story = await _context.Story.FirstAsync(s => s.Id == storyId);
+        
+        int authorId = await _context.AppUser
+            .Where(au => au.UserName == username)
+            .Select(au => au.Id)
+            .FirstAsync();;
+
+        story.CurrentAuthorId = authorId;
+        await _context.SaveChangesAsync();
+    }
+    
     public async Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string username, CreateStoryPartDto storyPartDto)
     {
         StoryPart newStoryPart = storyPartDto.ToStoryPartModel();
         newStoryPart.StoryId = storyId;
 
         AppUser creatorUser = await _context.AppUser
-                                .Where(au => au.UserName == username)
-                                .FirstAsync();
+            .Where(au => au.UserName == username)
+            .FirstAsync();
                                 
         AuthorInStory? authorInStory = await _context.AuthorInStory
-                            .FirstOrDefaultAsync(ais => ais.AuthorId == creatorUser.Id && ais.StoryId == storyId);
+            .FirstOrDefaultAsync(ais => ais.AuthorId == creatorUser.Id && ais.StoryId == storyId);
 
         if(authorInStory is null) return null;
 
@@ -279,14 +305,13 @@ public class StoryService : IStoryService
     public async Task<bool> IsStoryPartCreator(string username, int storyPartId)
     {
         int userId =  await _context.AppUser
-                        .Where(au => au.UserName == username)
-                        .Select(au => au.Id)
-                        .FirstAsync();
+            .Where(au => au.UserName == username)
+            .Select(au => au.Id)
+            .FirstAsync();
 
         bool isStoryPartCreator = await _context.StoryPart
-                                    .Where(s => s.Id == storyPartId)
-                                    .AnyAsync(s => s.UserId == userId);
+            .Where(s => s.Id == storyPartId)
+            .AnyAsync(s => s.UserId == userId);
         return isStoryPartCreator;
     }
-
 }

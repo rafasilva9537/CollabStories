@@ -4,6 +4,7 @@ namespace api.IntegrationTests.Constants;
 
 public static class TestConstants
 {
+    public const int DefaultUserId = 1;
     public const string DefaultUserName = "neva_rosenbaum29";
     public const string DefaultNameIdentifier = "neva_rosenbaum29";
     public const string DefaultEmail = "neva_rosenbaum2930@hotmail.com";

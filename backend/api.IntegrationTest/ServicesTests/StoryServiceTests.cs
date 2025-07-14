@@ -69,19 +69,17 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
 
         await context.Database.BeginTransactionAsync();
         await context.Story.ExecuteDeleteAsync();
-        Story newStory = new Story
+        Story expectedStory = new Story
         {
             Title = title,
             Description = description,
+            UserId = TestConstants.DefaultUserId,
         };
-        StoryMainInfoDto expectedStory = newStory.ToStoryMainInfoDto();
 
-        await context.Story.AddAsync(newStory);
+        await context.Story.AddAsync(expectedStory);
         await context.SaveChangesAsync();
 
         //Act
-        // TODO: see if ef tracker is caching data
-        context.ChangeTracker.Clear();
         IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(null);
 
         //Assert
@@ -89,7 +87,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         Assert.NotEqual(0, actualStories[0].Id);
         Assert.Equal(expectedStory.Title, actualStories[0].Title);
         Assert.Equal(expectedStory.Description, actualStories[0].Description);
-        Assert.Equal(expectedStory.UserName, actualStories[0].UserName);
+        Assert.Equal(TestConstants.DefaultUserName, actualStories[0].UserName);
         Assert.Equal(expectedStory.MaximumAuthors, actualStories[0].MaximumAuthors);
         Assert.Equal(expectedStory.CreatedDate, actualStories[0].CreatedDate);
         Assert.Equal(expectedStory.UpdatedDate, actualStories[0].UpdatedDate);
@@ -127,5 +125,54 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         
         // Assert
         Assert.False(storyExists);   
+    }
+    
+    [Theory]
+    [ClassData(typeof(StoryTestData))]
+    public async Task GetStoryInfoForSession_WhenStoryExists_ReturnsStoryInfoForSessionDto(Story expectedStory)
+    {
+        // Arrange 
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        StoryService storyService = new StoryService(context);
+        
+        // Act
+        StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSession(expectedStory.Id);
+        
+        // Assert
+        Assert.NotNull(storyInfo);
+        Assert.Equal(expectedStory.TurnDurationSeconds, storyInfo.TurnDurationSeconds);
+        Assert.Equal(expectedStory.UpdatedDate, storyInfo.UpdatedDate);   
+    }
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(int.MaxValue)]
+    public async Task GetStoryInfoForSession_WhenStoryDoesNotExist_ReturnsNull(int storyId)
+    {
+        // Arrange 
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        StoryService storyService = new StoryService(context);
+        
+        // Act
+        StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSession(storyId);
+        
+        // Assert
+        Assert.Null(storyInfo);
+    }
+    
+    [Fact]
+    public async Task ChangeCurrentStoryAuthor_WhenAuthorIsInStory_ReturnsTrue()
+    {
+        // Arrange 
+        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
+        StoryService storyService = new StoryService(context);
+        
+        // Act
+        await storyService.ChangeCurrentStoryAuthor(TestConstants.DefaultJoinedStoryId, TestConstants.DefaultUserName);
+        
+        // Assert
+        Story changedStory = await context.Story.FirstAsync(s => s.Id == TestConstants.DefaultJoinedStoryId);
+        
+        Assert.Equal(TestConstants.DefaultUserId, changedStory.CurrentAuthorId);;
     }
 }
