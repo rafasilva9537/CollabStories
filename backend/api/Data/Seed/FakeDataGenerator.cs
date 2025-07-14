@@ -60,7 +60,8 @@ public class FakeDataGenerator
                 if (possibleUsers.IsNullOrEmpty()) return null;
                 AppUser randomUser = f.PickRandom(possibleUsers);
                 return randomUser.Id;
-            });
+            })
+            .RuleFor(s => s.CurrentAuthorId, (f, s) => s.UserId);
 
         if (!possibleUsers.IsNullOrEmpty())
         {
