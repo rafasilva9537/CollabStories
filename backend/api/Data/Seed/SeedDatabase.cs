@@ -1,7 +1,4 @@
-using System.Threading.Tasks;
 using api.Models;
-using api.Services.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace api.Data.Seed;

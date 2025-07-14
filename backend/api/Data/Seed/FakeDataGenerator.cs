@@ -3,7 +3,7 @@ using api.Models;
 using Bogus;
 using Microsoft.IdentityModel.Tokens;
 
-namespace api.Services.Data;
+namespace api.Data.Seed;
 
 public class FakeDataGenerator
 {
