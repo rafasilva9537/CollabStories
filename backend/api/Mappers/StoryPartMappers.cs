@@ -39,12 +39,13 @@ public static class StoryPartMappers
             UserName = storyPart.User.UserName,
         };
     }
-    
-    public static readonly Expression<Func<StoryPart, StoryPartInListDto>> ProjectToStoryPartInListDto = (storyPartModel) => new StoryPartInListDto 
-    {
-        Id = storyPartModel.Id,
-        UserName = storyPartModel.User.UserName,
-        Text = storyPartModel.Text,
-        CreatedDate = storyPartModel.CreatedDate,
-    };
+
+    public static readonly Expression<Func<StoryPart, StoryPartInListDto>> ProjectToStoryPartInListDto =
+        (storyPartModel) => new StoryPartInListDto
+        {
+            Id = storyPartModel.Id,
+            UserName = storyPartModel.User.UserName,
+            Text = storyPartModel.Text,
+            CreatedDate = storyPartModel.CreatedDate,
+        };
 }

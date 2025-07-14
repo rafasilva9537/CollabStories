@@ -30,12 +30,14 @@ public static class AppUserMappers
         };
     }
 
-    public static readonly Expression<Func<AppUser, UserMainInfoDto>> ProjectToUserMainInfoDto = (appUser) => new UserMainInfoDto {
-        Id = appUser.Id,
-        UserName = appUser.UserName,
-        Nickname = appUser.Nickname,
-        CreatedDate = appUser.CreatedDate,
-    };
+    public static readonly Expression<Func<AppUser, UserMainInfoDto>> ProjectToUserMainInfoDto = (appUser) =>
+        new UserMainInfoDto
+        {
+            Id = appUser.Id,
+            UserName = appUser.UserName,
+            Nickname = appUser.Nickname,
+            CreatedDate = appUser.CreatedDate,
+        };
 
 
     // Dto to Model

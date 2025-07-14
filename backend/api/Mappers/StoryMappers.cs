@@ -25,7 +25,7 @@ public static class StoryMappers
         };
     }
 
-    public static Expression<Func<Story, StoryDto>> ProjectToStoryDto = (storyModel) => new StoryDto
+    public static readonly Expression<Func<Story, StoryDto>> ProjectToStoryDto = (storyModel) => new StoryDto
     {
         Id = storyModel.Id,
         Title = storyModel.Title,
@@ -50,16 +50,24 @@ public static class StoryMappers
         };
     }
 
-    public static Expression<Func<Story, StoryMainInfoDto>> ProjectToStoryMainInfoDto = (storyModel) => new StoryMainInfoDto
-    {
-        Id = storyModel.Id,
-        Title = storyModel.Title,
-        Description = storyModel.Description,
-        CreatedDate = storyModel.CreatedDate,
-        UpdatedDate = storyModel.UpdatedDate,
-        MaximumAuthors = storyModel.MaximumAuthors,
-        UserName = storyModel.User.UserName,
-    };
+    public static readonly Expression<Func<Story, StoryMainInfoDto>> ProjectToStoryMainInfoDto = (storyModel) =>
+        new StoryMainInfoDto
+        {
+            Id = storyModel.Id,
+            Title = storyModel.Title,
+            Description = storyModel.Description,
+            CreatedDate = storyModel.CreatedDate,
+            UpdatedDate = storyModel.UpdatedDate,
+            MaximumAuthors = storyModel.MaximumAuthors,
+            UserName = storyModel.User.UserName,
+        };
+
+    public static readonly Expression<Func<Story, StoryInfoForSessionDto>> ProjectToStoryInfoForSessionDto =
+        (storyModel) => new StoryInfoForSessionDto()
+        {
+            TurnDurationSeconds = storyModel.TurnDurationSeconds,
+            UpdatedDate = storyModel.UpdatedDate,
+        };
 
     public static CompleteStoryDto ToCompleteStoryDto(this Story storyModel)
     {
