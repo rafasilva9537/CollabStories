@@ -51,7 +51,7 @@ public class FakeDataGenerator
         Faker<Story> fakeStory = new Faker<Story>()
             .RuleFor(s => s.Title, f => f.Lorem.Sentence(2, 6))
             .RuleFor(s => s.Description, f => f.Lorem.Sentence(8, 12))
-            .RuleFor(s => s.MaximumAuthors, f => f.Random.Int(2, 16))
+            .RuleFor(s => s.MaximumAuthors, f => f.Random.Int(2, StoryConstants.MaxAuthors))
             .RuleFor(s => s.TurnDurationSeconds, f => f.Random.Int(30, 3600))
             .RuleFor(s => s.CreatedDate, f => f.Date.BetweenOffset(_storyStartDate, _storyEndDate))
             .RuleFor(s => s.UpdatedDate, (f, s) => f.Date.BetweenOffset(s.CreatedDate, _storyEndDate))
