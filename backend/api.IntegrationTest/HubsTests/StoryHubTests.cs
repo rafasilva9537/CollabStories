@@ -246,6 +246,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         // Arrange
         const int storyId = AuthorsInStoryTestData.StoryId;
         using IStorySessionService sessionService = _factory.Services.GetRequiredService<IStorySessionService>();
+        
         await using HubConnection connection1 = _factory.CreateHubConnectionWithAuth(
             user1.UserName,
             user1.NameIdentifier,
@@ -274,24 +275,51 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         await connection3.StartAsync();
         await connection3.InvokeAsync("JoinStorySession", storyId);
         
-        // Act
-        await connection1.InvokeAsync("SendStoryPart", storyId, storyPartTextFromUser1);
         
-        // Assert
+        // Act
+        TaskCompletionSource connection2ReceivedStoryPartTcs = new();
+        TaskCompletionSource connection3ReceivedStoryPartTcs = new();
+        
+        int? storyIdConnection2 = null;
+        StoryPartDto? storyPartConnection2 = null;
         connection2.On<int, StoryPartDto>("ReceiveStoryPart", (receivedStoryId, receivedStoryPart) =>
         {
-            Assert.Equal(storyId, receivedStoryId);
-            Assert.Equal(storyPartTextFromUser1, receivedStoryPart.Text);
-            Assert.Equal(user1.UserName, receivedStoryPart.UserName);
-            Assert.Equal(storyId, receivedStoryPart.StoryId);
+            storyIdConnection2 = receivedStoryId;
+            storyPartConnection2 = receivedStoryPart;
+            connection2ReceivedStoryPartTcs.SetResult();
         });
         
+        int? storyIdConnection3 = null;
+        StoryPartDto? storyPartConnection3 = null;
         connection3.On<int, StoryPartDto>("ReceiveStoryPart", (receivedStoryId, receivedStoryPart) =>
         {
-            Assert.Equal(storyId, receivedStoryId);
-            Assert.Equal(storyPartTextFromUser1, receivedStoryPart.Text);
-            Assert.Equal(user1.UserName, receivedStoryPart.UserName);
-            Assert.Equal(storyId, receivedStoryPart.StoryId);
+            storyIdConnection3 = receivedStoryId;
+            storyPartConnection3 = receivedStoryPart;
+            connection3ReceivedStoryPartTcs.SetResult();
         });
+        
+        await connection1.InvokeAsync("SendStoryPart", storyId, storyPartTextFromUser1);
+        
+        Task timeout = Task.Delay(TimeSpan.FromSeconds(5));
+        Task allConnectionsReceivedStoryPart = Task.WhenAll(connection2ReceivedStoryPartTcs.Task, connection3ReceivedStoryPartTcs.Task);
+        await Task.WhenAny(timeout, allConnectionsReceivedStoryPart);
+        
+        
+        // Assert
+        Assert.False(timeout.IsCompleted, "Timeout reached");
+        
+        Assert.NotNull(storyPartConnection2);
+        Assert.NotNull(storyIdConnection2);
+        Assert.Equal(storyId, storyIdConnection2);
+        Assert.Equal(storyPartTextFromUser1, storyPartConnection2.Text);
+        Assert.Equal(user1.UserName, storyPartConnection2.UserName);
+        Assert.Equal(storyId, storyPartConnection2.StoryId);
+        
+        Assert.NotNull(storyPartConnection3);
+        Assert.NotNull(storyIdConnection3);
+        Assert.Equal(storyId, storyIdConnection3);
+        Assert.Equal(storyPartTextFromUser1, storyPartConnection3.Text);
+        Assert.Equal(user1.UserName, storyPartConnection3.UserName);
+        Assert.Equal(storyId, storyPartConnection3.StoryId);
     }
 }
