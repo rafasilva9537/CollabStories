@@ -24,15 +24,11 @@ public static class SeedDatabase
 
         List<Story> newStories = fakeData.GenerateStories(totalStories, newUsers);
         dbContext.Story.AddRange(newStories);
-        List<Story> storiesWithoutUser = fakeData.GenerateStories(totalStories/10);
-        dbContext.Story.AddRange(storiesWithoutUser);
         dbContext.SaveChanges();
         newStories = dbContext.Story.ToList();
 
         List<StoryPart> storyParts = fakeData.GenerateStoryParts(totalStoryParts, newStories, newUsers);
         dbContext.StoryPart.AddRange(storyParts);
-        List<StoryPart> storyPartsWithoutUsers = fakeData.GenerateStoryParts(totalStoryParts/100, newStories);
-        dbContext.StoryPart.AddRange(storyPartsWithoutUsers);
         dbContext.SaveChanges();
         
         seedTransaction.Commit();
