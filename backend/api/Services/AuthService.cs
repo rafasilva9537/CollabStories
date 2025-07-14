@@ -90,7 +90,7 @@ public class AuthService : IAuthService
             .OrderByDescending(au => au.Id)
             .Where(au => !lastId.HasValue || au.Id < lastId)
             .Take(pageSize)
-            .Select(AppUserMappers.ProjetToUserMainInfoDto)
+            .Select(AppUserMappers.ProjectToUserMainInfoDto)
             .ToListAsync();
         return usersDto;
     }
