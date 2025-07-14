@@ -55,10 +55,10 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         // Arrange
         using IStorySessionService sessionService = _factory.Services.GetRequiredService<IStorySessionService>();
         await using HubConnection connection = _factory.CreateHubConnectionWithAuth(
-            "neva_rosenbaum29",
-            "neva_rosenbaum29",
-            "neva_rosenbaum2930@hotmail.com",
-            RoleConstants.User
+            TestConstants.DefaultUserName,
+            TestConstants.DefaultNameIdentifier,
+            TestConstants.DefaultEmail,
+            TestConstants.DefaultRole
         );
 
         // Act
@@ -185,6 +185,55 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         // Assert
         Assert.Equal(0, storySessionService.SessionsCount);
     }
+    
+    [Theory]
+    [ClassData(typeof(AuthorsInStoryTestData))]
+    public async Task JoinStorySession_WhenManyUsersLeaveSession_ThenUsersAreRemovedFromSession(
+        TestUserModel user1,
+        TestUserModel user2,
+        TestUserModel user3
+    )
+    {
+        // Arrange
+        const int storyId = AuthorsInStoryTestData.StoryId;
+        using IStorySessionService storySessionService = _factory.Services.GetRequiredService<IStorySessionService>();
+        
+        await using HubConnection connection1 = _factory.CreateHubConnectionWithAuth(
+            user1.UserName,
+            user1.NameIdentifier,
+            user1.Email,
+            RoleConstants.User
+        );
+        
+        await using HubConnection connection2 = _factory.CreateHubConnectionWithAuth(
+            user2.UserName,
+            user2.NameIdentifier,
+            user2.Email,
+            RoleConstants.User
+        );
+        
+        await using HubConnection connection3 = _factory.CreateHubConnectionWithAuth(
+            user3.UserName,
+            user3.NameIdentifier,
+            user3.Email,
+            RoleConstants.User
+        );
+        await connection1.StartAsync();
+        await connection1.InvokeAsync("JoinStorySession", storyId);
+        await connection2.StartAsync();
+        await connection2.InvokeAsync("JoinStorySession", storyId);
+        await connection3.StartAsync();
+        await connection3.InvokeAsync("JoinStorySession", storyId);
+
+        // Act
+        await connection1.InvokeAsync("LeaveStorySession", storyId);
+        await connection2.InvokeAsync("LeaveStorySession", storyId);
+        await connection3.InvokeAsync("LeaveStorySession", storyId);
+        
+        // Assert
+        Assert.False(storySessionService.SessionIsActive(storyId.ToString()));
+        Assert.Equal(0, storySessionService.SessionsCount);
+    }
 
     [Theory]
     [ClassData(typeof(AuthorsInStoryTestData))]
@@ -205,6 +254,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         );
         await connection1.StartAsync();
         await connection1.InvokeAsync("JoinStorySession", storyId);
+        const string storyPartTextFromUser1 = "Test story part";
         
         await using HubConnection connection2 = _factory.CreateHubConnectionWithAuth(
             user2.UserName,
@@ -225,22 +275,22 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         await connection3.InvokeAsync("JoinStorySession", storyId);
         
         // Act
-        await connection1.InvokeAsync("SendStoryPart", storyId, "Test story part");
+        await connection1.InvokeAsync("SendStoryPart", storyId, storyPartTextFromUser1);
         
         // Assert
         connection2.On<int, StoryPartDto>("ReceiveStoryPart", (receivedStoryId, receivedStoryPart) =>
         {
             Assert.Equal(storyId, receivedStoryId);
-            Assert.Equal("Test story part", receivedStoryPart.Text);
-            Assert.Equal("neva_rosenbaum29", receivedStoryPart.UserName);
+            Assert.Equal(storyPartTextFromUser1, receivedStoryPart.Text);
+            Assert.Equal(user1.UserName, receivedStoryPart.UserName);
             Assert.Equal(storyId, receivedStoryPart.StoryId);
         });
         
         connection3.On<int, StoryPartDto>("ReceiveStoryPart", (receivedStoryId, receivedStoryPart) =>
         {
             Assert.Equal(storyId, receivedStoryId);
-            Assert.Equal("Test story part", receivedStoryPart.Text);
-            Assert.Equal("neva_rosenbaum29", receivedStoryPart.UserName);
+            Assert.Equal(storyPartTextFromUser1, receivedStoryPart.Text);
+            Assert.Equal(user1.UserName, receivedStoryPart.UserName);
             Assert.Equal(storyId, receivedStoryPart.StoryId);
         });
     }
