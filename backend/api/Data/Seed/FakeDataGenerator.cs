@@ -55,6 +55,7 @@ public class FakeDataGenerator
             .RuleFor(s => s.TurnDurationSeconds, f => f.Random.Int(30, 3600))
             .RuleFor(s => s.CreatedDate, f => f.Date.BetweenOffset(_storyStartDate, _storyEndDate))
             .RuleFor(s => s.UpdatedDate, (f, s) => f.Date.BetweenOffset(s.CreatedDate, _storyEndDate))
+            .RuleFor(s => s.AuthorsMembershipChangeDate, (f, s) => s.UpdatedDate)
             .RuleFor(s => s.UserId, f =>
             {
                 if (possibleUsers.IsNullOrEmpty()) return null;
