@@ -67,7 +67,7 @@ public static class StoryMappers
         (storyModel) => new StoryInfoForSessionDto()
         {
             TurnDurationSeconds = storyModel.TurnDurationSeconds,
-            UpdatedDate = storyModel.UpdatedDate,
+            AuthorsMembershipChangeDate = storyModel.UpdatedDate,
         };
 
     public static CompleteStoryDto ToCompleteStoryDto(this Story storyModel)
