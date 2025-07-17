@@ -4,10 +4,13 @@ using api.Dtos.StoryPart;
 using api.IntegrationTests.Constants;
 using api.IntegrationTests.Data;
 using api.IntegrationTests.WebAppFactories;
+using api.Interfaces;
 using api.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
 
 namespace api.IntegrationTests.HubsTests;
 
@@ -165,6 +168,42 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     }
 
     [Fact]
+    public async Task JoinStorySession_WhenAUserJoinsSession_TimerInfoReturnsCorrectValues()
+    {
+        // Arrange
+        DateTimeOffset fakeDateNow = DateTimeOffset.Parse("2024-12-05T05:09:15.8676393+00:00");;
+        IDateTimeProvider? dateTimeProvider = Substitute.For<IDateTimeProvider>();
+        dateTimeProvider.UtcNow.Returns(fakeDateNow);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(IDateTimeProvider));
+                services.AddTransient<IDateTimeProvider>(_ => dateTimeProvider);
+            });
+        });
+        using IStorySessionService storySessionService = factory.Services.GetRequiredService<IStorySessionService>();
+        await using HubConnection connection = factory.CreateHubConnectionWithAuth(
+            TestConstants.DefaultUserName,
+            TestConstants.DefaultNameIdentifier,
+            TestConstants.DefaultEmail,
+            TestConstants.DefaultRole
+        );
+        const int storyId = TestConstants.DefaultJoinedStoryId;
+
+        // Act
+        await connection.StartAsync();
+        await connection.InvokeAsync("JoinStorySession", storyId);
+
+        // Assert
+        double actualTimerSeconds = storySessionService.GetSessionTimerSeconds(storyId.ToString());
+        int actualTurnDurationSeconds = storySessionService.GetSessionTurnDurationSeconds(storyId.ToString());
+        Assert.Equal(5, actualTimerSeconds);
+        Assert.Equal(1447, actualTurnDurationSeconds);
+    }
+
+    [Fact]
     public async Task LeaveStorySession_WhenUserLeavesSession_ThenUserIsRemovedFromSession()
     {
         // Arrange
@@ -175,7 +214,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             TestConstants.DefaultEmail,
             TestConstants.DefaultRole
         );
-        const int storyId = 158;
+        const int storyId = TestConstants.DefaultJoinedStoryId;
 
         // Act
         await connection.StartAsync();
@@ -188,7 +227,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     
     [Theory]
     [ClassData(typeof(AuthorsInStoryTestData))]
-    public async Task JoinStorySession_WhenManyUsersLeaveSession_ThenUsersAreRemovedFromSession(
+    public async Task LeaveStorySession_WhenManyUsersLeaveSession_ThenUsersAreRemovedFromSession(
         TestUserModel user1,
         TestUserModel user2,
         TestUserModel user3

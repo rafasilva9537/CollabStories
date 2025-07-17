@@ -23,7 +23,7 @@ public interface IStoryService
     Task<bool> LeaveStoryAsync(string username, int storyId);
     Task<bool> IsStoryAuthorAsync(string username, int storyId);
     Task<bool> StoryExistsAsync(int storyId);
-    Task<StoryInfoForSessionDto?> GetStoryInfoForSession(int storyId);
+    Task<StoryInfoForSessionDto?> GetStoryInfoForSessionAsync(int storyId);
     Task ChangeCurrentStoryAuthor(int storyId, string username);
 
     Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string username, CreateStoryPartDto storyPartDto);
@@ -246,7 +246,7 @@ public class StoryService : IStoryService
         return await _context.Story.AnyAsync(s => s.Id == storyId);
     }
 
-    public async Task<StoryInfoForSessionDto?> GetStoryInfoForSession(int storyId)
+    public async Task<StoryInfoForSessionDto?> GetStoryInfoForSessionAsync(int storyId)
     {
         StoryInfoForSessionDto? storyInfo = await _context.Story
             .Where(s => s.Id == storyId)

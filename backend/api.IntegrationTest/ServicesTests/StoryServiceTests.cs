@@ -136,12 +136,12 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         StoryService storyService = new StoryService(context);
         
         // Act
-        StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSession(expectedStory.Id);
+        StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSessionAsync(expectedStory.Id);
         
         // Assert
         Assert.NotNull(storyInfo);
         Assert.Equal(expectedStory.TurnDurationSeconds, storyInfo.TurnDurationSeconds);
-        Assert.Equal(expectedStory.UpdatedDate, storyInfo.UpdatedDate);   
+        Assert.Equal(expectedStory.UpdatedDate, storyInfo.AuthorsMembershipChangeDate);   
     }
     
     [Theory]
@@ -154,7 +154,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         StoryService storyService = new StoryService(context);
         
         // Act
-        StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSession(storyId);
+        StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSessionAsync(storyId);
         
         // Assert
         Assert.Null(storyInfo);

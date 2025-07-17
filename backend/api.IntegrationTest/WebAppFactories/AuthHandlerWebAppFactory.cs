@@ -11,7 +11,7 @@ namespace api.IntegrationTests.WebAppFactories;
 /// <summary>
 /// AuthHandlerWebAppFactory is a specialized implementation of the CustomWebAppFactory that provides
 /// support for integration tests requiring customized authentication configuration. This factory
-/// made for scenarios where test clients or SignalR Hub connections need to access
+/// is made for scenarios where test clients or SignalR Hub connections need to access
 /// endpoints with authentication headers, without the need to handle tokens.
 /// </summary>
 public sealed class AuthHandlerWebAppFactory : CustomWebAppFactory

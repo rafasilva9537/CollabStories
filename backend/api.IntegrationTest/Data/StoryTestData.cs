@@ -19,6 +19,7 @@ public class StoryTestData : IEnumerable<object[]>
                 TurnDurationSeconds = 1447,
                 CreatedDate = DateTimeOffset.Parse("2024-09-10T10:12:08.6461789+00:00"),
                 UpdatedDate = DateTimeOffset.Parse("2024-12-05T05:09:10.8676393+00:00"),
+                AuthorsMembershipChangeDate = DateTimeOffset.Parse("2024-12-05T05:09:10.8676393+00:00"),
                 IsFinished = false
             }
         };

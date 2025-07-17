@@ -1,3 +1,4 @@
+using api.Constants;
 using api.Dtos.StoryPart;
 using api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -54,7 +55,7 @@ public class StoryHub : Hub<IStoryClient>
         string storySessionId = storyId.ToString();
         if (!_storySessionService.SessionIsActive(storySessionId))
         {
-            _storySessionService.AddSession(storySessionId);
+            await _storySessionService.AddSessionAsync(storySessionId, _storyService);
             // TODO: add timer
         }
         _storySessionService.AddConnectionToSession(storySessionId, Context.ConnectionId);
@@ -125,6 +126,12 @@ public class StoryHub : Hub<IStoryClient>
         }
         
         await Clients.Group(storyId.ToString()).ReceiveStoryPart(storyId, createdStoryPart);
+    }
+    
+    // TODO: block access from users
+    public async Task SendTimerSeconds(int seconds, int storyId)
+    {
+        await Clients.Group(storyId.ToString()).ReceiveTimerSeconds(seconds);
     }
 
     public async Task OnConnectedAsync(int storyId)
