@@ -11,6 +11,7 @@ using api.Services;
 using api.Constants;
 using api.Data.Seed;
 using api.Hubs;
+using api.Interfaces;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Primitives;
 
@@ -52,6 +53,8 @@ builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
 builder.Services.AddSingleton<IStorySessionService, StorySessionService>();
 
