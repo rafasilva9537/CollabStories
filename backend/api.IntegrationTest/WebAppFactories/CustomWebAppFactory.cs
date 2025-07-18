@@ -1,9 +1,11 @@
 using System.Net.Http.Headers;
 using api.Constants;
 using api.Data;
+using api.Data.Seed;
 using api.IntegrationTests.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
@@ -61,6 +63,9 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
 
         if (dbCreated)
         {
+            var roleManager = Services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+            SeedRoles.InitializeAsync(roleManager).Wait();
+            
             SeedTestDatabase.Initialize(dbContext, 100);
         }
     }
