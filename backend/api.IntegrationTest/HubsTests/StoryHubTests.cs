@@ -117,7 +117,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     }
     
     [Theory]
-    [ClassData(typeof(AuthorsInStoryTestData))]
+    [ClassData(typeof(StoryAndAuthorsTestData))]
     public async Task JoinStorySession_WhenManyUsersJoinSession_ThenUsersAreAddedToSession(
         TestUserModel user1, 
         TestUserModel user2, 
@@ -170,7 +170,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     public async Task JoinStorySession_WhenAUserJoinsSession_TimerInfoReturnsCorrectValues()
     {
         // Arrange
-        DateTimeOffset fakeDateNow = AuthorsInStoryTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(5);
+        DateTimeOffset fakeDateNow = StoryAndAuthorsTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(5);
         IDateTimeProvider? dateTimeProvider = Substitute.For<IDateTimeProvider>();
         dateTimeProvider.UtcNow.Returns(fakeDateNow);
 
@@ -225,7 +225,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     }
     
     [Theory]
-    [ClassData(typeof(AuthorsInStoryTestData))]
+    [ClassData(typeof(StoryAndAuthorsTestData))]
     public async Task LeaveStorySession_WhenManyUsersLeaveSession_ThenUsersAreRemovedFromSession(
         TestUserModel user1,
         TestUserModel user2,
@@ -273,7 +273,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     }
 
     [Theory]
-    [ClassData(typeof(AuthorsInStoryTestData))]
+    [ClassData(typeof(StoryAndAuthorsTestData))]
     public async Task SendStoryPart_WhenConnectedToStory_OtherUsersReceiveStoryPart(
         TestUserModel user1, 
         TestUserModel user2,
@@ -360,7 +360,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     }
 
     [Theory]
-    [ClassData(typeof(AuthorsInStoryTestData))]
+    [ClassData(typeof(StoryAndAuthorsTestData))]
     public async Task ReceiveTimerSeconds_WithUsersInSession_ReturnsTimerSeconds(
         TestUserModel user1,
         TestUserModel user2,
@@ -369,7 +369,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     {
         // Arrange
         const double expectedSeconds = 20;
-        DateTimeOffset fakeDateNow = AuthorsInStoryTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(expectedSeconds);
+        DateTimeOffset fakeDateNow = StoryAndAuthorsTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(expectedSeconds);
         IDateTimeProvider dateTimeProvider = Substitute.For<IDateTimeProvider>();
         dateTimeProvider.UtcNow.Returns(fakeDateNow);
         
@@ -406,9 +406,9 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         
         
         // Act
-        await connection1.InvokeAsync("JoinStorySession", AuthorsInStoryTestData.StoryId);
-        await connection2.InvokeAsync("JoinStorySession", AuthorsInStoryTestData.StoryId);
-        await connection3.InvokeAsync("JoinStorySession", AuthorsInStoryTestData.StoryId);
+        await connection1.InvokeAsync("JoinStorySession", StoryAndAuthorsTestData.StoryId);
+        await connection2.InvokeAsync("JoinStorySession", StoryAndAuthorsTestData.StoryId);
+        await connection3.InvokeAsync("JoinStorySession", StoryAndAuthorsTestData.StoryId);
         
         TaskCompletionSource connection1TimerSecondsTcs = new();
         TaskCompletionSource connection2TimerSecondsTcs = new();

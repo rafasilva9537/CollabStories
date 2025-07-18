@@ -3,7 +3,7 @@ using api.Models;
 
 namespace api.IntegrationTests.Data;
 
-public class AuthorsInStoryTestData : IEnumerable<object[]>
+public class StoryAndAuthorsTestData : IEnumerable<object[]>
 {
     public const int StoryId = 158;
     public static readonly DateTimeOffset AuthorsMembershipChangeDate = DateTimeOffset.Parse("2024-12-05T05:09:10.8676393+00:00");
