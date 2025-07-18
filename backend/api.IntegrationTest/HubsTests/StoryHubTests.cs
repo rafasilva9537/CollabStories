@@ -5,7 +5,6 @@ using api.IntegrationTests.Constants;
 using api.IntegrationTests.Data;
 using api.IntegrationTests.WebAppFactories;
 using api.Interfaces;
-using api.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;

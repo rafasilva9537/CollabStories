@@ -57,6 +57,7 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
 builder.Services.AddSingleton<IStorySessionService, StorySessionService>();
+builder.Services.AddHostedService<TimerBackgroundService>();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
