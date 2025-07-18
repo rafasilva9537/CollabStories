@@ -1,16 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using api.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using api.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace api.Services;
-
-public interface ITokenService
-{
-    Task<string> GenerateToken(AppUser user);
-}
 
 public class TokenService : ITokenService
 {

@@ -6,6 +6,7 @@ using api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using api.Dtos.HttpResponses;
+using api.Interfaces;
 
 namespace api.Controllers;
 

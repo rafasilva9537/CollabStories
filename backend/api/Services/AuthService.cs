@@ -1,6 +1,7 @@
 using api.Constants;
 using api.Data;
 using api.Dtos.AppUser;
+using api.Interfaces;
 using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Identity;
@@ -14,18 +15,6 @@ public struct AuthenticationResult
     public string Token { get; init; }
     public bool Succeeded { get; init; }
     public IEnumerable<string> ErrorMessages { get; set; }
-}
-
-public interface IAuthService
-{
-    Task<IList<UserMainInfoDto>> GetUsersAsync(int? lastId);
-    Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto);
-    Task<string?> LoginAsync(LoginUserDto loginUserDto);
-    Task<bool> DeleteByNameAsync(string username);
-    Task<AppUserDto?> GetUserAsync(string username);
-    Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
-    Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName);
-    Task DeleteProfileImageAsync(string username, string directoryName);
 }
 
 public class AuthService : IAuthService

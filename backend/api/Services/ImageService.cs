@@ -1,12 +1,7 @@
 using api.Constants;
+using api.Interfaces;
 
 namespace api.Services;
-
-public interface IImageService
-{
-    Task<string> SaveImageAsync(IFormFile image, string directoryName);
-    void DeleteImage(string imageName, string directoryName);
-}
 
 public class ImageService : IImageService
 {
