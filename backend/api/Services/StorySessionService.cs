@@ -56,7 +56,13 @@ public class StorySessionService : IStorySessionService
         }
 
         TimeSpan timeSinceUpdate = _dateTimeProvider.UtcNow - story.AuthorsMembershipChangeDate;
+
         double remainingTimerSeconds = timeSinceUpdate.TotalSeconds;
+        if (remainingTimerSeconds > story.TurnDurationSeconds)
+        {
+            remainingTimerSeconds %= story.TurnDurationSeconds;
+        }
+        
         int turnDurationSeconds = story.TurnDurationSeconds;
         
         SessionInfo sessionInfo = new SessionInfo(remainingTimerSeconds, turnDurationSeconds);

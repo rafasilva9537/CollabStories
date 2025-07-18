@@ -369,7 +369,9 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     {
         // Arrange
         const double expectedSeconds = 20;
-        DateTimeOffset fakeDateNow = StoryAndAuthorsTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(expectedSeconds);
+        double secondsPassedFromMembersChange = (story.TurnDurationSeconds * 2) + 20;
+        
+        DateTimeOffset fakeDateNow = StoryAndAuthorsTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(secondsPassedFromMembersChange);
         IDateTimeProvider dateTimeProvider = Substitute.For<IDateTimeProvider>();
         dateTimeProvider.UtcNow.Returns(fakeDateNow);
         
