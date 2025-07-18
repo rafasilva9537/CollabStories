@@ -2,6 +2,7 @@ using api.Data;
 using api.Dtos.Story;
 using api.IntegrationTests.Constants;
 using api.IntegrationTests.Data;
+using api.IntegrationTests.Data.ClassData;
 using api.Mappers;
 using api.Models;
 using api.Services;

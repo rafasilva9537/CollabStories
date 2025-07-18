@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using api.Models;
 
-namespace api.IntegrationTests.Data;
+namespace api.IntegrationTests.Data.ClassData;
 
 public class StoryTestData : IEnumerable<object[]>
 {

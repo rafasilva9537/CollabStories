@@ -3,6 +3,7 @@ using api.Constants;
 using api.Dtos.StoryPart;
 using api.IntegrationTests.Constants;
 using api.IntegrationTests.Data;
+using api.IntegrationTests.Data.ClassData;
 using api.IntegrationTests.WebAppFactories;
 using api.Interfaces;
 using api.Models;
