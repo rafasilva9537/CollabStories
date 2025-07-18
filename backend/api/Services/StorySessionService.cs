@@ -106,6 +106,11 @@ public class StorySessionService : IStorySessionService
     {
         foreach (string storyId in _sessions.Keys)
         {
+            if (_sessions[storyId].TimerSeconds <= 0)
+            {
+                _sessions[storyId].TimerSeconds = _sessions[storyId].TurnDurationSeconds;
+            }
+            
             _hubContext.Clients.Group(storyId).ReceiveTimerSeconds(_sessions[storyId].TimerSeconds);
             DecrementSessionTimer(storyId, deltaTimeSeconds);
         }

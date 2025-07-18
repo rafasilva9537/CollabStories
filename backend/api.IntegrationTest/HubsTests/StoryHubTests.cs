@@ -437,8 +437,6 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             if(!connection3TimerSecondsTcs.Task.IsCompleted) connection3TimerSecondsTcs.SetResult();
         });
         
-        
-        // Assert
         Task timeout = Task.Delay(TimeSpan.FromSeconds(10));
         Task allConnectionsReceivedTimerSeconds = Task.WhenAll(
             connection1TimerSecondsTcs.Task, 
@@ -448,7 +446,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         await Task.WhenAny(timeout, allConnectionsReceivedTimerSeconds);
         
         
-        // Act
+        // Assert
         Assert.False(timeout.IsCompleted, "Timeout reached");
         
         Assert.NotNull(connection1TimerSeconds);
@@ -470,5 +468,70 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         Assert.Equal(expectedSeconds-3, connection1TimerSeconds);
         Assert.Equal(expectedSeconds-3, connection2TimerSeconds);
         Assert.Equal(expectedSeconds-3, connection3TimerSeconds);
+    }
+    
+    [Theory]
+    [ClassData(typeof(StoryAndAuthorsTestData))]
+    public async Task ReceiveTimerSeconds_WhenTimeReachesZero_TimerResets(
+        TestUserModel user1,
+        TestUserModel user2,
+        TestUserModel user3,
+        Story story)
+    {
+        // Arrange
+        double secondsPassedFromMembersChange = (story.TurnDurationSeconds * 2) + 1;
+        
+        DateTimeOffset fakeDateNow = StoryAndAuthorsTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(secondsPassedFromMembersChange);
+        IDateTimeProvider dateTimeProvider = Substitute.For<IDateTimeProvider>();
+        dateTimeProvider.UtcNow.Returns(fakeDateNow);
+        
+        var customFactory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(IDateTimeProvider));
+                services.AddTransient<IDateTimeProvider>(_ => dateTimeProvider);
+            });
+        });
+        
+        await using HubConnection connection1 = customFactory.CreateHubConnectionWithAuth(
+            user1.UserName,
+            user1.NameIdentifier,
+            user1.Email,
+            RoleConstants.User
+        );
+        await connection1.StartAsync();
+        
+        
+        // Act
+        await connection1.InvokeAsync("JoinStorySession", StoryAndAuthorsTestData.StoryId);
+        
+        TaskCompletionSource connection1TimerSecondsTcs = new();
+        
+        double? connection1TimerSeconds = null;
+        connection1.On<double>("ReceiveTimerSeconds", (timerSeconds) =>
+        {
+            connection1TimerSeconds = timerSeconds;
+            connection1TimerSecondsTcs.SetResult();
+        });
+        
+        
+        // Assert
+        Task timeout = Task.Delay(TimeSpan.FromSeconds(10));
+        await Task.WhenAny(timeout, connection1TimerSecondsTcs.Task);
+        
+        Assert.False(timeout.IsCompleted, "Timeout reached");
+        
+        Assert.NotNull(connection1TimerSeconds);
+        
+        Assert.Equal(1, connection1TimerSeconds);
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        Assert.Equal(story.TurnDurationSeconds, connection1TimerSeconds);
+        
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        Assert.Equal(story.TurnDurationSeconds-1, connection1TimerSeconds);
     }
 }
