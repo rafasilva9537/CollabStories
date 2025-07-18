@@ -1,3 +1,4 @@
+using api.Constants;
 using api.Dtos.StoryPart;
 using api.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ namespace api.Hubs;
 public interface IStoryClient
 {
     Task ReceiveStoryPart(int storyId, StoryPartDto createdStoryPart);
-    Task ReceiveTimerSeconds(int seconds);
+    Task ReceiveTimerSeconds(double seconds);
     Task MessageFailed(string message);
     Task UserDisconnected(string userName);
     Task UserConnected(string userName);
@@ -55,7 +56,6 @@ public class StoryHub : Hub<IStoryClient>
         if (!_storySessionService.SessionIsActive(storySessionId))
         {
             await _storySessionService.AddSessionAsync(storySessionId, _storyService);
-            // TODO: add timer
         }
         _storySessionService.AddConnectionToSession(storySessionId, Context.ConnectionId);
         
@@ -92,7 +92,6 @@ public class StoryHub : Hub<IStoryClient>
             _storySessionService.RemoveConnectionFromSession(storySessionId, Context.ConnectionId);
             if (_storySessionService.SessionIsEmpty(storySessionId))
             {
-                // TODO: remove timer
                 _storySessionService.RemoveSession(storySessionId);
             }
         }
@@ -125,12 +124,6 @@ public class StoryHub : Hub<IStoryClient>
         }
         
         await Clients.Group(storyId.ToString()).ReceiveStoryPart(storyId, createdStoryPart);
-    }
-    
-    // TODO: block access from users
-    public async Task SendTimerSeconds(int seconds, int storyId)
-    {
-        await Clients.Group(storyId.ToString()).ReceiveTimerSeconds(seconds);
     }
 
     public async Task OnConnectedAsync(int storyId)

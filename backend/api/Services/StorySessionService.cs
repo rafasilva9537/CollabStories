@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using api.Dtos.Story;
 using api.Exceptions;
+using api.Hubs;
 using api.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 
 namespace api.Services;
 
@@ -31,13 +33,18 @@ public class StorySessionService : IStorySessionService
     private readonly ConcurrentDictionary<string, SessionInfo> _sessions = new();
     private readonly ILogger<IStorySessionService> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IHubContext<StoryHub, IStoryClient> _hubContext;
 
     public int SessionsCount { get => _sessions.Count; }
     
-    public StorySessionService(ILogger<IStorySessionService> logger, IDateTimeProvider dateTimeProvider)
+    public StorySessionService(
+        ILogger<IStorySessionService> logger, 
+        IDateTimeProvider dateTimeProvider, 
+        IHubContext<StoryHub, IStoryClient> hubContext)
     {
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
+        _hubContext = hubContext;
     }
 
     public async Task AddSessionAsync(string storyId, IStoryService storyService)
@@ -93,8 +100,8 @@ public class StorySessionService : IStorySessionService
     {
         foreach (string storyId in _sessions.Keys)
         {
+            _hubContext.Clients.Group(storyId).ReceiveTimerSeconds(_sessions[storyId].TimerSeconds);
             DecrementSessionTimer(storyId, deltaTimeSeconds);
-            Console.WriteLine($"Story {storyId} timer: {_sessions[storyId].TimerSeconds}s.");
         }
     }
 

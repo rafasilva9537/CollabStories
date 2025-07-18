@@ -5,6 +5,7 @@ using api.IntegrationTests.Constants;
 using api.IntegrationTests.Data;
 using api.IntegrationTests.WebAppFactories;
 using api.Interfaces;
+using api.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -120,11 +121,10 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     public async Task JoinStorySession_WhenManyUsersJoinSession_ThenUsersAreAddedToSession(
         TestUserModel user1, 
         TestUserModel user2, 
-        TestUserModel user3
-        )
+        TestUserModel user3,
+        Story story)
     {
         // Arrange
-        const int storyId = AuthorsInStoryTestData.StoryId;
         using IStorySessionService storySessionService = _factory.Services.GetRequiredService<IStorySessionService>();
         
         await using HubConnection connection1 = _factory.CreateHubConnectionWithAuth(
@@ -150,16 +150,16 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
 
         // Act
         await connection1.StartAsync();
-        await connection1.InvokeAsync("JoinStorySession", storyId);
+        await connection1.InvokeAsync("JoinStorySession", story.Id);
         await connection2.StartAsync();
-        await connection2.InvokeAsync("JoinStorySession", storyId);
+        await connection2.InvokeAsync("JoinStorySession", story.Id);
         await connection3.StartAsync();
-        await connection3.InvokeAsync("JoinStorySession", storyId);
+        await connection3.InvokeAsync("JoinStorySession", story.Id);
     
         // Assert
         Assert.Equal(1, storySessionService.SessionsCount);
         
-        var connections = storySessionService.GetSessionConnections(storyId.ToString());
+        var connections = storySessionService.GetSessionConnections(story.Id.ToString());
         Assert.Equal(3, connections.Count);
         Assert.Contains(connection1.ConnectionId, connections);
         Assert.Contains(connection2.ConnectionId, connections);
@@ -170,7 +170,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     public async Task JoinStorySession_WhenAUserJoinsSession_TimerInfoReturnsCorrectValues()
     {
         // Arrange
-        DateTimeOffset fakeDateNow = DateTimeOffset.Parse("2024-12-05T05:09:15.8676393+00:00");;
+        DateTimeOffset fakeDateNow = AuthorsInStoryTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(5);
         IDateTimeProvider? dateTimeProvider = Substitute.For<IDateTimeProvider>();
         dateTimeProvider.UtcNow.Returns(fakeDateNow);
 
@@ -229,11 +229,10 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     public async Task LeaveStorySession_WhenManyUsersLeaveSession_ThenUsersAreRemovedFromSession(
         TestUserModel user1,
         TestUserModel user2,
-        TestUserModel user3
-    )
+        TestUserModel user3,
+        Story story)
     {
         // Arrange
-        const int storyId = AuthorsInStoryTestData.StoryId;
         using IStorySessionService storySessionService = _factory.Services.GetRequiredService<IStorySessionService>();
         
         await using HubConnection connection1 = _factory.CreateHubConnectionWithAuth(
@@ -257,19 +256,19 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             RoleConstants.User
         );
         await connection1.StartAsync();
-        await connection1.InvokeAsync("JoinStorySession", storyId);
+        await connection1.InvokeAsync("JoinStorySession", story.Id);
         await connection2.StartAsync();
-        await connection2.InvokeAsync("JoinStorySession", storyId);
+        await connection2.InvokeAsync("JoinStorySession", story.Id);
         await connection3.StartAsync();
-        await connection3.InvokeAsync("JoinStorySession", storyId);
+        await connection3.InvokeAsync("JoinStorySession", story.Id);
 
         // Act
-        await connection1.InvokeAsync("LeaveStorySession", storyId);
-        await connection2.InvokeAsync("LeaveStorySession", storyId);
-        await connection3.InvokeAsync("LeaveStorySession", storyId);
+        await connection1.InvokeAsync("LeaveStorySession", story.Id);
+        await connection2.InvokeAsync("LeaveStorySession", story.Id);
+        await connection3.InvokeAsync("LeaveStorySession", story.Id);
         
         // Assert
-        Assert.False(storySessionService.SessionIsActive(storyId.ToString()));
+        Assert.False(storySessionService.SessionIsActive(story.Id.ToString()));
         Assert.Equal(0, storySessionService.SessionsCount);
     }
 
@@ -278,11 +277,10 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
     public async Task SendStoryPart_WhenConnectedToStory_OtherUsersReceiveStoryPart(
         TestUserModel user1, 
         TestUserModel user2,
-        TestUserModel user3
-        )
+        TestUserModel user3,
+        Story story)
     {
         // Arrange
-        const int storyId = AuthorsInStoryTestData.StoryId;
         using IStorySessionService sessionService = _factory.Services.GetRequiredService<IStorySessionService>();
         
         await using HubConnection connection1 = _factory.CreateHubConnectionWithAuth(
@@ -292,7 +290,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             RoleConstants.User
         );
         await connection1.StartAsync();
-        await connection1.InvokeAsync("JoinStorySession", storyId);
+        await connection1.InvokeAsync("JoinStorySession", story.Id);
         const string storyPartTextFromUser1 = "Test story part";
         
         await using HubConnection connection2 = _factory.CreateHubConnectionWithAuth(
@@ -302,7 +300,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             RoleConstants.User
         );
         await connection2.StartAsync();
-        await connection2.InvokeAsync("JoinStorySession", storyId);
+        await connection2.InvokeAsync("JoinStorySession", story.Id);
         
         await using HubConnection connection3 = _factory.CreateHubConnectionWithAuth(
             user3.UserName,
@@ -311,7 +309,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             RoleConstants.User
         );
         await connection3.StartAsync();
-        await connection3.InvokeAsync("JoinStorySession", storyId);
+        await connection3.InvokeAsync("JoinStorySession", story.Id);
         
         
         // Act
@@ -336,7 +334,7 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
             connection3ReceivedStoryPartTcs.SetResult();
         });
         
-        await connection1.InvokeAsync("SendStoryPart", storyId, storyPartTextFromUser1);
+        await connection1.InvokeAsync("SendStoryPart", story.Id, storyPartTextFromUser1);
         
         Task timeout = Task.Delay(TimeSpan.FromSeconds(5));
         Task allConnectionsReceivedStoryPart = Task.WhenAll(connection2ReceivedStoryPartTcs.Task, connection3ReceivedStoryPartTcs.Task);
@@ -348,16 +346,127 @@ public class StoryHubTests : IClassFixture<AuthHandlerWebAppFactory>
         
         Assert.NotNull(storyPartConnection2);
         Assert.NotNull(storyIdConnection2);
-        Assert.Equal(storyId, storyIdConnection2);
+        Assert.Equal(story.Id, storyIdConnection2);
         Assert.Equal(storyPartTextFromUser1, storyPartConnection2.Text);
         Assert.Equal(user1.UserName, storyPartConnection2.UserName);
-        Assert.Equal(storyId, storyPartConnection2.StoryId);
+        Assert.Equal(story.Id, storyPartConnection2.StoryId);
         
         Assert.NotNull(storyPartConnection3);
         Assert.NotNull(storyIdConnection3);
-        Assert.Equal(storyId, storyIdConnection3);
+        Assert.Equal(story.Id, storyIdConnection3);
         Assert.Equal(storyPartTextFromUser1, storyPartConnection3.Text);
         Assert.Equal(user1.UserName, storyPartConnection3.UserName);
-        Assert.Equal(storyId, storyPartConnection3.StoryId);
+        Assert.Equal(story.Id, storyPartConnection3.StoryId);
+    }
+
+    [Theory]
+    [ClassData(typeof(AuthorsInStoryTestData))]
+    public async Task ReceiveTimerSeconds_WithUsersInSession_ReturnsTimerSeconds(
+        TestUserModel user1,
+        TestUserModel user2,
+        TestUserModel user3,
+        Story story)
+    {
+        // Arrange
+        const double expectedSeconds = 20;
+        DateTimeOffset fakeDateNow = AuthorsInStoryTestData.AuthorsMembershipChangeDate + TimeSpan.FromSeconds(expectedSeconds);
+        IDateTimeProvider dateTimeProvider = Substitute.For<IDateTimeProvider>();
+        dateTimeProvider.UtcNow.Returns(fakeDateNow);
+        
+        var customFactory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(IDateTimeProvider));
+                services.AddTransient<IDateTimeProvider>(_ => dateTimeProvider);
+            });
+        });
+        
+        await using HubConnection connection1 = customFactory.CreateHubConnectionWithAuth(
+            user1.UserName,
+            user1.NameIdentifier,
+            user1.Email,
+            RoleConstants.User
+        );
+        await using HubConnection connection2 = customFactory.CreateHubConnectionWithAuth(
+            user2.UserName,
+            user2.NameIdentifier,
+            user2.Email,
+            RoleConstants.User
+        );        
+        await using HubConnection connection3 = customFactory.CreateHubConnectionWithAuth(
+            user3.UserName,
+            user3.NameIdentifier,
+            user3.Email,
+            RoleConstants.User
+        );
+        await connection1.StartAsync();
+        await connection2.StartAsync();
+        await connection3.StartAsync();
+        
+        
+        // Act
+        await connection1.InvokeAsync("JoinStorySession", AuthorsInStoryTestData.StoryId);
+        await connection2.InvokeAsync("JoinStorySession", AuthorsInStoryTestData.StoryId);
+        await connection3.InvokeAsync("JoinStorySession", AuthorsInStoryTestData.StoryId);
+        
+        TaskCompletionSource connection1TimerSecondsTcs = new();
+        TaskCompletionSource connection2TimerSecondsTcs = new();
+        TaskCompletionSource connection3TimerSecondsTcs = new();
+        
+        double? connection1TimerSeconds = null;
+        connection1.On<double>("ReceiveTimerSeconds", (timerSeconds) =>
+        {
+            connection1TimerSeconds = timerSeconds;
+            if(!connection1TimerSecondsTcs.Task.IsCompleted) connection1TimerSecondsTcs.SetResult();
+        });
+        
+        double? connection2TimerSeconds = null;
+        connection2.On<double>("ReceiveTimerSeconds", (timerSeconds) =>
+        {
+            connection2TimerSeconds = timerSeconds;
+            if(!connection2TimerSecondsTcs.Task.IsCompleted) connection2TimerSecondsTcs.SetResult();
+        });
+        
+        double? connection3TimerSeconds = null;
+        connection3.On<double>("ReceiveTimerSeconds", (timerSeconds) =>
+        {
+            connection3TimerSeconds = timerSeconds;
+            if(!connection3TimerSecondsTcs.Task.IsCompleted) connection3TimerSecondsTcs.SetResult();
+        });
+        
+        
+        // Assert
+        Task timeout = Task.Delay(TimeSpan.FromSeconds(10));
+        Task allConnectionsReceivedTimerSeconds = Task.WhenAll(
+            connection1TimerSecondsTcs.Task, 
+            connection2TimerSecondsTcs.Task, 
+            connection3TimerSecondsTcs.Task
+        );
+        await Task.WhenAny(timeout, allConnectionsReceivedTimerSeconds);
+        
+        
+        // Act
+        Assert.False(timeout.IsCompleted, "Timeout reached");
+        
+        Assert.NotNull(connection1TimerSeconds);
+        Assert.NotNull(connection2TimerSeconds);
+        Assert.NotNull(connection3TimerSeconds);
+        
+        Assert.Equal(expectedSeconds, connection1TimerSeconds);
+        Assert.Equal(expectedSeconds, connection2TimerSeconds);
+        Assert.Equal(expectedSeconds, connection3TimerSeconds);
+
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        
+        Assert.Equal(expectedSeconds-2, connection1TimerSeconds);
+        Assert.Equal(expectedSeconds-2, connection2TimerSeconds);
+        Assert.Equal(expectedSeconds-2, connection3TimerSeconds);
+        
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        Assert.Equal(expectedSeconds-3, connection1TimerSeconds);
+        Assert.Equal(expectedSeconds-3, connection2TimerSeconds);
+        Assert.Equal(expectedSeconds-3, connection3TimerSeconds);
     }
 }
