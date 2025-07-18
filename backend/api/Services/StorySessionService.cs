@@ -5,23 +5,6 @@ using api.Interfaces;
 
 namespace api.Services;
 
-public interface IStorySessionService : IDisposable
-{
-    int SessionsCount { get; }
-    Task AddSessionAsync(string storyId, IStoryService storyService);
-    void RemoveSession(string storyId);
-    void RemoveAllSessions();
-    bool SessionIsActive(string storyId);
-    bool SessionIsEmpty(string storyId);
-    public int GetSessionTurnDurationSeconds(string storyId);
-    public double GetSessionTimerSeconds(string storyId);
-    public void DecrementSessionTimer(string storyId, double seconds = 1);
-    void AddConnectionToSession(string storyId, string connectionId);
-    void RemoveConnectionFromSession(string storyId, string connectionId);
-    
-    IReadOnlySet<string> GetSessionConnections(string storyId);
-}
-
 public class SessionInfo
 {
     public readonly HashSet<string> Connections = [];
@@ -79,6 +62,11 @@ public class StorySessionService : IStorySessionService
             turnDurationSeconds);
     }
     
+    public ICollection<string> GetSessionIds()
+    {
+        return _sessions.Keys;
+    }
+    
     public void RemoveSession(string storyId)
     {
         _sessions.TryRemove(storyId, out _);
@@ -99,6 +87,15 @@ public class StorySessionService : IStorySessionService
     {
         _sessions.Clear();
         _logger.LogInformation("Removed all sessions");   
+    }
+
+    public void UpdateAllTimers(double deltaTimeSeconds)
+    {
+        foreach (string storyId in _sessions.Keys)
+        {
+            DecrementSessionTimer(storyId, deltaTimeSeconds);
+            Console.WriteLine($"Story {storyId} timer: {_sessions[storyId].TimerSeconds}s.");
+        }
     }
 
     public int GetSessionTurnDurationSeconds(string storyId)
