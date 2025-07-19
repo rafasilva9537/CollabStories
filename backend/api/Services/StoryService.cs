@@ -130,24 +130,13 @@ public class StoryService : IStoryService
 
         CompleteStoryDto completeStoryDto = completeStory.ToCompleteStoryDto();
 
-        IList<StoryPartInListDto> storyPartsDto = await _context.StoryPart
-            .Where(sp => sp.StoryId == storyId)
-            .Include(sp => sp.User)
-            .Select(StoryPartMappers.ProjectToStoryPartInListDto)
-            .ToListAsync();
-
         IList<AuthorFromStoryInListDto> storyAuthors = await _context.AuthorInStory
             .Where(ais => ais.StoryId == storyId)
             .Include(ais => ais.Author)
             // TODO: create mapper for projection here
-            .Select(ais => new AuthorFromStoryInListDto
-            {
-                AuthorUserName = ais.Author.UserName,
-                EntryDate = ais.EntryDate,
-            })
+            .Select(AuthorInStoryMappers.ProjectToAuthorFromStoryInListDto)
             .ToListAsync();
-
-        completeStoryDto.StoryParts = storyPartsDto;
+        
         completeStoryDto.StoryAuthors = storyAuthors;
 
         return completeStoryDto;

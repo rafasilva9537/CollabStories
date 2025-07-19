@@ -81,7 +81,6 @@ public static class StoryMappers
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
             TurnDurationSeconds = storyModel.TurnDurationSeconds,
-            StoryParts = new List<StoryPartInListDto>(),
         };
     }
 
