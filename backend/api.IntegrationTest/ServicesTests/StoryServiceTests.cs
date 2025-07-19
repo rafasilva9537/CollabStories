@@ -169,7 +169,7 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
         StoryService storyService = new StoryService(context);
         
         // Act
-        await storyService.ChangeCurrentStoryAuthor(TestConstants.DefaultJoinedStoryId, TestConstants.DefaultUserName);
+        await storyService.ChangeCurrentStoryAuthorAsync(TestConstants.DefaultJoinedStoryId, TestConstants.DefaultUserName);
         
         // Assert
         Story changedStory = await context.Story.FirstAsync(s => s.Id == TestConstants.DefaultJoinedStoryId);

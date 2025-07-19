@@ -2,6 +2,7 @@ using api.Data;
 using api.Dtos.AuthorInStory;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
+using api.Exceptions;
 using api.Interfaces;
 using api.Mappers;
 using api.Models;
@@ -118,6 +119,49 @@ public class StoryService : IStoryService
         return isStoryCreator;
     }
 
+    public async Task<bool> ChangeToNextCurrentAuthorAsync(int storyId)
+    {
+        var storyAuthorsIds = await _context.Story
+            .Where(s => s.Id == storyId)
+            .Select(s => new
+            {
+                CurrentAuthorId = s.CurrentAuthorId,
+                AuthorsInStoryIds = s.AuthorInStory
+                    .OrderBy(ais => ais.EntryDate)
+                    .Select(ais => ais.AuthorId)
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (storyAuthorsIds is null)
+        {
+            throw new NoStoryException("Story does not exists.");
+        }
+        if(storyAuthorsIds.AuthorsInStoryIds.Count <= 1) return false;
+        if(storyAuthorsIds.CurrentAuthorId is null) return false;
+
+        int currentAuthorIndex = storyAuthorsIds.AuthorsInStoryIds
+            .IndexOf((int)storyAuthorsIds.CurrentAuthorId);
+
+        if (currentAuthorIndex == storyAuthorsIds.AuthorsInStoryIds.Count-1)
+        {
+            await _context.Story
+                .ExecuteUpdateAsync(sp => 
+                    sp.SetProperty(story => story.CurrentAuthorId, storyAuthorsIds.AuthorsInStoryIds[0])
+                );
+        }
+        else
+        {
+            currentAuthorIndex += 1;
+            await _context.Story
+                .ExecuteUpdateAsync(sp => 
+                    sp.SetProperty(story => story.CurrentAuthorId, storyAuthorsIds.AuthorsInStoryIds[currentAuthorIndex])
+                );
+        }
+
+        return true;
+    }
+
     public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId)
     {
         //TODO: improve, reduce roundtrips
@@ -230,7 +274,7 @@ public class StoryService : IStoryService
         return storyInfo;
     }
 
-    public async Task ChangeCurrentStoryAuthor(int storyId, string username)
+    public async Task ChangeCurrentStoryAuthorAsync(int storyId, string username)
     {
         Story story = await _context.Story.FirstAsync(s => s.Id == storyId);
         
