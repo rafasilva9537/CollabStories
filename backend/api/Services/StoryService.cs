@@ -126,14 +126,20 @@ public class StoryService : IStoryService
             .Include(story => story.StoryParts)
             .FirstOrDefaultAsync();
         
-        if(completeStory == null) return null;
+        if(completeStory is null) return null;
 
+        string currentAuthor = await _context.AppUser
+            .Where(au => au.Id == completeStory.CurrentAuthorId)
+            .Select(au => au.UserName)
+            .FirstAsync();
+        
         CompleteStoryDto completeStoryDto = completeStory.ToCompleteStoryDto();
+        completeStoryDto.CurrentAuthor = currentAuthor;
 
         IList<AuthorFromStoryInListDto> storyAuthors = await _context.AuthorInStory
             .Where(ais => ais.StoryId == storyId)
             .Include(ais => ais.Author)
-            // TODO: create mapper for projection here
+            .OrderBy(ais => ais.EntryDate)
             .Select(AuthorInStoryMappers.ProjectToAuthorFromStoryInListDto)
             .ToListAsync();
         

@@ -13,5 +13,6 @@ public record CompleteStoryDto
     public DateTimeOffset UpdatedDate { get; set; }
     public int MaximumAuthors { get; set; }
     public int TurnDurationSeconds { get; set; }
-    public ICollection<AuthorFromStoryInListDto> StoryAuthors { get; set; } = [];
+    public string CurrentAuthor { get; set; } = string.Empty;
+    public IList<AuthorFromStoryInListDto> StoryAuthors { get; set; } = [];
 }
