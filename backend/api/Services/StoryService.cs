@@ -192,6 +192,18 @@ public class StoryService : IStoryService
         return completeStoryDto;
     }
 
+    public async Task<string> GetCurrentAuthorUserNameAsync(int storyId)
+    {
+        string? currentAuthorUserName = await _context.Story
+            .Where(s => s.Id == storyId)
+            .Select(s => s.CurrentAuthor.UserName)
+            .FirstOrDefaultAsync();
+        
+        if(currentAuthorUserName is null) throw new NoStoryException("Story does not exists.");
+        
+        return currentAuthorUserName;
+    }
+
     public async Task<bool> JoinStoryAsync(string username, int storyId)
     {
         // TODO: decrease roundtrips
@@ -281,7 +293,7 @@ public class StoryService : IStoryService
         int authorId = await _context.AppUser
             .Where(au => au.UserName == username)
             .Select(au => au.Id)
-            .FirstAsync();;
+            .FirstAsync();
 
         story.CurrentAuthorId = authorId;
         await _context.SaveChangesAsync();

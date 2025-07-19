@@ -14,6 +14,7 @@ public interface IStoryService
     Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
     Task<bool> IsStoryCreator(string username, int storyId);
     Task<bool> ChangeToNextCurrentAuthorAsync(int storyId);
+    Task<string> GetCurrentAuthorUserNameAsync(int storyId);
     Task ChangeCurrentStoryAuthorAsync(int storyId, string username);
     Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId);
     Task<bool> JoinStoryAsync(string username, int storyId);
