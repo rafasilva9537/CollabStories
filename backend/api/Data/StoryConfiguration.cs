@@ -19,6 +19,12 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
         builder.Property(s => s.TurnDurationSeconds).HasDefaultValue(300);
         builder.Property(s => s.IsFinished).HasDefaultValue(false);
 
+        builder.HasOne(s => s.CurrentAuthor)
+            .WithMany(au => au.CurrentAuthorStories)
+            .HasForeignKey(s => s.CurrentAuthorId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+        
         builder.HasOne(s => s.User)
             .WithMany(au => au.Stories)
             .HasForeignKey(s => s.UserId)

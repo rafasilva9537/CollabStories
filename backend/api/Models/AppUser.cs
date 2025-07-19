@@ -12,6 +12,7 @@ public class AppUser : IdentityUser<int>
     public string ProfileImage { get; set; } = string.Empty;
 
     public ICollection<Story> Stories { get;} = [];
+    public ICollection<Story> CurrentAuthorStories { get; } = [];
     public ICollection<StoryPart> StoryParts { get; } = [];
     public ICollection<AuthorInStory> AuthorInStory { get; } = [];
 }
