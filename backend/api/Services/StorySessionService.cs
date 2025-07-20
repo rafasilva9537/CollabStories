@@ -34,17 +34,21 @@ public class StorySessionService : IStorySessionService
     private readonly ILogger<IStorySessionService> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IHubContext<StoryHub, IStoryClient> _hubContext;
+    
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public int SessionsCount { get => _sessions.Count; }
     
     public StorySessionService(
         ILogger<IStorySessionService> logger, 
         IDateTimeProvider dateTimeProvider, 
-        IHubContext<StoryHub, IStoryClient> hubContext)
+        IHubContext<StoryHub, IStoryClient> hubContext,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         _hubContext = hubContext;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task AddSessionAsync(string storyId, IStoryService storyService)
@@ -102,16 +106,20 @@ public class StorySessionService : IStorySessionService
         _logger.LogInformation("Removed all sessions");   
     }
 
-    public void UpdateAllTimers(double deltaTimeSeconds)
+    public async Task UpdateAllTimersAsync(double deltaTimeSeconds)
     {
         foreach (string storyId in _sessions.Keys)
         {
             if (_sessions[storyId].TimerSeconds <= 0)
             {
+                using IServiceScope scope = _serviceScopeFactory.CreateScope();
+                IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+                await storyService.ChangeToNextCurrentAuthorAsync(int.Parse(storyId));
+                
                 _sessions[storyId].TimerSeconds = _sessions[storyId].TurnDurationSeconds;
             }
             
-            _hubContext.Clients.Group(storyId).ReceiveTimerSeconds(_sessions[storyId].TimerSeconds);
+            await _hubContext.Clients.Group(storyId).ReceiveTimerSeconds(_sessions[storyId].TimerSeconds);
             DecrementSessionTimer(storyId, deltaTimeSeconds);
         }
     }

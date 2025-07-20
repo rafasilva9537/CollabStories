@@ -17,7 +17,7 @@ public class TimerBackgroundService : BackgroundService
         using PeriodicTimer timer = new(TimeSpan.FromSeconds(deltaTimeSeconds));
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
-            _storySessionService.UpdateAllTimers(deltaTimeSeconds);
+            await _storySessionService.UpdateAllTimersAsync(deltaTimeSeconds);
         }
     }
 }
