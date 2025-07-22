@@ -15,7 +15,7 @@ function Home() {
   return (
     <div className="Home">
       <header className="Header-Home">
-        <h1 className="Title-Home">Home Page</h1>
+        <h1 className="Title-Home">Página Inicial</h1>
       </header>
 
       <section className="section-home">
