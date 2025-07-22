@@ -1,0 +1,18 @@
+.AsideRegister{
+    height: 80%;
+    width: 20%;
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border: solid black 2px;
+    border-right: none;
+    border-bottom-left-radius: 40px;
+    border-top-left-radius: 40px;
+}
+
+.ImgRegister{
+    height: 60%;
+    width: 100%;
+}

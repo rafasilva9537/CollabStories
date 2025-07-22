@@ -1,0 +1,69 @@
+.Home{
+    height: 100%;
+    width: 100%;
+}
+
+.Header-Home{
+    height: 20%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(221, 221, 244);
+}
+
+.Title-Home{
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid black 2px;
+    border-radius: 20px;
+    padding: 20px;
+    background-color: white;
+}
+
+.section-home{
+    height: 80%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.Buttons-Home{
+    height: 20%;
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center ;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-content-home{
+    height: 70%;
+    width: 50%;
+    border: solid black 2px;
+    border-radius: 20px;
+}
+
+.Button-Home{
+    height: 100%;
+    width: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid black 4px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom: none;
+    cursor: pointer;
+}
+
+.Icons-Home{
+    height: 80px;
+    width: 80px;
+}

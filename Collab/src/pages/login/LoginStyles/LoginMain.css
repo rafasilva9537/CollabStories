@@ -1,0 +1,31 @@
+.MainLogin{
+    height: 80%;
+    width: 40%;
+    border: solid black 2px;
+    border-left: none;
+    border-bottom-right-radius: 40px;
+    border-top-right-radius: 40px;
+}
+
+.Login-Data{
+    height: 80%;
+    width: 100%;
+}
+
+.form-login{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-direction: column;
+}
+
+.input-login{
+    width: 60%;
+}
+
+.button-login{
+    width: 65%;
+}

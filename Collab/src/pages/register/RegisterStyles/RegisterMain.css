@@ -1,0 +1,68 @@
+.MainRegister{
+    height: 80%;
+    width: 40%;
+    border: solid black 2px;
+    border-left: none;
+    border-bottom-right-radius: 40px;
+    border-top-right-radius: 40px;
+}
+
+.Register-Form{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.Register-MainContainer{
+    height: 80%;
+    width: 100%;
+}
+
+.container-Register-name-user{
+    height: 20%;
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.container-Register-data{
+    height: 30%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.Input-Register-EmAndPassw{
+    width: 60%;
+}
+
+.CreateAccount-Button{
+    height: 10%;
+    width: 65%;
+}
+
+.container-Register-IdPlayer{
+    height: 10%;
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.arroba{
+    height: 40px;
+    width: 40px;
+}
+
+.Input-Register-Id{
+    width: 50%;
+}
