@@ -1,50 +1,42 @@
-import './home.css'
+import { useState } from 'react';
+import './home.css';
 
-import NewStory from '../../assets/buttons/newStory.png'
-import Player from '../../assets/buttons/player.png'
-import Gallery from '../../assets/buttons/gallery.png'
+import NewStoryIcon from '../../assets/buttons/newStory.png';
+import ProfileIcon from '../../assets/buttons/player.png';
+import GalleryIcon from '../../assets/buttons/gallery.png';
 
-function Home(){
+import GalleryPage from './Mains/mainGallery';
+import ProfilePage from './Mains/mainProfile';
+import NewStoryPage from './Mains/mainNewStory';
 
-return(
+function Home() {
+  const [currentComponent, setCurrentComponent] = useState(<ProfilePage />);
 
-    <>
+  return (
     <div className="Home">
-        <header className='Header-Home'>
+      <header className="Header-Home">
+        <h1 className="Title-Home">Home Page</h1>
+      </header>
 
-            <h1 className='Title-Home'>
-                Página Inicial
-            </h1>
+      <section className="section-home">
+        <div className="Buttons-Home">
+          <div className="Button-Home" onClick={() => setCurrentComponent(<ProfilePage />)}>
+            <img className="Icons-Home" src={ProfileIcon} alt="Profile" />
+          </div>
+          <div className="Button-Home" onClick={() => setCurrentComponent(<GalleryPage />)}>
+            <img className="Icons-Home" src={GalleryIcon} alt="Gallery" />
+          </div>
+          <div className="Button-Home" onClick={() => setCurrentComponent(<NewStoryPage />)}>
+            <img className="Icons-Home" src={NewStoryIcon} alt="Create Story" />
+          </div>
+        </div>
 
-        </header>
-        <section className='section-home'>
-
-            <div className="Buttons-Home">
-
-                <div className="Button-Home">
-                    <img className='Icons-Home'
-                    src={Player} alt="Meu perfil" />
-                </div>
-                <div className="Button-Home">
-                    <img className='Icons-Home'
-                    src={Gallery} alt="Galeria" />
-                </div>
-                <div className="Button-Home">
-                    <img className='Icons-Home'
-                    src={NewStory} alt="Criar história" />
-                </div>
-
-            </div>
-            <main className='main-content-home'>
-
-            </main>
-
-        </section>
+        <main className="main-content-home">
+          {currentComponent}
+        </main>
+      </section>
     </div>
-    </>
-
-)
-
+  );
 }
 
 export default Home;
