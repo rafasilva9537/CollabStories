@@ -20,7 +20,7 @@ public class StoryController : ControllerBase
     {
         _storyService = storyService;
     }
-
+    
     [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IList<StoryMainInfoDto>>> GetStories([FromQuery] int? lastId)
@@ -31,7 +31,7 @@ public class StoryController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:int}")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<StoryDto>> GetStory(int id)
     {
         StoryDto? story = await _storyService.GetStoryAsync(id);
@@ -55,7 +55,7 @@ public class StoryController : ControllerBase
         return CreatedAtAction(nameof(this.GetStory), new { id = newStory.Id }, newStory);
     }
 
-    [HttpPut("{storyId:int}")]
+    [HttpPut("{storyId}")]
     public async Task<ActionResult<StoryDto>> UpdateStory(int storyId, [FromBody] UpdateStoryDto updateStory)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -79,7 +79,7 @@ public class StoryController : ControllerBase
         return CreatedAtAction(nameof(this.GetStory), new { id = updatedStory.Id }, updatedStory);
     }
 
-    [HttpDelete("{storyId:int}")]
+    [HttpDelete("{storyId}")]
     public async Task<ActionResult<MessageResponse>> DeleteStory([FromRoute] int storyId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -101,7 +101,7 @@ public class StoryController : ControllerBase
     }
 
 
-    [HttpPost("{storyId:int}/join")]
+    [HttpPost("{storyId}/join")]
     public async Task<ActionResult<MessageResponse>> JoinStory([FromRoute] int storyId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -117,7 +117,7 @@ public class StoryController : ControllerBase
         return Ok(new MessageResponse { Message = "User joined story." });
     }
 
-    [HttpPost("{storyId:int}/leave")]
+    [HttpPost("{storyId}/leave")]
     public async Task<ActionResult<MessageResponse>> LeaveStory([FromRoute] int storyId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -134,7 +134,7 @@ public class StoryController : ControllerBase
 
 
     [AllowAnonymous]
-    [HttpGet("{storyId:int}/story-parts")]
+    [HttpGet("{storyId}/story-parts")]
     public async Task<ActionResult<CompleteStoryDto>> GetCompleteStory([FromRoute] int storyId)
     {
         CompleteStoryDto? completeStory = await _storyService.GetCompleteStoryAsync(storyId);
@@ -144,7 +144,7 @@ public class StoryController : ControllerBase
         return Ok(completeStory);
     }
 
-    [HttpPost("{storyId:int}/story-parts")]
+    [HttpPost("{storyId}/story-parts")]
     public async Task<ActionResult<StoryPartDto>> CreateStoryPart([FromRoute] int storyId, [FromBody] CreateStoryPartDto storyPartDto)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -160,7 +160,7 @@ public class StoryController : ControllerBase
         return Ok(newStoryPart);
     }
     
-    [HttpDelete("{storyId:int}/story-parts/{storyPartId:int}")]
+    [HttpDelete("{storyId}/story-parts/{storyPartId}")]
     public async Task<ActionResult<MessageResponse>> DeleteStoryPart([FromRoute] int storyId, [FromRoute] int storyPartId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
