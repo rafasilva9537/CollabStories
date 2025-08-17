@@ -7,11 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using api.Services;
 using api.Constants;
 using api.Data.Seed;
 using api.Hubs;
-using api.Interfaces;
+using api.Startup;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Primitives;
 
@@ -40,7 +39,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-builder.Services.AddControllers();
+
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -49,15 +48,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("MSSQL_CONNECTION_STRING");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<IStoryService, StoryService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IImageService, ImageService>();
-
-builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
-
-builder.Services.AddSingleton<IStorySessionService, StorySessionService>();
-builder.Services.AddHostedService<TimerBackgroundService>();
+builder.Services.AddServices();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
