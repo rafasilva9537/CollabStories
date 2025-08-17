@@ -1,0 +1,25 @@
+.story{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.aside-story{
+    min-height: 700px;
+    height: 80%;
+    width: 20%;
+    min-width: 300px;
+}
+
+.main-story{
+    min-height: 700px;
+    height: 80%;
+    width: 60%;
+    min-width: 800px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}

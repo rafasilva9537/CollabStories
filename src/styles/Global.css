@@ -1,0 +1,28 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+html, body, #root{
+    height: 100vh;
+    width: 100vw;
+    font-family: Arial;
+}
+
+textarea:focus{
+    outline: none;
+}
+
+button{
+    cursor: pointer;
+}
+
+::-webkit-scrollbar{
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(170, 170, 206);
+  border-radius: 4px;
+  cursor: pointer;
+}
