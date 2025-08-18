@@ -56,7 +56,7 @@ public class StorySessionService : IStorySessionService
         StoryInfoForSessionDto? story = await storyService.GetStoryInfoForSessionAsync(int.Parse(storyId));
         if (story is null)
         {
-            throw new NoStoryException($"Story with ID {storyId} not found.");
+            throw new StoryNotFoundException($"Story with ID {storyId} not found.");
         }
 
         TimeSpan timeSinceUpdate = _dateTimeProvider.UtcNow - story.AuthorsMembershipChangeDate;

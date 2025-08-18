@@ -135,7 +135,7 @@ public class StoryService : IStoryService
 
         if (storyAuthorsIds is null)
         {
-            throw new NoStoryException("Story does not exists.");
+            throw new StoryNotFoundException("Story does not exists.");
         }
         if(storyAuthorsIds.AuthorsInStoryIds.Count <= 1) return false;
         if(storyAuthorsIds.CurrentAuthorId is null) return false;
@@ -199,7 +199,7 @@ public class StoryService : IStoryService
             .Select(s => s.CurrentAuthor.UserName)
             .FirstOrDefaultAsync();
         
-        if(currentAuthorUserName is null) throw new NoStoryException("Story does not exists.");
+        if(currentAuthorUserName is null) throw new StoryNotFoundException("Story does not exists.");
         
         return currentAuthorUserName;
     }
