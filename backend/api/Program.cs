@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using api.Data;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,10 @@ using Microsoft.OpenApi.Models;
 using api.Constants;
 using api.Data.Seed;
 using api.Hubs;
+using api.Middlewares;
 using api.Startup;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +43,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+{
+    Activity? activity = context.HttpContext.Features.Get<IHttpActivityFeature>()?.Activity;
+    context.ProblemDetails.Extensions.TryAdd("traceId", activity?.Id);
+});
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -48,7 +58,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("MSSQL_CONNECTION_STRING");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddServices();
+builder.Services.AddDependencyInjectionServices();
 
 // Auth configs
 builder.Services.AddIdentityCore<AppUser>()
@@ -165,6 +175,8 @@ else if (app.Environment.EnvironmentName == "Test")
     app.UseSwagger();
     app.UseSwaggerUI();   
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

@@ -5,7 +5,7 @@ namespace api.Startup;
 
 public static class DependenciesConfig
 {
-    public static void AddServices(this IServiceCollection services)
+    public static void AddDependencyInjectionServices(this IServiceCollection services)
     {
         services.AddScoped<IStoryService, StoryService>();
         services.AddScoped<ITokenService, TokenService>();
