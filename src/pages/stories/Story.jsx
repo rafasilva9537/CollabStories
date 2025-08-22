@@ -8,16 +8,11 @@ import { useNavigate } from 'react-router-dom'
 import useStory from './useStory'
 
 import PlayerIcon from '../../assets/icons/player.png'
-import Clock from '../../assets/icons/clock.png'
-import Home from '../../assets/buttons/home.png'
+import Home from '../../assets/icons/home.png'
+import AddPlayer from '../../assets/icons/add_player.png'
 
 const Players = [
-    {id: 1, icon: PlayerIcon ,name: 'Pedro'},
-    {id: 2, icon: PlayerIcon ,name: 'Lucas'},
-    {id: 3, icon: PlayerIcon ,name: 'Rafael'}, 
-    {id: 4, icon: PlayerIcon ,name: 'Davi'},
-    {id: 5, icon: PlayerIcon ,name: 'Leandra'},
-    {id: 6, icon: PlayerIcon ,name: 'Giih'},   
+    {id: 1, icon: PlayerIcon ,name: 'Pedro'},  
 ]
 
 function Story() {
@@ -42,30 +37,42 @@ function Story() {
       <aside className='aside-story'>
 
         <ul className="players-container">
-          {Players.map((player) => (
-            <li key={player.id} className='player-card'>
-              <img className='player-icon' src={player.icon} alt={player.name}/>
-              <span className="player-name">{player.name}</span>
-            </li>
-          ))}
+            {Players.map((player) => (
+                <li key={player.id} className='player-card'>
+                <img className='player-icon' src={player.icon} alt={player.name}/>
+                <span className="player-name">{player.name}</span>
+                </li>
+            ))}
+
+            {Array.from({ length: 5 }).map((_, i) => (
+                <li key={`add-${i}`} className="Add-player-container">
+                    <button>
+                        <img src={AddPlayer} alt="Adicionar jogador" />
+                    </button>
+                    <div className="player-add">
+                        <span>
+                            Adicionar Jogador
+                        </span>
+                        <input type="text" placeholder='@...'/>
+                    </div>
+                </li>
+            ))}
         </ul>
 
-        <div className="timer-container">
-          <img className='ClockIcon' src={Clock} alt="Relógio" />
-          <div className="infs-time">
-            <span className="player-timer">Turno: {currentPlayer.name}</span>
-            <span className='timer'>{seconds}s</span>
-          </div>
-        </div>
-
-      </aside>
+    </aside>
 
     <main className='main-story'>
 
         <section className="stories">
 
           <header className="story-header">
-            <h2>Como Treinar o Seu Dragão</h2>
+
+            <div className="header-infs">
+                <h2>Como Treinar o Seu Dragão</h2>
+                <span className='gender'>
+                    Aventura
+                </span>
+            </div>
             <button onClick={() => navigate('/home')} aria-label='Voltar para a home'>
               <img className='icon-home' src={Home} alt=''/>
             </button>

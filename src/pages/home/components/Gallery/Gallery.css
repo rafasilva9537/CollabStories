@@ -1,0 +1,92 @@
+.gallery {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+}
+
+/*Carrossel*/
+.carrossel-gallery{
+    height: 80%;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-top: solid black 10px;
+    border-bottom: solid black 10px;
+    overflow-x: auto;
+}
+
+.card-story{
+    height: 80%;
+    width: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid black 5px;
+    border-radius: 50px;
+    margin-left: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+.card-story:hover{
+    transform: scale(1.05);
+}
+
+.card-story img{
+    width: 8rem;
+}
+
+/*Conteúdos principais do card*/
+.story-content-card{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
+.story-content-card h4{
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-align: center;
+    padding: 10px;
+}
+
+/*Stats da história no cartão*/
+.gallery-story-stats{
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.stats-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stats-item img{
+    width: 2rem;
+}
+
+.stats-item span{
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+/*Label*/
+.story-in-carrossel{
+    position: absolute;
+    font-weight: 900;
+    font-size: 2rem;
+    top: 2%;
+    left: 50%;
+    padding: 5px 20px;
+    background-color: white;
+}

@@ -1,0 +1,117 @@
+.profile-card, .search-player {
+    position: relative;
+    height: 80%;
+    width: 30%;
+    min-width: 600px;
+    display: flex;
+    justify-content: space-between;
+    border: 10px solid black;
+    border-radius: 20px;
+    transition: 0.3s ease-in-out;
+} 
+
+/*Botão de mudar seção*/
+.button-change{
+    height: 100%;
+    width: 40%;
+    display: flex;
+    align-items: center;
+    border: solid black 10px;
+    border-radius: 20px;
+    background-color: white;
+    transform: scale(1.1);
+    transition: 0.4s ease-in-out;
+}
+
+.button-change img{
+    width: 10rem;   
+}
+
+.button-change:hover{
+    transform: scale(1.2);
+}
+
+/*Informações do jogador*/
+.player-infs-container{
+    height: 100%;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
+/*Nome e id*/
+.player-infs-container h2{
+    font-size: 4rem;
+}
+
+.profile-player-id{
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.player-infs-container p{
+    text-align: center;
+    padding: 40px;
+}
+
+/*stats do seu perfil*/
+.profile-player-stats{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.profile-container-stat{
+    display: flex;
+    align-items: center;
+    border: solid black 2px;
+    border-radius: 20px;
+    padding: 10px;
+    margin-left: 2%;
+    gap: 5px;
+    transition: 0.3s ease-in-out;
+}
+
+.profile-container-stat:hover{
+    transform: scale(1.1);
+}
+
+.profile-container-stat img{
+    width: 2rem;
+}
+
+.profile-container-stat span{
+    font-weight: 900;
+}
+
+/*Pesquisa de jogadores*/
+.search-players-container{
+    position: absolute;
+    width: 60%;
+    top: 0;
+    border-bottom: solid black 5px;
+}
+
+.search-players-container input{
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-top-left-radius: 10px;
+}
+
+.search-players-container button{
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(221, 221, 244);
+}
+
+@media (max-height: 800px){
+    .icon-player-profile{
+        position: relative;
+        height: 5rem;
+        width: 5rem;
+    }
+}

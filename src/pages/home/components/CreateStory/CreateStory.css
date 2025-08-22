@@ -1,0 +1,94 @@
+.to-create-story{
+    position: relative;
+    height: 80%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+}
+
+/*Containers*/
+.story-icon-container{
+    height: 100%;
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid black 10px;
+    border-radius: 20px;
+    transform: scale(1.05);
+    background-color: white;
+}
+
+.story-icon-container img{
+    width: 15rem;
+}
+
+/*Confirgurações*/
+.story-settings{
+    height: 80%;
+    width: 60%;
+    border: solid black 10px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    background-color: rgb(229, 229, 240);
+}
+
+/*Título*/
+.story-title-container{
+    position: relative;
+    width: 100%;
+}
+
+.story-title-container input{
+    font-size: 1.4rem;
+    width: 100%;
+    padding: 20px;
+    border: none;
+    border-top-right-radius: 20px;
+    border-bottom: solid black 5px;
+}
+
+.story-title-container label{
+    position: absolute;
+    font-size: 1.6rem;
+    font-weight: bolder;
+    top: -20px;
+    left: 30%;
+    padding: 0 20px;
+    background-color: white;
+}
+
+/*Seleção de Gênero*/
+.to-create-story select{
+    font-weight: 800;
+    width: 100%;
+    padding: 20px;
+    border: 0;
+    cursor: pointer;
+    background-color: rgb(229, 229, 240);
+}
+
+/*Descrição*/
+.story-settings textarea{
+    font-size: 1.1rem;
+    height: 40%;
+    width: 100%;
+    padding: 20px;
+    border: none;
+    border-radius: 0;
+}
+
+/*Botão de iniciar*/
+.story-settings button{
+    font-weight: 900;
+    width: 100%;
+    margin-top: auto;
+    border-bottom-right-radius: 15px;
+    background-color: rgb(229, 229, 240);
+}
+
+@media (max-height: 800px){
+
+}

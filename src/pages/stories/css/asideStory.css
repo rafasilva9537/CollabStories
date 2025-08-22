@@ -1,11 +1,11 @@
 .players-container{
-    height: 69%;
+    height: 100%;
     width: 100%;
     display: flex;
     align-items: center;
     flex-direction: column;
     overflow-y: auto;
-    gap: 20px;
+    gap: 30px;
 }
 
 .player-card{
@@ -27,40 +27,52 @@
     font-weight: bold;
 }
 
-/*Timer*/
-.timer-container{
-    height: 30%;
-    width: 100%;
+/*Adicionar Jogador*/
+.Add-player-container{
+    width: 80%;
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 20px;
     border: solid black 4px;
     border-radius: 20px;
 }
 
-.infs-time{
+/*Botão*/
+.Add-player-container button{
+    border-radius: 20px;
+    transition: 0.3s ease-in-out;
+}
+
+.Add-player-container button:hover{
+    transform: scale(1.1);
+}
+
+.Add-player-container img{
+    width: 4rem;
+}
+
+.player-add{
     height: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     flex-direction: column;
 }
 
-.player-timer{
-    font-size: 1.4rem;
-    font-weight: bold;
-    height: 50%;
+/*Informações*/
+.player-add span{
+    font-weight: 800;
+    width: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
     text-align: center;
 }
 
-.ClockIcon{
-    width: 6rem;
-}
-
-.timer{
-    font-size: 3rem;
-    font-weight: bold;
+.player-add input{
+    font-size: 1.2rem;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-top: solid black 2px;
+    border-bottom: solid black 2px;
 }

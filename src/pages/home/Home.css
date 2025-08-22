@@ -1,4 +1,30 @@
 .home{
-    min-height: 100vh;
+    height: 100vh;
+    min-height: 900px;
+    width: 100vw;
+    min-width: 1600px;
+    overflow-y: auto;
+}
+
+.main-home{
+    height: 60%;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.gallery-content{
+    height: 40%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+@media (max-height: 800px){
+    .gallery-content label{
+        display: none;
+    }
 }

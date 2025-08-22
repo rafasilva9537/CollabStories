@@ -13,19 +13,26 @@
     display: flex;
 }
 
-.story-header h2{
-    font-size: 1.8rem;
+/*Header infs*/
+.header-infs{
     height: 100%;
     width: 90%;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+}
+
+.header-infs h2{
+    font-weight: 900;
+    font-size: 2rem;
 }
 
 .story-header button{
     height: 100%;
     width: 10%;
     display: flex;
+    align-items: center;
     justify-content: center;
     border: none;
     border-top-right-radius: 20px;
@@ -33,9 +40,8 @@
 }
 
 .icon-home{
-    height: 4rem;
-    width: 4rem;
-    padding: 20px;
+    height: 5rem;
+    width: 5rem;
 }
 
 /*Container principal*/

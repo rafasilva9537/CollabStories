@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import './styles/Global.css'
 
+/*Pages*/
+import Account from './pages/account/Account'
 import Home from './pages/home/Home'
 import Story from './pages/stories/Story'
 
@@ -13,14 +15,16 @@ function App() {
     
       <Routes>
 
+        <Route path="/" element={<Account/>}/>
         <Route path="/home" element={<Home/>}/>
-        <Route path="/" element={<Story/>}/>
+        <Route path="/story" element={<Story/>}/>
 
       </Routes>
 
     </BrowserRouter>
 
   )
+
 }
 
 export default App;
