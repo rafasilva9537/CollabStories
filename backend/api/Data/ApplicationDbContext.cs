@@ -8,7 +8,7 @@ namespace api.Data;
  
 public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<int>, int>
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContextoptions) : base(dbContextoptions)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContextOptions) : base(dbContextOptions)
     {
     }
 

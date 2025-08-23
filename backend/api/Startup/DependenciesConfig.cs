@@ -121,13 +121,13 @@ public static class DependenciesConfig
         // TODO: change to more secure configs after
         services.Configure<IdentityOptions>(options => {
             options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireUppercase = false;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
             options.Password.RequiredLength = 8;
             options.Password.RequiredUniqueChars = 1;
             options.Password.RequireNonAlphanumeric = false;
-            options.User.RequireUniqueEmail = false;
-            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            options.User.RequireUniqueEmail = true;
+            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
         });
         
         return services;

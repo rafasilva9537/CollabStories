@@ -6,7 +6,7 @@ namespace api.Interfaces;
 public interface IAuthService
 {
     Task<IList<UserMainInfoDto>> GetUsersAsync(int? lastId);
-    Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto);
+    Task<string> RegisterAsync(RegisterUserDto registerUserDto);
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     Task<bool> DeleteByNameAsync(string username);
     Task<AppUserDto?> GetUserAsync(string username);

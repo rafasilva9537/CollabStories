@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
-using api.Services;
 using api.Constants;
 using System.Security.Claims;
 using api.Dtos.HttpResponses;
+using api.Exceptions;
 using api.Interfaces;
 
 namespace api.Controllers;
@@ -35,23 +35,20 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<TokenResponse>> Register([FromBody] RegisterUserDto registerUser)
     {
-        // TODO: remove user
-        var user = await _authService.GetUserAsync(registerUser.UserName);
-        AuthenticationResult registerResult = await _authService.RegisterAsync(registerUser);
-        _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
-        
-        string token = registerResult.Token;
-
-        if(registerResult.ErrorMessages is not null)
+        try
         {
-            foreach(string errorDescription in registerResult.ErrorMessages)
-            {
-                ModelState.AddModelError("Error Message", errorDescription);
-            }
-            return BadRequest(ModelState);
+            string token = await _authService.RegisterAsync(registerUser);
+            _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
+            return Ok(new TokenResponse { Token = token });
         }
+        catch (UserRegistrationException ex)
+        {
+            _logger.LogError(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
+            var errors = ex.Errors?.ToDictionary();
 
-        return Ok(new TokenResponse { Token = token}); 
+            ValidationProblemDetails problemDetails = new(errors ?? []);
+            return ValidationProblem(problemDetails);
+        }
     }
 
     [AllowAnonymous]

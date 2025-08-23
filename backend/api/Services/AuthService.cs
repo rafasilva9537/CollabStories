@@ -1,6 +1,7 @@
 using api.Constants;
 using api.Data;
 using api.Dtos.AppUser;
+using api.Exceptions;
 using api.Interfaces;
 using api.Mappers;
 using api.Models;
@@ -8,14 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
-
-// TODO: remove this and change to exception
-public struct AuthenticationResult
-{
-    public string Token { get; init; }
-    public bool Succeeded { get; init; }
-    public IEnumerable<string> ErrorMessages { get; set; }
-}
 
 public class AuthService : IAuthService
 {
@@ -31,26 +24,30 @@ public class AuthService : IAuthService
         _imageService = imageService;
     }
 
-    public async Task<AuthenticationResult> RegisterAsync(RegisterUserDto registerUserDto)
+    public async Task<string> RegisterAsync(RegisterUserDto registerUserDto)
     {
+        
         AppUser newUser = registerUserDto.ToAppUserModel();
         newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
 
         IdentityResult resultUser = await _userManager.CreateAsync(newUser, registerUserDto.Password);
-
         if(!resultUser.Succeeded)
         {
-            return new AuthenticationResult { Succeeded = false, ErrorMessages = resultUser.Errors.Select(e => e.Description) };
+            var errors = resultUser.Errors.ToList();
+            UserRegistrationException exception = new("Invalid username, email or password.", errors);
+            throw exception;
         }
 
         IdentityResult resultRole = await _userManager.AddToRoleAsync(newUser, RoleConstants.User);
         if(!resultRole.Succeeded)
         {
-            return new AuthenticationResult { Succeeded = false, ErrorMessages = resultRole.Errors.Select(e => e.Description) };
+            var errors = resultUser.Errors.ToList();
+            UserRegistrationException exception = new("Unable to add user to role.", errors);
+            throw exception; 
         }
 
         string token = await _tokenService.GenerateToken(newUser);
-        return new AuthenticationResult { Succeeded = true, Token = token};
+        return token;
     }
 
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
