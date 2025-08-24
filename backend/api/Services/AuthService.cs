@@ -15,12 +15,19 @@ public class AuthService : IAuthService
     private readonly ApplicationDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IImageService _imageService;
-    public AuthService(ApplicationDbContext context, UserManager<AppUser> userManager, ITokenService tokenService, IImageService imageService)
+    public AuthService(
+        ApplicationDbContext context, 
+        UserManager<AppUser> userManager, 
+        ITokenService tokenService,
+        IDateTimeProvider dateTimeProvider,
+        IImageService imageService)
     {
+        _context = context;
         _userManager = userManager;
         _tokenService = tokenService;
-        _context = context;
+        _dateTimeProvider = dateTimeProvider;
         _imageService = imageService;
     }
 
@@ -28,6 +35,7 @@ public class AuthService : IAuthService
     {
         
         AppUser newUser = registerUserDto.ToAppUserModel();
+        newUser.CreatedDate = _dateTimeProvider.UtcNow;
         newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
 
         IdentityResult resultUser = await _userManager.CreateAsync(newUser, registerUserDto.Password);
@@ -49,13 +57,13 @@ public class AuthService : IAuthService
         string token = await _tokenService.GenerateToken(newUser);
         return token;
     }
-
+    
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
     {
         // TODO: change to use CheckPasswordSignInAsync(), eliminating one round trip
         AppUser? loggedUser = await _userManager.FindByNameAsync(loginUserDto.UserName);
 
-        if(loggedUser is null) return null;
+        if(loggedUser is null) throw new UserNotFoundException("User does not exist on login attempt.");
 
         string password = loginUserDto.Password;
         if(!await _userManager.CheckPasswordAsync(loggedUser, password))
