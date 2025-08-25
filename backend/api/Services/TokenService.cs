@@ -50,10 +50,12 @@ public class TokenService : ITokenService
             Issuer = issuer,
             Audience = audience,
             Expires = _dateTimeProvider.UtcNowDateTime.AddDays(7), // TODO: decrease time in production
-            SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
+            IssuedAt = _dateTimeProvider.UtcNowDateTime,
+            NotBefore = _dateTimeProvider.UtcNowDateTime,
         };
 
-        string? token = tokenHandler.CreateToken(tokenDescriptor);
+        string token = tokenHandler.CreateToken(tokenDescriptor);
         return token;
     }
 }
