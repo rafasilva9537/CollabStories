@@ -5,6 +5,7 @@ using api.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using api.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace api.Services;
 
@@ -12,25 +13,27 @@ public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public TokenService(IConfiguration configuration, UserManager<AppUser> userManager)
+    public TokenService(IConfiguration configuration, UserManager<AppUser> userManager, IDateTimeProvider dateTimeProvider)
     {
         _configuration = configuration;
         _userManager = userManager;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<string> GenerateToken(AppUser user)
     {
-        String? secret = _configuration["JwtConfig:Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET");
-        String? issuer = _configuration["JwtConfig:ValidIssuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER");
-        String? audience = _configuration["JwtConfig:ValidAudiences"] ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+        string? secret = _configuration["JwtConfig:Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET");
+        string? issuer = _configuration["JwtConfig:ValidIssuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER");
+        string? audience = _configuration["JwtConfig:ValidAudiences"] ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE");
         if(secret is null || issuer is null || audience is null)
         {
             throw new ArgumentNullException("Jwt is not set in the configuration");
         }
 
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-        var tokenHandler = new JwtSecurityTokenHandler();
+        SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(secret));
+        JsonWebTokenHandler tokenHandler = new();
 
         var userRoles = await _userManager.GetRolesAsync(user);
 
@@ -42,17 +45,15 @@ public class TokenService : ITokenService
 
         claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-        var tokenDescriptor = new SecurityTokenDescriptor {
+        SecurityTokenDescriptor tokenDescriptor = new() {
             Subject = new ClaimsIdentity(claims),
             Issuer = issuer,
             Audience = audience,
-            Expires = DateTime.UtcNow.AddDays(7), // TODO: decrease time in production
+            Expires = _dateTimeProvider.UtcNowDateTime.AddDays(7), // TODO: decrease time in production
             SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256Signature)
         };
 
-        SecurityToken securityToken = tokenHandler.CreateToken(tokenDescriptor);
-
-        string token = tokenHandler.WriteToken(securityToken);
+        string? token = tokenHandler.CreateToken(tokenDescriptor);
         return token;
     }
 }
