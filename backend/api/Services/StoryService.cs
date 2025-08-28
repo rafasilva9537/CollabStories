@@ -29,6 +29,7 @@ public class StoryService : IStoryService
             .Where(s => !lastId.HasValue || s.Id < lastId)
             .Take(pageSize)
             .Select(StoryMappers.ProjectToStoryMainInfoDto)
+            .AsNoTracking()
             .ToListAsync();
 
         return storyDto;
@@ -38,6 +39,7 @@ public class StoryService : IStoryService
     {
         StoryDto? storyDto = await _context.Story.Where(s => s.Id == id)
             .Select(StoryMappers.ProjectToStoryDto)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
 
         return storyDto;
@@ -197,6 +199,7 @@ public class StoryService : IStoryService
         string? currentAuthorUserName = await _context.Story
             .Where(s => s.Id == storyId)
             .Select(s => s.CurrentAuthor.UserName)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
         
         if(currentAuthorUserName is null) throw new StoryNotFoundException("Story does not exists.");
@@ -281,6 +284,7 @@ public class StoryService : IStoryService
         StoryInfoForSessionDto? storyInfo = await _context.Story
             .Where(s => s.Id == storyId)
             .Select(StoryMappers.ProjectToStoryInfoForSessionDto)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
         
         return storyInfo;

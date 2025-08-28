@@ -95,6 +95,7 @@ public class AuthService : IAuthService
             .ThenByDescending(au => au.UserName)
             .Take(pageSize + 1)
             .Select(AppUserMappers.ProjectToUserMainInfoDto)
+            .AsNoTracking()
             .ToListAsync();
         
         bool hasMore = usersDto.Count > pageSize;
