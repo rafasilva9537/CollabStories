@@ -1,6 +1,7 @@
 using api.Constants;
 using api.Data;
 using api.Dtos.AppUser;
+using api.Dtos.Pagination;
 using api.Exceptions;
 using api.Interfaces;
 using api.Mappers;
@@ -76,17 +77,46 @@ public class AuthService : IAuthService
     }
 
     // TODO: change pagination logic, shouldn't expose user id. Pagination by (date, username) should be better.
-    public async Task<IList<UserMainInfoDto>> GetUsersAsync(int? lastId)
+    public async Task<PagedKeysetList<UserMainInfoDto>> GetUsersAsync(
+        DateTimeOffset? lastDate = null,
+        string? lastUserName = null,
+        int pageSize = 15)
     {
-        int pageSize = 15;
+        var query = _context.AppUser.AsQueryable();
+        
+        if (lastUserName != null && lastDate.HasValue)
+        {
+            query = query.Where(u => 
+                u.CreatedDate < lastDate || 
+                (u.CreatedDate == lastDate && string.Compare(u.UserName, lastUserName) <= 0));
+        }
 
-        IList<UserMainInfoDto> usersDto = await _context.AppUser
-            .OrderByDescending(au => au.Id)
-            .Where(au => !lastId.HasValue || au.Id < lastId)
-            .Take(pageSize)
+        var usersDto = await query
+            .OrderByDescending(au => au.CreatedDate)
+            .ThenByDescending(au => au.UserName)
+            .Take(pageSize + 1)
             .Select(AppUserMappers.ProjectToUserMainInfoDto)
             .ToListAsync();
-        return usersDto;
+        
+        bool hasMore = usersDto.Count > pageSize;
+        DateTimeOffset? nextDate = null;
+        string? nextUserName = null;
+        if (hasMore)
+        {
+            nextDate = usersDto[^1].CreatedDate;
+            nextUserName = usersDto[^1].UserName;
+            usersDto.RemoveAt(usersDto.Count - 1);
+        }
+
+        PagedKeysetList<UserMainInfoDto> keySetUsersList = new()
+        {
+            Data = usersDto,
+            HasMore = hasMore,
+            NextDate = nextDate,
+            NextUserName = nextUserName
+        };
+        
+        return keySetUsersList;
     }
 
     public async Task<bool> DeleteByNameAsync(string username)
@@ -115,7 +145,7 @@ public class AuthService : IAuthService
         bool passwordIsChanged = currentPassword != String.Empty && newPassword != String.Empty;
 
         bool userNameIsChanged = updatedUserDto.UserName != String.Empty;
-        bool descriptionIsChanged = updatedUserDto.UserName != String.Empty;
+        bool descriptionIsChanged = updatedUserDto.Description != String.Empty;
         bool emailIsChanged = updatedUserDto.Email != String.Empty;
 
         if(passwordIsChanged)

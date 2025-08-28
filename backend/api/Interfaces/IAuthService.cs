@@ -1,11 +1,12 @@
 ﻿using api.Dtos.AppUser;
+using api.Dtos.Pagination;
 using api.Exceptions;
 
 namespace api.Interfaces;
 
 public interface IAuthService
 {
-    Task<IList<UserMainInfoDto>> GetUsersAsync(int? lastId);
+    Task<PagedKeysetList<UserMainInfoDto>> GetUsersAsync(DateTimeOffset? lastDate = null, string? lastUserName = null, int pageSize = 15);
     Task<string> RegisterAsync(RegisterUserDto registerUserDto);
     
     /// <summary>

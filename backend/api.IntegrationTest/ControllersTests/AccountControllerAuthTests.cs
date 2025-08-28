@@ -5,6 +5,10 @@ using api.IntegrationTests.WebAppFactories;
 
 namespace api.IntegrationTests.ControllersTests;
 
+/// <summary>
+/// Contains integration tests for authentication-related functionalities of the AccountController.
+/// These tests ensure that the AccountController behaves correctly when authentication is required.
+/// </summary>
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
 public class AccountControllerAuthTests : IClassFixture<CustomWebAppFactory>
 {

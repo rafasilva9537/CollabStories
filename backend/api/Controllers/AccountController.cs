@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using api.Constants;
 using System.Security.Claims;
 using api.Dtos.HttpResponses;
+using api.Dtos.Pagination;
 using api.Exceptions;
 using api.Interfaces;
 
@@ -25,10 +26,12 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers([FromQuery] int? lastId)
+    public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers(
+        [FromQuery] DateTimeOffset? lastDate, 
+        [FromQuery] string? lastUserName)
     {
-        IList<UserMainInfoDto> users = await _authService.GetUsersAsync(lastId);
-        return Ok(users);
+        PagedKeysetList<UserMainInfoDto> pagedUsers = await _authService.GetUsersAsync(lastDate, lastUserName, 15);
+        return Ok(pagedUsers);
     }
 
     [AllowAnonymous]
