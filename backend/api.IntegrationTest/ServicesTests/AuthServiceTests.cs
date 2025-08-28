@@ -181,8 +181,8 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     }
 
     [Theory]
-    [InlineData("test_user_1", "test.user1@example.com")]
-    [InlineData("test_user_2", "test.user2@example.com")]
+    [InlineData("joerge", "test.user1@example.com")]
+    [InlineData("joe", "test.user2@example.com")]
     [InlineData("test_user_3", "test.user3@example.com")]
     public async Task GetUserAsync_WhenExists_ReturnsExpectedUser(string baseUserName, string baseEmail)
     {
