@@ -75,8 +75,7 @@ public class AuthService : IAuthService
         string token = await _tokenService.GenerateToken(loggedUser);
         return token;
     }
-
-    // TODO: change pagination logic, shouldn't expose user id. Pagination by (date, username) should be better.
+    
     public async Task<PagedKeysetList<UserMainInfoDto>> GetUsersAsync(
         DateTimeOffset? lastDate = null,
         string? lastUserName = null,
