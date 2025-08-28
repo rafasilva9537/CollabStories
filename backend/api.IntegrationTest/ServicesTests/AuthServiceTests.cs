@@ -223,4 +223,27 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         // Assert
         Assert.Null(actualUserDto);
     }
+
+    [Fact]
+    public async Task GetUsersAsync_GivenValidPaginationFields_ReturnsCorrectUsersOrderingAndNextPagination()
+    {
+        // Arrange
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        const int expectedPageSize = 15;
+        
+        // Act
+        var firstPaginatedUsers = await authService.GetUsersAsync(pageSize: expectedPageSize);
+        
+        var secondPaginatedUsers = await authService.GetUsersAsync(
+            firstPaginatedUsers.NextDate, firstPaginatedUsers.NextUserName, expectedPageSize);
+
+        // Assert
+        Assert.True(firstPaginatedUsers.HasMore);
+        Assert.Equal(firstPaginatedUsers.Items.Count, secondPaginatedUsers.Items.Count);
+        Assert.Equal(expectedPageSize, firstPaginatedUsers.Items.Count);
+        Assert.Equal(expectedPageSize, secondPaginatedUsers.Items.Count);
+        Assert.Equal(firstPaginatedUsers.NextUserName, secondPaginatedUsers.Items[0].UserName);
+        Assert.Equal(firstPaginatedUsers.NextDate, secondPaginatedUsers.Items[0].CreatedDate);
+    }
 }

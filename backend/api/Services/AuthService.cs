@@ -110,7 +110,7 @@ public class AuthService : IAuthService
 
         PagedKeysetList<UserMainInfoDto> keySetUsersList = new()
         {
-            Data = usersDto,
+            Items = usersDto,
             HasMore = hasMore,
             NextDate = nextDate,
             NextUserName = nextUserName
