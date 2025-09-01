@@ -11,17 +11,15 @@ public static class WebAppFactoryExtensions
 {
     public static HttpClient CreateClientWithAuth(
         this WebApplicationFactory<Program> factory, 
-        string userName, 
-        string nameIdentifier, 
-        string email, 
+        AppUser user,
         params string[] roles)
     {
         HttpClient client = factory.CreateClient();
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.AuthenticationScheme);
-        client.DefaultRequestHeaders.Add(TestAuthHandler.NameHeader, userName);
-        client.DefaultRequestHeaders.Add(TestAuthHandler.NameIdentifierHeader, nameIdentifier);
-        client.DefaultRequestHeaders.Add(TestAuthHandler.EmailHeader, email);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.NameHeader, user.UserName);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.NameIdentifierHeader, user.UserName);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.EmailHeader, user.Email);
         foreach (string role in roles)
         {
             client.DefaultRequestHeaders.Add(TestAuthHandler.RoleHeader, role);
