@@ -121,18 +121,17 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     [InlineData("test_user_1", "test.user1@example.com", "TestPassw0rd!")]
     [InlineData("test_user_2", "test.user2@example.com", "SecureP@ss123")]
     [InlineData("test_user_3", "test.user3@example.com", "StrongP@ssw0rd")]
-    public async Task LoginAsync_WithValidCredentials_ReturnsToken(string userName, string email, string password)
+    public async Task LoginAsync_WithValidCredentials_ReturnsToken(string baseUserName, string baseEmail, string password)
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
         IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         
-        (userName, email) = UniqueDataCreation.CreateUniqueUserNameAndEmail(userName, email);
-        AppUser newUser = new() { UserName = userName, Email = email};
+        AppUser newUser = TestModelFactory.CreateAppUserModel(baseUserName, baseEmail);
         await userManager.CreateAsync(newUser, password);
         
-        LoginUserDto loginUserDto = new() { UserName = userName, Password = password };
+        LoginUserDto loginUserDto = new() { UserName = newUser.UserName, Password = password };
         
         // Act
         string? loginToken = await authService.LoginAsync(loginUserDto);
@@ -143,18 +142,17 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     
     [Theory]
     [InlineData("test_user", "test.user@example.com", "TestPassw0rd", "TestPassw0rd123")]
-    public async Task LoginAsync_WithInvalidPassword_ReturnsNull(string userName, string email, string originalPassword, string invalidPassword)
+    public async Task LoginAsync_WithInvalidPassword_ReturnsNull(string baseUserName, string baseEmail, string originalPassword, string invalidPassword)
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
         IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         
-        (userName, email) = UniqueDataCreation.CreateUniqueUserNameAndEmail(userName, email);
-        AppUser newUser = new() { UserName = userName, Email = email};
+        AppUser newUser = TestModelFactory.CreateAppUserModel(baseUserName, baseEmail);
         await userManager.CreateAsync(newUser, originalPassword);
         
-        LoginUserDto loginUserDto = new() { UserName = userName, Password = invalidPassword };
+        LoginUserDto loginUserDto = new() { UserName = newUser.UserName, Password = invalidPassword };
         
         // Act
         string? loginToken = await authService.LoginAsync(loginUserDto);
@@ -192,7 +190,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
         
-        AppUser expectedUser = UniqueDataCreation.CreateUniqueTestUser(baseUserName, baseEmail);
+        AppUser expectedUser = TestModelFactory.CreateAppUserModel(baseUserName, baseEmail);
         await dbContext.Users.AddAsync(expectedUser);
         await dbContext.SaveChangesAsync();
         
@@ -203,7 +201,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         Assert.NotNull(actualUserDto);
         Assert.Equal(expectedUser.UserName, actualUserDto.UserName);
         Assert.Equal(expectedUser.Email, actualUserDto.Email);
-        Assert.Equal(string.Empty, actualUserDto.Nickname);
+        Assert.Equal(expectedUser.Nickname, actualUserDto.Nickname);
     }
     
     [Theory]
@@ -230,8 +228,12 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
         const int expectedPageSize = 15;
+
+        var newUsers = TestModelFactory.CreateMultipleAppUserModels(expectedPageSize * 2);
+        TestDataSeeder.SeedMultipleUsers(dbContext, newUsers);
         
         // Act
         var firstPaginatedUsers = await authService.GetUsersAsync(pageSize: expectedPageSize);
