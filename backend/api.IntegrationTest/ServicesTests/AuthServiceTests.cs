@@ -3,6 +3,7 @@ using api.Data;
 using api.Dtos.AppUser;
 using api.Exceptions;
 using api.IntegrationTests.Constants;
+using api.IntegrationTests.TestHelpers;
 using api.IntegrationTests.WebAppFactories;
 using api.Interfaces;
 using api.Models;
