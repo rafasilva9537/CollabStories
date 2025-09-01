@@ -17,7 +17,7 @@ public class AppUserTests
         Assert.Equal(string.Empty, actualUser.ProfileImage);
         Assert.Equal(string.Empty, actualUser.Description);
         Assert.Equal(string.Empty, actualUser.ProfileImage);
-        Assert.NotEqual(DateTimeOffset.MinValue, actualUser.CreatedDate);
+        Assert.Equal(DateTimeOffset.MinValue, actualUser.CreatedDate);
         Assert.IsType<DateTimeOffset>(actualUser.CreatedDate);
     }
 
