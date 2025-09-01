@@ -11,6 +11,12 @@ internal static class TestDataSeeder
         dbContext.SaveChanges();
     }
 
+    public static void SeedMultipleUsers(ApplicationDbContext dbContext, List<AppUser> users)
+    {
+        dbContext.AppUser.AddRange(users);
+        dbContext.SaveChanges();
+    }
+
     public static void SeedStory(ApplicationDbContext dbContext, Story story)
     {
         dbContext.Story.Add(story);
