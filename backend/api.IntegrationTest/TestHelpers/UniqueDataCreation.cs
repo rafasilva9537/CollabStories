@@ -1,6 +1,6 @@
 ﻿using api.Models;
 
-namespace api.IntegrationTests.ServicesTests;
+namespace api.IntegrationTests.TestHelpers;
 
 public static class UniqueDataCreation
 {
