@@ -35,7 +35,7 @@ public class StoryServiceTests : IClassFixture<StoryServiceFixture>
         var actualStories = await storyService.GetStoriesAsync(0);
 
         //Assert
-        Assert.Empty(actualStories);
+        Assert.Empty(actualStories.Items);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class StoryServiceTests : IClassFixture<StoryServiceFixture>
         var actualStories = await storyService.GetStoriesAsync(16);
 
         //Assert
-        Assert.NotEmpty(actualStories);
+        Assert.NotEmpty(actualStories.Items);
     }
 
     [Theory]
@@ -79,14 +79,16 @@ public class StoryServiceTests : IClassFixture<StoryServiceFixture>
         var actualStories = await storyService.GetStoriesAsync(null);
 
         //Assert
-        Assert.True(actualStories.Count == 1);
-        Assert.NotEqual(0, actualStories[0].Id);
-        Assert.Equal(expectedStory.Title, actualStories[0].Title);
-        Assert.Equal(expectedStory.Description, actualStories[0].Description);
-        Assert.Equal(defaultUser.UserName, actualStories[0].UserName);
-        Assert.Equal(expectedStory.MaximumAuthors, actualStories[0].MaximumAuthors);
-        Assert.Equal(expectedStory.CreatedDate, actualStories[0].CreatedDate);
-        Assert.Equal(expectedStory.UpdatedDate, actualStories[0].UpdatedDate);
+        Assert.Single(actualStories.Items);
+        
+        StoryMainInfoDto firstStory = actualStories.Items[0];
+        Assert.NotEqual(0, firstStory.Id);
+        Assert.Equal(expectedStory.Title, firstStory.Title);
+        Assert.Equal(expectedStory.Description, firstStory.Description);
+        Assert.Equal(defaultUser.UserName, firstStory.UserName);
+        Assert.Equal(expectedStory.MaximumAuthors, firstStory.MaximumAuthors);
+        Assert.Equal(expectedStory.CreatedDate, firstStory.CreatedDate);
+        Assert.Equal(expectedStory.UpdatedDate, firstStory.UpdatedDate);
     }
 
     [Theory]

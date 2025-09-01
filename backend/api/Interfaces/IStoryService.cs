@@ -1,4 +1,5 @@
-﻿using api.Dtos.Story;
+﻿using api.Dtos.Pagination;
+using api.Dtos.Story;
 using api.Dtos.StoryPart;
 using api.Models;
 
@@ -6,7 +7,7 @@ namespace api.Interfaces;
 
 public interface IStoryService
 {
-    Task<IList<StoryMainInfoDto>> GetStoriesAsync(int? lastId);
+    Task<PagedKeysetStoryList<StoryMainInfoDto>> GetStoriesAsync(int? lastId = null, int pageSize = 15);
     
     Task<StoryDto?> GetStoryAsync(int id);
     

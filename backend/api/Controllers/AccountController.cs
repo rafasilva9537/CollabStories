@@ -30,7 +30,8 @@ public class AccountController : ControllerBase
         [FromQuery] DateTimeOffset? lastDate, 
         [FromQuery] string? lastUserName)
     {
-        PagedKeysetList<UserMainInfoDto> pagedUsers = await _authService.GetUsersAsync(lastDate, lastUserName, 15);
+        const int pageSize = 15;
+        PagedKeysetUserList<UserMainInfoDto> pagedUsers = await _authService.GetUsersAsync(lastDate, lastUserName, pageSize);
         return Ok(pagedUsers);
     }
 

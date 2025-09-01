@@ -1,38 +1,35 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Net.Mime;
 using System.Text.Json;
+using api.Dtos.Pagination;
 using api.Dtos.Story;
 using api.IntegrationTests.Constants;
+using api.IntegrationTests.ControllersTests.ControllersFixtures;
 using api.IntegrationTests.WebAppFactories;
 
 namespace api.IntegrationTests.ControllersTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
-public class StoryControllerTests : IClassFixture<CustomWebAppFactory>
+public class StoryControllerTests : IClassFixture<StoryControllerFixture>
 {
     private readonly CustomWebAppFactory _factory;
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-    public StoryControllerTests(CustomWebAppFactory factory)
+    public StoryControllerTests(StoryControllerFixture fixture)
     {
-        _factory = factory;
-        
-        _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        };
+        _factory = fixture.Factory;
     }
     
     [Theory]
-    [InlineData(100, 15, false)]
-    [InlineData(1000, 15, false)]
-    [InlineData(45, 15, false)]
-    [InlineData(5, 4, true)]
-    [InlineData(16, 15, true)]
+    [InlineData(46, 15, false)]
+    [InlineData(5, 5, true)]
+    [InlineData(15, 15, true)]
     [InlineData(-15, 0, false)]
     [InlineData(0, 0, false)]
+    [InlineData(1, 1, true)]
     [InlineData(null, 15, false)]
-    public async Task GetAllStories_GivenValidLastId_ReturnExpectedStories(int? lastId, int expectedStoriesCount, bool containsStoryWithId1 = true)
+    public async Task GetAllStories_GivenValidLastId_ReturnExpectedResponse(int? lastId, int expectedStoriesCount, bool containsStoryWithId1 = true)
     {
         // Arrange
         HttpClient client = _factory.CreateClient();
@@ -45,15 +42,13 @@ public class StoryControllerTests : IClassFixture<CustomWebAppFactory>
         
         response.EnsureSuccessStatusCode();
         Assert.NotNull(contentType);
-        Assert.Equal("application/json", contentType.MediaType);
+        Assert.Equal(MediaTypeNames.Application.Json, contentType.MediaType);
         Assert.Equal("utf-8", contentType.CharSet);
-
-        string? jsonResponse = await response.Content.ReadAsStringAsync();
-        var stories = JsonSerializer.Deserialize<IList<StoryMainInfoDto>>(jsonResponse, _jsonSerializerOptions);
-        Assert.NotNull(stories);
-        Assert.Equal(expectedStoriesCount, stories.Count);
         
-        Assert.Equal(containsStoryWithId1, stories.Any(s => s.Id == 1));
+        var pagedStories = await response.Content.ReadFromJsonAsync<PagedKeysetStoryList<StoryMainInfoDto>>();
+        Assert.NotNull(pagedStories);
+        Assert.Equal(expectedStoriesCount, pagedStories.Items.Count);
+        Assert.Equal(containsStoryWithId1, pagedStories.Items.Any(s => s.Id == 1));
     }
     
     // Query parameters that don't exist should be equivalent to no additional query param
@@ -77,16 +72,16 @@ public class StoryControllerTests : IClassFixture<CustomWebAppFactory>
         
         actualResponse.EnsureSuccessStatusCode();
         Assert.NotNull(actualContentType);
-        Assert.Equal("application/json", actualContentType.MediaType);
+        Assert.Equal(MediaTypeNames.Application.Json, actualContentType.MediaType);
         Assert.Equal("utf-8", actualContentType.CharSet);
         Assert.Equal(expectedResponse.StatusCode, actualResponse.StatusCode);
         Assert.Equal(expectedResponse.Content.Headers.ContentType, actualResponse.Content.Headers.ContentType);
-
-        string jsonActualResponse = await actualResponse.Content.ReadAsStringAsync();
-        string jsonExpectedResponse = await expectedResponse.Content.ReadAsStringAsync();
-        var actualStories = JsonSerializer.Deserialize<IList<StoryMainInfoDto>>(jsonActualResponse, _jsonSerializerOptions);
-        var expectedStories = JsonSerializer.Deserialize<IList<StoryMainInfoDto>>(jsonExpectedResponse, _jsonSerializerOptions);
-        Assert.Equal(expectedStories, actualStories);
+        
+        var actualPagedStories = await actualResponse.Content.ReadFromJsonAsync<PagedKeysetStoryList<StoryMainInfoDto>>();
+        var expectedPagedStories = await expectedResponse.Content.ReadFromJsonAsync<PagedKeysetStoryList<StoryMainInfoDto>>();
+        Assert.NotNull(actualPagedStories);
+        Assert.NotNull(expectedPagedStories);
+        Assert.Equal(expectedPagedStories.Items, actualPagedStories.Items);
     }
     
     [Theory]

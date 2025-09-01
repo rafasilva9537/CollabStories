@@ -22,6 +22,12 @@ internal static class TestDataSeeder
         dbContext.Story.Add(story);
         dbContext.SaveChanges();
     }
+
+    public static void SeedMultipleStories(ApplicationDbContext dbContext, List<Story> stories)
+    {
+        dbContext.Story.AddRange(stories);
+        dbContext.SaveChanges();   
+    }
     
     public static void SeedAuthorInStory(ApplicationDbContext dbContext, AuthorInStory authorInStory)
     {

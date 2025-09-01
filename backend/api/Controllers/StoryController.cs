@@ -5,6 +5,7 @@ using api.Dtos.StoryPart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using api.Dtos.HttpResponses;
+using api.Dtos.Pagination;
 using api.Interfaces;
 
 namespace api.Controllers;
@@ -24,7 +25,7 @@ public class StoryController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IList<StoryMainInfoDto>>> GetStories([FromQuery] int? lastId)
     {
-        IList<StoryMainInfoDto> stories = await _storyService.GetStoriesAsync(lastId);
+        PagedKeysetStoryList<StoryMainInfoDto> stories = await _storyService.GetStoriesAsync(lastId);
 
         return Ok(stories);
     }

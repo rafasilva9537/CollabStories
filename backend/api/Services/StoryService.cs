@@ -1,5 +1,6 @@
 using api.Data;
 using api.Dtos.AuthorInStory;
+using api.Dtos.Pagination;
 using api.Dtos.Story;
 using api.Dtos.StoryPart;
 using api.Exceptions;
@@ -20,19 +21,32 @@ public class StoryService : IStoryService
         _context = context;
     }
 
-    public async Task<IList<StoryMainInfoDto>> GetStoriesAsync(int? lastId)
+    public async Task<PagedKeysetStoryList<StoryMainInfoDto>> GetStoriesAsync(int? lastId = null, int pageSize = 15)
     {
-        const int pageSize = 15;
-
-        List<StoryMainInfoDto> storyDto = await _context.Story
-            .OrderByDescending(s => s.Id)
-            .Where(s => !lastId.HasValue || s.Id < lastId)
-            .Take(pageSize)
+        var storiesDto = await _context.Story
+            .OrderByDescending(au => au.Id)
+            .Where(u => !lastId.HasValue || u.Id <= lastId)
+            .Take(pageSize + 1)
             .Select(StoryMappers.ProjectToStoryMainInfoDto)
             .AsNoTracking()
             .ToListAsync();
+        
+        bool hasMore = storiesDto.Count > pageSize;
+        int? nextId = null;
+        if (hasMore)
+        {
+            nextId = storiesDto[^1].Id;
+            storiesDto.RemoveAt(storiesDto.Count - 1);
+        }
 
-        return storyDto;
+        PagedKeysetStoryList<StoryMainInfoDto> pagedStories = new()
+        {
+            Items = storiesDto,
+            HasMore = hasMore,
+            NextId = nextId,
+        };
+        
+        return pagedStories;
     }
 
     public async Task<StoryDto?> GetStoryAsync(int id)

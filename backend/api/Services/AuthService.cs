@@ -76,7 +76,7 @@ public class AuthService : IAuthService
         return token;
     }
     
-    public async Task<PagedKeysetList<UserMainInfoDto>> GetUsersAsync(
+    public async Task<PagedKeysetUserList<UserMainInfoDto>> GetUsersAsync(
         DateTimeOffset? lastDate = null,
         string? lastUserName = null,
         int pageSize = 15)
@@ -86,7 +86,7 @@ public class AuthService : IAuthService
         if (lastUserName != null && lastDate.HasValue)
         {
             query = query.Where(u => 
-                u.CreatedDate < lastDate || 
+                u.CreatedDate < lastDate ||
                 (u.CreatedDate == lastDate && string.Compare(u.UserName, lastUserName) <= 0));
         }
 
@@ -108,7 +108,7 @@ public class AuthService : IAuthService
             usersDto.RemoveAt(usersDto.Count - 1);
         }
 
-        PagedKeysetList<UserMainInfoDto> keySetUsersList = new()
+        PagedKeysetUserList<UserMainInfoDto> keySetUsersUserList = new()
         {
             Items = usersDto,
             HasMore = hasMore,
@@ -116,7 +116,7 @@ public class AuthService : IAuthService
             NextUserName = nextUserName
         };
         
-        return keySetUsersList;
+        return keySetUsersUserList;
     }
 
     public async Task<bool> DeleteByNameAsync(string username)

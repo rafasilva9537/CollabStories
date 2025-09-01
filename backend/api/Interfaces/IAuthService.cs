@@ -6,7 +6,8 @@ namespace api.Interfaces;
 
 public interface IAuthService
 {
-    Task<PagedKeysetList<UserMainInfoDto>> GetUsersAsync(DateTimeOffset? lastDate = null, string? lastUserName = null, int pageSize = 15);
+    Task<PagedKeysetUserList<UserMainInfoDto>> GetUsersAsync(DateTimeOffset? lastDate = null, string? lastUserName = null, int pageSize = 15);
+    
     Task<string> RegisterAsync(RegisterUserDto registerUserDto);
     
     /// <summary>
@@ -20,8 +21,12 @@ public interface IAuthService
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     
     Task<bool> DeleteByNameAsync(string username);
+    
     Task<AppUserDto?> GetUserAsync(string username);
+    
     Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
+    
     Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName);
+    
     Task DeleteProfileImageAsync(string username, string directoryName);
 }
