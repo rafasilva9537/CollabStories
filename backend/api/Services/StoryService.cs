@@ -121,7 +121,7 @@ public class StoryService : IStoryService
         return isStoryCreator;
     }
 
-    public async Task<bool> ChangeToNextCurrentAuthorAsync(int storyId)
+    public async Task ChangeToNextCurrentAuthorAsync(int storyId)
     {
         var storyAuthorsIds = await _context.Story
             .Where(s => s.Id == storyId)
@@ -137,31 +137,35 @@ public class StoryService : IStoryService
 
         if (storyAuthorsIds is null)
         {
-            throw new StoryNotFoundException("Story does not exists.");
+            throw new StoryNotFoundException("Cannot change author: story does not exists.");
         }
-        if(storyAuthorsIds.AuthorsInStoryIds.Count <= 1) return false;
-        if(storyAuthorsIds.CurrentAuthorId is null) return false;
-
-        int currentAuthorIndex = storyAuthorsIds.AuthorsInStoryIds
-            .IndexOf((int)storyAuthorsIds.CurrentAuthorId);
-
-        if (currentAuthorIndex == storyAuthorsIds.AuthorsInStoryIds.Count-1)
+        
+        int? currentAuthorId = storyAuthorsIds.CurrentAuthorId;
+        List<int> authorsIds = storyAuthorsIds.AuthorsInStoryIds;
+        
+        if(currentAuthorId is null) 
         {
-            await _context.Story
-                .ExecuteUpdateAsync(sp => 
-                    sp.SetProperty(story => story.CurrentAuthorId, storyAuthorsIds.AuthorsInStoryIds[0])
-                );
+            throw new InvalidOperationException("Cannot change author: no current author is set.");
         }
-        else
+        if(storyAuthorsIds.AuthorsInStoryIds.Count <= 1) 
         {
-            currentAuthorIndex += 1;
-            await _context.Story
-                .ExecuteUpdateAsync(sp => 
-                    sp.SetProperty(story => story.CurrentAuthorId, storyAuthorsIds.AuthorsInStoryIds[currentAuthorIndex])
-                );
+            throw new InvalidOperationException("Cannot change author: story must have at least 2 authors.");
         }
-
-        return true;
+        
+        int currentAuthorIndex = authorsIds.IndexOf(currentAuthorId.Value);
+        if (currentAuthorIndex == -1)
+        {
+            throw new InvalidOperationException("Cannot change author: current author is not in story.");
+        }
+        
+        int nextAuthorIndex = (currentAuthorIndex + 1) % authorsIds.Count;
+        int nextAuthorId = authorsIds[nextAuthorIndex];
+        
+        await _context.Story
+            .Where(s => s.Id == storyId)
+            .ExecuteUpdateAsync(sp => 
+                sp.SetProperty(story => story.CurrentAuthorId, nextAuthorId)
+            );
     }
 
     public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId)

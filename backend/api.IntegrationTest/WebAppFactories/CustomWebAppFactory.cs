@@ -66,7 +66,7 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
             var roleManager = Services.GetRequiredService<RoleManager<IdentityRole<int>>>();
             SeedRoles.InitializeAsync(roleManager).Wait();
             
-            SeedTestDatabase.Initialize(dbContext, 100);
+            SeedTestDatabase.Initialize(dbContext);
         }
     }
 

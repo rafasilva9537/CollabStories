@@ -6,22 +6,24 @@ namespace api.IntegrationTests.Data;
 
 public static class SeedTestDatabase
 {
-    public static void Initialize(ApplicationDbContext dbContext, int totalUsers)
+    public static void Initialize(ApplicationDbContext dbContext, int totalUsers = 0)
     {
         SeedDatabase.Initialize(dbContext, totalUsers);
 
+        string adminUserName = "test_admin";
+        string adminEmail = $"{adminUserName}@gmail.com";
         AppUser testAdmin = new()
         {
-            UserName = "test_admin",
-            Email = "test_admin@gmail.com",
-            NormalizedUserName = "TEST_ADMIN",
-            NormalizedEmail = "TEST_ADMIN@GMAIL.COM",
+            UserName = adminUserName,
+            Email = adminEmail,
+            NormalizedUserName = adminUserName.ToUpper(),
+            NormalizedEmail = adminEmail.ToUpper(),
             Nickname = "Test Admin",
             Description = "This is a test admin",
             CreatedDate = new DateTimeOffset(2022, 1, 1, 0, 0, 0, new TimeSpan(0)),
-            
         };
         dbContext.AppUser.Add(testAdmin);
+        
         dbContext.SaveChanges();
     }
 }

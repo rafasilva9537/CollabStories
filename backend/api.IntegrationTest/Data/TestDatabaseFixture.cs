@@ -53,7 +53,7 @@ public class TestDatabaseFixture
 
         if (dbCreated)
         {
-            SeedDatabase.Initialize(dbContext, 100);
+            SeedTestDatabase.Initialize(dbContext);
         }
     }
 }

@@ -1,35 +1,38 @@
 using api.Data;
 using api.Dtos.Story;
 using api.IntegrationTests.Constants;
-using api.IntegrationTests.Data;
-using api.IntegrationTests.Data.ClassData;
-using api.Mappers;
+using api.IntegrationTests.ServicesTests.ServicesFixtures;
+using api.IntegrationTests.TestHelpers;
+using api.Interfaces;
 using api.Models;
-using api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace api.IntegrationTests.ServicesTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
-public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
+public class StoryServiceTests : IClassFixture<StoryServiceFixture>
 {
-    private readonly TestDatabaseFixture _testDatabase;
-    public StoryServiceTests(TestDatabaseFixture testDatabase)
+    private readonly StoryServiceFixture _fixture;
+
+    public StoryServiceTests(StoryServiceFixture fixture)
     {
-        _testDatabase = testDatabase;
+        _fixture = fixture;
     }
 
     [Fact]
     public async Task GetStoriesAsync_WhenNoStoryExists_ReturnsEmptyList()
     {
         //Arrange
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        await context.Database.BeginTransactionAsync();
-        await context.Story.ExecuteDeleteAsync();
-        StoryService storyService = new StoryService(context);
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        await dbContext.Database.BeginTransactionAsync();
+        await dbContext.Story.ExecuteDeleteAsync();
 
         //Act
-        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(0);
+        var actualStories = await storyService.GetStoriesAsync(0);
 
         //Assert
         Assert.Empty(actualStories);
@@ -39,21 +42,17 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
     public async Task GetStoriesAsync_WhenStoriesExists_ReturnsNonEmptyList()
     {
         //Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await context.Database.BeginTransactionAsync();
-        Story newStory = new Story
-        {
-            Title = "Test story",
-            Description = "This is a test story",
-        };
-        await context.Story.AddAsync(newStory);
-        await context.SaveChangesAsync();
+        await dbContext.Database.BeginTransactionAsync();
+        Story newStory = TestModelFactory.CreateStoryModel(userId: _fixture.DefaultAppUser.Id);
+        await dbContext.Story.AddAsync(newStory);
+        await dbContext.SaveChangesAsync();
 
         //Act
-        // TODO: see if ef tracker is caching data
-        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(16);
+        var actualStories = await storyService.GetStoriesAsync(16);
 
         //Assert
         Assert.NotEmpty(actualStories);
@@ -62,55 +61,55 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
     [Theory]
     [InlineData("Test story", "This is a test story")]
     [InlineData("Story without description", "")]
-    public async Task GetStoriesAsync_WhenOnlyOneStoryExists_ReturnsExpectedStoryValue(string title, string description)
+    public async Task GetStoriesAsync_WhenOnlyOneStoryExists_ReturnsExpectedStoryValue(string storyTitle, string storyDescription)
     {
         //Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await context.Database.BeginTransactionAsync();
-        await context.Story.ExecuteDeleteAsync();
-        Story expectedStory = new Story
-        {
-            Title = title,
-            Description = description,
-            UserId = TestConstants.DefaultUserId,
-        };
+        await dbContext.Database.BeginTransactionAsync();
+        await dbContext.Story.ExecuteDeleteAsync();
 
-        await context.Story.AddAsync(expectedStory);
-        await context.SaveChangesAsync();
+        AppUser defaultUser = _fixture.DefaultAppUser;
+        Story expectedStory = TestModelFactory.CreateStoryModel(storyTitle, storyDescription, userId: defaultUser.Id);
+        TestDataSeeder.SeedStory(dbContext, expectedStory);
 
         //Act
-        IList<StoryMainInfoDto> actualStories = await storyService.GetStoriesAsync(null);
+        var actualStories = await storyService.GetStoriesAsync(null);
 
         //Assert
         Assert.True(actualStories.Count == 1);
         Assert.NotEqual(0, actualStories[0].Id);
         Assert.Equal(expectedStory.Title, actualStories[0].Title);
         Assert.Equal(expectedStory.Description, actualStories[0].Description);
-        Assert.Equal(TestConstants.DefaultUserName, actualStories[0].UserName);
+        Assert.Equal(defaultUser.UserName, actualStories[0].UserName);
         Assert.Equal(expectedStory.MaximumAuthors, actualStories[0].MaximumAuthors);
         Assert.Equal(expectedStory.CreatedDate, actualStories[0].CreatedDate);
         Assert.Equal(expectedStory.UpdatedDate, actualStories[0].UpdatedDate);
     }
 
     [Theory]
-    [InlineData(1)]
-    [InlineData(15)]
-    [InlineData(500)]
-    public async Task StoryExists_WhenStoryExists_ReturnsTrue(int storyId)
+    [InlineData("My new test story")]
+    [InlineData("")]
+    public async Task StoryExists_WhenStoryExists_ReturnsTrue(string storyTitle)
     {
-        // Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
-        
+        // Arrange
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+
+        AppUser defaultUser = _fixture.DefaultAppUser;
+        Story story = TestModelFactory.CreateStoryModel(storyTitle, userId: defaultUser.Id);
+        TestDataSeeder.SeedStory(dbContext, story);
+
         // Act
-        bool storyExists = await storyService.StoryExistsAsync(storyId);
-        
-        // Assert
+        bool storyExists = await storyService.StoryExistsAsync(story.Id);
+
+        // Assert 
         Assert.True(storyExists);
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(10_000)]
@@ -118,62 +117,135 @@ public class StoryServiceTests : IClassFixture<TestDatabaseFixture>
     public async Task StoryExists_WhenStoryDoesNotExist_ReturnsFalse(int storyId)
     {
         // Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
-        
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
         // Act
         bool storyExists = await storyService.StoryExistsAsync(storyId);
-        
+
         // Assert
-        Assert.False(storyExists);   
+        Assert.False(storyExists);
     }
-    
-    [Theory]
-    [ClassData(typeof(StoryTestData))]
-    public async Task GetStoryInfoForSession_WhenStoryExists_ReturnsStoryInfoForSessionDto(Story expectedStory)
+
+    [Fact]
+    public async Task GetStoryInfoForSession_WhenStoryExists_ReturnsStoryInfoForSessionDto()
     {
         // Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
-        
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        Story expectedStory = _fixture.DefaultStory;
+
         // Act
         StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSessionAsync(expectedStory.Id);
-        
+
         // Assert
         Assert.NotNull(storyInfo);
         Assert.Equal(expectedStory.TurnDurationSeconds, storyInfo.TurnDurationSeconds);
-        Assert.Equal(expectedStory.UpdatedDate, storyInfo.AuthorsMembershipChangeDate);   
+        Assert.Equal(expectedStory.UpdatedDate, storyInfo.AuthorsMembershipChangeDate);
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(int.MaxValue)]
     public async Task GetStoryInfoForSession_WhenStoryDoesNotExist_ReturnsNull(int storyId)
     {
-        // Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
-        
+        // Arrange
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+
         // Act
         StoryInfoForSessionDto? storyInfo = await storyService.GetStoryInfoForSessionAsync(storyId);
-        
+
         // Assert
         Assert.Null(storyInfo);
     }
-    
+
     [Fact]
-    public async Task ChangeCurrentStoryAuthor_WhenAuthorIsInStory_ReturnsTrue()
+    public async Task ChangeToNextCurrentAuthorAsync_WithThreeAuthors_CyclesThroughAuthorsCorrectly()
     {
         // Arrange 
-        await using ApplicationDbContext context = _testDatabase.CreateDbContext();
-        StoryService storyService = new StoryService(context);
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
-        // Act
-        await storyService.ChangeCurrentStoryAuthorAsync(TestConstants.DefaultJoinedStoryId, TestConstants.DefaultUserName);
+        AppUser storyOwner = TestModelFactory.CreateAppUserModel(
+            baseUserName: "storyowner",
+            baseEmail: "owner@example.com",
+            nickname: "StoryOwner");
+        TestDataSeeder.SeedUser(dbContext, storyOwner);
         
-        // Assert
-        Story changedStory = await context.Story.FirstAsync(s => s.Id == TestConstants.DefaultJoinedStoryId);
+        AppUser secondAuthor = TestModelFactory.CreateAppUserModel(
+            baseUserName: "secondauthor", 
+            baseEmail: "second@example.com",
+            nickname: "SecondAuthor");
+        TestDataSeeder.SeedUser(dbContext, secondAuthor);
         
-        Assert.Equal(TestConstants.DefaultUserId, changedStory.CurrentAuthorId);;
+        AppUser thirdAuthor = TestModelFactory.CreateAppUserModel(
+            baseUserName: "thirdauthor", 
+            baseEmail: "third@example.com",
+            nickname: "ThirdAuthor");
+        TestDataSeeder.SeedUser(dbContext, thirdAuthor);
+        
+        Story testStory = TestModelFactory.CreateStoryModel(
+            title: "Test Story with Multiple Authors",
+            description: "A story to test cycling through multiple authors",
+            userId: storyOwner.Id,
+            currentAuthorId: storyOwner.Id,
+            createdDate: new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            updatedDate: new DateTimeOffset(2025, 1, 15, 0, 0, 0, TimeSpan.Zero));
+        TestDataSeeder.SeedStory(dbContext, testStory);
+        
+        DateTimeOffset baseTime = testStory.UpdatedDate;
+        AuthorInStory ownerAsAuthor = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: storyOwner.Id,
+            entryDate: baseTime);
+        TestDataSeeder.SeedAuthorInStory(dbContext, ownerAsAuthor);
+
+        AuthorInStory secondAuthorInStory = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: secondAuthor.Id,
+            entryDate: baseTime.AddMinutes(5));
+        TestDataSeeder.SeedAuthorInStory(dbContext, secondAuthorInStory);
+
+        AuthorInStory thirdAuthorInStory = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: thirdAuthor.Id,
+            entryDate: baseTime.AddMinutes(10));
+        TestDataSeeder.SeedAuthorInStory(dbContext, thirdAuthorInStory);
+
+        
+        // Act/Assert
+        // Initially the current author should be the story owner
+        Story? initialStory = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(initialStory);
+        Assert.Equal(storyOwner.Id, initialStory.CurrentAuthorId);
+        
+        // Change to second author
+        await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
+        Story? afterFirstChange = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(afterFirstChange);
+        Assert.Equal(secondAuthor.Id, afterFirstChange.CurrentAuthorId);
+        
+        // Change to third author
+        await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
+        Story? afterSecondChange = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(afterSecondChange);
+        Assert.Equal(thirdAuthor.Id, afterSecondChange.CurrentAuthorId);
+        
+        // Change back to the first author
+        await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
+        Story? afterThirdChange = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(afterThirdChange);
+        Assert.Equal(storyOwner.Id, afterThirdChange.CurrentAuthorId);
     }
 }
