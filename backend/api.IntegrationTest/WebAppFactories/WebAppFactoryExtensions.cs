@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using api.Constants;
+using api.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
@@ -31,9 +32,7 @@ public static class WebAppFactoryExtensions
     
     public static HubConnection CreateHubConnectionWithAuth(
         this WebApplicationFactory<Program> factory,
-        string userName, 
-        string nameIdentifier, 
-        string email,
+        AppUser user,
         params string[] roles
     )
     {
@@ -43,9 +42,9 @@ public static class WebAppFactoryExtensions
             {
                 options.HttpMessageHandlerFactory = _ => server.CreateHandler();
                 options.Headers.Add("Authorization", TestAuthHandler.AuthenticationScheme);;
-                options.Headers.Add(TestAuthHandler.NameHeader, userName);
-                options.Headers.Add(TestAuthHandler.NameIdentifierHeader, nameIdentifier);
-                options.Headers.Add(TestAuthHandler.EmailHeader, email);
+                options.Headers.Add(TestAuthHandler.NameHeader, user.UserName);
+                options.Headers.Add(TestAuthHandler.NameIdentifierHeader, user.UserName);
+                options.Headers.Add(TestAuthHandler.EmailHeader, user.UserName);
                 foreach (string role in roles)
                 {
                     options.Headers.Add(TestAuthHandler.RoleHeader, role);

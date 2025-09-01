@@ -1,25 +1,25 @@
-using System.Net;
 using System.Net.Http.Headers;
-using System.Text.Json;
+using System.Net.Http.Json;
+using System.Net.Mime;
+using api.Constants;
 using api.Dtos.AppUser;
 using api.IntegrationTests.Constants;
+using api.IntegrationTests.ControllersTests.ControllersFixtures;
 using api.IntegrationTests.WebAppFactories;
+using api.Models;
 
 namespace api.IntegrationTests.ControllersTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
-public class AccountControllerTests : IClassFixture<AuthHandlerWebAppFactory>
+public class AccountControllerTests : IClassFixture<AccountControllerFixture>
 {
     private readonly AuthHandlerWebAppFactory _factory;
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
+    private readonly AppUser _defaultUser;
     
-    public AccountControllerTests(AuthHandlerWebAppFactory factory)
+    public AccountControllerTests(AccountControllerFixture fixture)
     {
-        _factory = factory;
-        _jsonSerializerOptions = new JsonSerializerOptions()
-        {
-            PropertyNameCaseInsensitive = true,
-        };
+        _factory = fixture.Factory;
+        _defaultUser = fixture.DefaultUser;
     }
 
     [Theory]
@@ -46,10 +46,8 @@ public class AccountControllerTests : IClassFixture<AuthHandlerWebAppFactory>
         Assert.NotNull(contentType);
         Assert.Equal("utf-8", contentType.CharSet);
         Assert.Equal("application/json", contentType.MediaType);
-        
-        string? jsonResponse = await response.Content.ReadAsStringAsync();
-        Assert.NotNull(jsonResponse);
-        var users = JsonSerializer.Deserialize<IList<UserMainInfoDto>>(jsonResponse, _jsonSerializerOptions);
+
+        var users = await response.Content.ReadFromJsonAsync<IList<UserMainInfoDto>>();
         
         Assert.NotNull(users);
         Assert.Equal(expectedUsersCount, users.Count);
@@ -60,11 +58,12 @@ public class AccountControllerTests : IClassFixture<AuthHandlerWebAppFactory>
     public async Task GetUser_WhenAuthenticated_ReturnsExpectedUser()
     {
         // Arrange
+        AppUser expectedUser = _defaultUser;
         HttpClient client = _factory.CreateClientWithAuth(
-            TestConstants.DefaultUserName, 
-            TestConstants.DefaultNameIdentifier, 
-            TestConstants.DefaultEmail, 
-            TestConstants.DefaultRole
+            expectedUser.UserName,
+            expectedUser.UserName,
+            expectedUser.Email,
+            RoleConstants.User
         );
         
         // Act
@@ -75,13 +74,12 @@ public class AccountControllerTests : IClassFixture<AuthHandlerWebAppFactory>
         
         response.EnsureSuccessStatusCode();
         Assert.NotNull(contentType);
+        Assert.Equal(MediaTypeNames.Application.Json, contentType.MediaType);
         Assert.Equal("utf-8", contentType.CharSet);
-        Assert.Equal("application/json", contentType.MediaType);
-        
-        string jsonResponse = await response.Content.ReadAsStringAsync();
-        AppUserDto? user = JsonSerializer.Deserialize<AppUserDto>(jsonResponse, _jsonSerializerOptions);
+
+        AppUserDto? user = await response.Content.ReadFromJsonAsync<AppUserDto>();
         Assert.NotNull(user);
-        Assert.Equal(TestConstants.DefaultUserName, user.UserName);
-        Assert.Equal(TestConstants.DefaultEmail, user.Email);
+        Assert.Equal(expectedUser.UserName, user.UserName);
+        Assert.Equal(expectedUser.Email, user.Email);
     }
 }

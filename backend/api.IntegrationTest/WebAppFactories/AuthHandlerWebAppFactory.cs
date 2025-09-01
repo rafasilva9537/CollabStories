@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using api.Constants;
+using api.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -33,14 +34,14 @@ public sealed class AuthHandlerWebAppFactory : CustomWebAppFactory
         });
     }
     
-    public HttpClient CreateClientWithAuth(string userName, string nameIdentifier, string email, params string[] roles)
+    public HttpClient CreateClientWithAuth(AppUser user, params string[] roles)
     {
         HttpClient client = CreateClient();
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.AuthenticationScheme);
-        client.DefaultRequestHeaders.Add(TestAuthHandler.NameHeader, userName);
-        client.DefaultRequestHeaders.Add(TestAuthHandler.NameIdentifierHeader, nameIdentifier);
-        client.DefaultRequestHeaders.Add(TestAuthHandler.EmailHeader, email);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.NameHeader, user.UserName);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.NameIdentifierHeader, user.UserName);
+        client.DefaultRequestHeaders.Add(TestAuthHandler.EmailHeader, user.Email);
         foreach (string role in roles)
         {
             client.DefaultRequestHeaders.Add(TestAuthHandler.RoleHeader, role);
@@ -49,12 +50,7 @@ public sealed class AuthHandlerWebAppFactory : CustomWebAppFactory
         return client;
     }
     
-    public HubConnection CreateHubConnectionWithAuth(
-        string userName, 
-        string nameIdentifier, 
-        string email,
-        params string[] roles
-    )
+    public HubConnection CreateHubConnectionWithAuth(AppUser user, params string[] roles)
     {
         TestServer server = Server;
         HubConnection connection = new HubConnectionBuilder()
@@ -62,9 +58,9 @@ public sealed class AuthHandlerWebAppFactory : CustomWebAppFactory
             {
                 options.HttpMessageHandlerFactory = _ => server.CreateHandler();
                 options.Headers.Add("Authorization", TestAuthHandler.AuthenticationScheme);;
-                options.Headers.Add(TestAuthHandler.NameHeader, userName);
-                options.Headers.Add(TestAuthHandler.NameIdentifierHeader, nameIdentifier);
-                options.Headers.Add(TestAuthHandler.EmailHeader, email);
+                options.Headers.Add(TestAuthHandler.NameHeader, user.UserName);
+                options.Headers.Add(TestAuthHandler.NameIdentifierHeader, user.UserName);
+                options.Headers.Add(TestAuthHandler.EmailHeader, user.UserName);
                 foreach (string role in roles)
                 {
                     options.Headers.Add(TestAuthHandler.RoleHeader, role);
