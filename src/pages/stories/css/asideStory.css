@@ -22,6 +22,16 @@
     width: 6rem;
 }
 
+/*Informações do jogador*/
+.player-infs-aside{
+    height: 100%;
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
 .player-name{
     font-size: 1.6rem;
     font-weight: bold;

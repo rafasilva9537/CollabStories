@@ -12,7 +12,7 @@ import Home from '../../assets/icons/home.png'
 import AddPlayer from '../../assets/icons/add_player.png'
 
 const Players = [
-    {id: 1, icon: PlayerIcon ,name: 'Pedro'},  
+    {id: 'dsousr', icon: PlayerIcon ,name: 'Pedro'},  
 ]
 
 function Story() {
@@ -39,8 +39,11 @@ function Story() {
         <ul className="players-container">
             {Players.map((player) => (
                 <li key={player.id} className='player-card'>
-                <img className='player-icon' src={player.icon} alt={player.name}/>
-                <span className="player-name">{player.name}</span>
+                  <img className='player-icon' src={player.icon} alt={player.name}/>
+                  <div className="player-infs-aside">
+                    <span className="player-name">{player.name}</span>
+                    <span>@{player.id}</span>
+                  </div>
                 </li>
             ))}
 
@@ -86,8 +89,7 @@ function Story() {
                 const player = Players[part.playerIndex]
                 return (
                   <div key={i} className="player-message">
-                    <img src={player.icon} alt={player.name} className='player-message-icon'/>
-                    <span className="current-player-name">{player.name}</span>
+                    <span className="current-player-id">{player.id}</span>
                     <p>{part.text}</p>
                   </div>
                 )
@@ -98,21 +100,35 @@ function Story() {
 
         </section>
 
-        <div className="interaction-container">
+        <div className="main-itens">
 
-          <textarea
-            ref={textRef}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder='Era uma vez...'
-            name="contribution"
-            id="contribution"
-            aria-label='Contribuição para a história'
-          />
-          <button onClick={handleSubmit} type='button'>
-            Enviar
-          </button>
-          
+        <div className="timer-container">
+
+          <span className="current-player">
+            Vez de: {currentPlayer?.name}
+          </span>
+          <span className="timer">
+            {seconds}s
+          </span>
+
+        </div>
+
+          <div className="interaction-container">
+
+            <textarea
+              ref={textRef}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder='Era uma vez...'
+              name="contribution"
+              id="contribution"
+              aria-label='Contribuição para a história'
+            />
+            <button onClick={handleSubmit} type='button'>
+              Enviar
+            </button>
+            
+          </div>
         </div>
 
     </main>

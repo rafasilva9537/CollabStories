@@ -35,7 +35,7 @@ function CreateStory() {
           </select>
           <textarea placeholder='Qual a descrição?' id="description"/>
           
-          <button onClick={() => navigate('/')}>
+          <button onClick={() => navigate('/story')}>
             Começar!
           </button>
 

@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './styles/Global.css'
 
 /*Pages*/
-import Account from './pages/account/Account'
+import Account from './pages/log/Account'
 import Home from './pages/home/Home'
 import Story from './pages/stories/Story'
 

@@ -10,6 +10,10 @@
     transition: 0.3s ease-in-out;
 } 
 
+.player-infs-container h2{
+    font-size: 4rem;
+}
+
 /*Botão de mudar seção*/
 .button-change{
     height: 100%;
@@ -42,18 +46,13 @@
 }
 
 /*Nome e id*/
-.player-infs-container h2{
-    font-size: 4rem;
+.player-infs-container h3{
+    font-size: 2rem;
 }
 
 .profile-player-id{
     font-size: 1.2rem;
     font-weight: bold;
-}
-
-.player-infs-container p{
-    text-align: center;
-    padding: 40px;
 }
 
 /*stats do seu perfil*/

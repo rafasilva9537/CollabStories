@@ -13,7 +13,6 @@ function Profile(){
   const [showSearch, setShowSearch] = useState(false)
 
   const Stats = [
-      {iconStat: Collaborators, title: 'Seguidores', count: '5'},
       {iconStat: Gallery, title: 'Histórias', count: '2'},
       {iconStat: Like, title: 'Curtidas', count: '24'}
   ]
@@ -49,12 +48,9 @@ function Profile(){
 
         <div className="player-infs-container">
 
-            <h2>Pedro</h2>
+            <h2>Perfil</h2>
+            <h3>Pedro</h3>
             <span className="profile-player-id">@dsousr</span>
-            <p>
-              Meu gênero favorito de histórias é terror! Adoro criar histórias
-              que colocam medo em qualquer um!
-            </p>
             <div className="profile-player-stats">
                 {Stats.map((stat, i) => (
                 <div key={i} className="profile-container-stat">
