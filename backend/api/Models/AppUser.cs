@@ -1,4 +1,3 @@
-using api.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace api.Models;

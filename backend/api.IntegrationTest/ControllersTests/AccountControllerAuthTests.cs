@@ -13,15 +13,10 @@ namespace api.IntegrationTests.ControllersTests;
 public class AccountControllerAuthTests : IClassFixture<CustomWebAppFactory>
 {
     private readonly CustomWebAppFactory _factory;
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
     
     public AccountControllerAuthTests(CustomWebAppFactory factory)
     {
         _factory = factory;
-        _jsonSerializerOptions = new JsonSerializerOptions()
-        {
-            PropertyNameCaseInsensitive = true,
-        };
     }
     
     [Fact]
