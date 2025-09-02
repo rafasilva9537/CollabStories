@@ -9,7 +9,7 @@ namespace api.Services;
 
 public class SessionInfo
 {
-    public readonly HashSet<string> Connections = [];
+    public readonly ConcurrentDictionary<string, byte> Connections = new();
     public double TimerSeconds { get; set; }
     public int TurnDurationSeconds { get; init; }
     
@@ -97,7 +97,7 @@ public class StorySessionService : IStorySessionService
 
     public bool SessionIsEmpty(string storyId)
     {
-        return _sessions[storyId].Connections.Count <= 0;
+        return _sessions[storyId].Connections.IsEmpty;
     }
 
     public void RemoveAllSessions()
@@ -141,13 +141,13 @@ public class StorySessionService : IStorySessionService
     
     public void AddConnectionToSession(string storyId, string connectionId)
     {
-        _sessions[storyId].Connections.Add(connectionId);
+        _sessions[storyId].Connections.TryAdd(connectionId, 0);
         _logger.LogInformation("Added connection {ConnectionId} to session for group {StoryId}", connectionId, storyId);
     }
     
     public void RemoveConnectionFromSession(string storyId, string connectionId)
     {
-        _sessions[storyId].Connections.Remove(connectionId);
+        _sessions[storyId].Connections.TryRemove(connectionId, out _);
         _logger.LogInformation("Removed connection {ConnectionId} from session for group {StoryId}", connectionId, storyId);
     }
     
@@ -158,7 +158,7 @@ public class StorySessionService : IStorySessionService
     /// <returns>A read-only set of connection IDs for the specified session.</returns>
     public IReadOnlySet<string> GetSessionConnections(string storyId)
     {
-        IReadOnlySet<string> connections = _sessions[storyId].Connections;
+        IReadOnlySet<string> connections = _sessions[storyId].Connections.Keys.ToHashSet();
         
         _logger.LogDebug("Returning connections for group {StoryId}", storyId);
         return connections;
