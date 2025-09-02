@@ -20,7 +20,7 @@ public interface IStoryService
     
     Task<bool> IsStoryCreator(string username, int storyId);
     
-    Task ChangeToNextCurrentAuthorAsync(int storyId);
+    Task<string> ChangeToNextCurrentAuthorAsync(int storyId);
     
     Task<string> GetCurrentAuthorUserNameAsync(int storyId);
     

@@ -135,7 +135,7 @@ public class StoryService : IStoryService
         return isStoryCreator;
     }
 
-    public async Task ChangeToNextCurrentAuthorAsync(int storyId)
+    public async Task<string> ChangeToNextCurrentAuthorAsync(int storyId)
     {
         var storyAuthorsIds = await _context.Story
             .Where(s => s.Id == storyId)
@@ -180,6 +180,13 @@ public class StoryService : IStoryService
             .ExecuteUpdateAsync(sp => 
                 sp.SetProperty(story => story.CurrentAuthorId, nextAuthorId)
             );
+        
+        string newAuthorUsername = await _context.AppUser
+            .Where(au => au.Id == nextAuthorId)
+            .Select(au => au.UserName!)
+            .FirstAsync();
+
+        return newAuthorUsername;
     }
 
     public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId)

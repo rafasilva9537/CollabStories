@@ -227,27 +227,30 @@ public class StoryServiceTests : IClassFixture<StoryServiceFixture>
         Assert.Equal(storyOwner.Id, initialStory.CurrentAuthorId);
         
         // Change to second author
-        await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
+        string returnedSecondAuthorName = await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
         Story? afterFirstChange = await dbContext.Story
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == testStory.Id);
         Assert.NotNull(afterFirstChange);
         Assert.Equal(secondAuthor.Id, afterFirstChange.CurrentAuthorId);
+        Assert.Equal(secondAuthor.UserName, returnedSecondAuthorName);
         
         // Change to third author
-        await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
+        string returnedThirdAuthorName = await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
         Story? afterSecondChange = await dbContext.Story
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == testStory.Id);
         Assert.NotNull(afterSecondChange);
         Assert.Equal(thirdAuthor.Id, afterSecondChange.CurrentAuthorId);
+        Assert.Equal(thirdAuthor.UserName, returnedThirdAuthorName);
         
         // Change back to the first author
-        await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
+        string returnedOwnerName = await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id);
         Story? afterThirdChange = await dbContext.Story
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == testStory.Id);
         Assert.NotNull(afterThirdChange);
         Assert.Equal(storyOwner.Id, afterThirdChange.CurrentAuthorId);
+        Assert.Equal(storyOwner.UserName, returnedOwnerName);
     }
 }
