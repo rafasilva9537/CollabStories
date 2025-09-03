@@ -178,7 +178,7 @@ public static class DependenciesConfig
             .WithOrigins(
                 "http://localhost:5500", 
                 "http://localhost:3001", 
-                "http://localhost:3000",
+                "http://localhost:3000"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
