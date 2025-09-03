@@ -27,8 +27,7 @@ public static class DependenciesConfig
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IImageService, ImageService>();
         
-        services.AddTransient<IDateTimeProvider, DateTimeProvider>();
-        
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<IStorySessionService, StorySessionService>();
         
         services.AddHostedService<TimerBackgroundService>();
@@ -177,9 +176,9 @@ public static class DependenciesConfig
         //TODO: improve security
         CorsPolicy corsPolicy = new CorsPolicyBuilder()
             .WithOrigins(
-                "http://localhost:3002", 
+                "http://localhost:5500", 
                 "http://localhost:3001", 
-                "http://localhost:3000"
+                "http://localhost:3000",
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
