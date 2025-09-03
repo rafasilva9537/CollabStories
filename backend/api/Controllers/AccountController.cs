@@ -17,11 +17,16 @@ public class AccountController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILogger<AccountController> _logger;
+    private readonly IDateTimeProvider _dateTimeProvider;
     
-    public AccountController(IAuthService authService, ILogger<AccountController> logger)
+    public AccountController(
+        IAuthService authService, 
+        ILogger<AccountController> logger, 
+        IDateTimeProvider dateTimeProvider)
     {
         _authService = authService;
         _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     [AllowAnonymous]
@@ -93,17 +98,22 @@ public class AccountController : ControllerBase
     [HttpDelete("{username}/delete")]
     public async Task<ActionResult<MessageResponse>> DeleteUser([FromRoute] string username)
     {
-        bool isDeleted = await _authService.DeleteByNameAsync(username);
-        
-        if(!isDeleted) return BadRequest("Impossible to delete user");
-        return Ok(new MessageResponse { Message = "User was successfully deleted!" });
+        try
+        {
+            await _authService.DeleteByNameAsync(username);
+            return Ok(new MessageResponse { Message = "User was successfully deleted." });
+        }
+        catch (UserNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "User '{UserName}' deletion failed at {DeleteTime}", username, _dateTimeProvider.UtcNow);
+            return NotFound();
+        }
     }
 
-    [HttpPut("{username}/profile-image")]
+    [HttpPut("profile-image")]
     public async Task<ActionResult> UpdateProfileImage(IFormFile image)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
-
         if(loggedUser is null)
         {
             return Forbid();
@@ -113,9 +123,8 @@ public class AccountController : ControllerBase
 
         return Ok();
     }
-
-    // TODO: remove username in route parameter?
-    [HttpDelete("{username}/profile-image")]
+    
+    [HttpDelete("profile-image")]
     public async Task<ActionResult> DeleteProfileImage()
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);

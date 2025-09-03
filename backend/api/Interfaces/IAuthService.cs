@@ -20,7 +20,7 @@ public interface IAuthService
     /// <exception cref="UserNotFoundException">Thrown when the user does not exist in the database.</exception>
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     
-    Task<bool> DeleteByNameAsync(string username);
+    Task DeleteByNameAsync(string username);
     
     Task<AppUserDto?> GetUserAsync(string username);
     

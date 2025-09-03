@@ -6,7 +6,7 @@ namespace api.Services;
 public class ImageService : IImageService
 {
     // TODO: change to some immutable collection
-    private string[] _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
+    private readonly string[] _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
     private readonly string _imagesPath = Path.Combine(DirectoryPathConstants.Media, DirectoryPathConstants.Images);
     private readonly IWebHostEnvironment _environment;
 
@@ -18,7 +18,7 @@ public class ImageService : IImageService
 
     public async Task<string> SaveImageAsync(IFormFile image, string directoryName)
     {
-        var rootPath = _environment.ContentRootPath;
+        string rootPath = _environment.ContentRootPath;
         string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
 
         if(!Directory.Exists(imageDirectoryPath))
@@ -36,19 +36,16 @@ public class ImageService : IImageService
 
         string imageName = $"{Guid.NewGuid()}{extension}";
         string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
-
-        // TODO: handle if the file already exists (IOException)
-        using(FileStream imageStream = new FileStream(imageNameWithPath, FileMode.CreateNew))
-        {
-            await image.CopyToAsync(imageStream);
-        }
+        
+        await using FileStream imageStream = new(imageNameWithPath, FileMode.CreateNew);
+        await image.CopyToAsync(imageStream);
 
         return imageName;
     }
 
     public void DeleteImage(string imageName, string directoryName)
     {
-        var rootPath = _environment.ContentRootPath;
+        string rootPath = _environment.ContentRootPath;
         string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
         string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
 

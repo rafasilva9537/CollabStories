@@ -18,18 +18,21 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IImageService _imageService;
+    private readonly ILogger<AuthService> _logger;
     public AuthService(
         ApplicationDbContext context, 
         UserManager<AppUser> userManager, 
         ITokenService tokenService,
         IDateTimeProvider dateTimeProvider,
-        IImageService imageService)
+        IImageService imageService,
+        ILogger<AuthService> logger)
     {
         _context = context;
         _userManager = userManager;
         _tokenService = tokenService;
         _dateTimeProvider = dateTimeProvider;
         _imageService = imageService;
+        _logger = logger;
     }
 
     public async Task<string> RegisterAsync(RegisterUserDto registerUserDto)
@@ -37,7 +40,6 @@ public class AuthService : IAuthService
         
         AppUser newUser = registerUserDto.ToAppUserModel();
         newUser.CreatedDate = _dateTimeProvider.UtcNow;
-        newUser.SecurityStamp = Guid.NewGuid().ToString(); //TODO: see if it's necessary at user creation/registering
 
         IdentityResult resultUser = await _userManager.CreateAsync(newUser, registerUserDto.Password);
         if(!resultUser.Succeeded)
@@ -58,12 +60,16 @@ public class AuthService : IAuthService
         string token = await _tokenService.GenerateToken(newUser);
         return token;
     }
-    
+
+    /// <summary>
+    /// Authenticates a user based on the provided login credentials and returns a JWT token if the login is successful.
+    /// </summary>
+    /// <param name="loginUserDto">An object containing the user's login credentials, including username and password.</param>
+    /// <returns>A JWT token as a string if the login is successful, otherwise, null if the provided credentials are invalid.</returns>
+    /// <exception cref="UserNotFoundException">Thrown when the username does not exist.</exception>
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
     {
-        // TODO: change to use CheckPasswordSignInAsync(), eliminating one round trip
         AppUser? loggedUser = await _userManager.FindByNameAsync(loginUserDto.UserName);
-
         if(loggedUser is null) throw new UserNotFoundException("User does not exist on login attempt.");
 
         string password = loginUserDto.Password;
@@ -119,16 +125,19 @@ public class AuthService : IAuthService
         return keySetUsersUserList;
     }
 
-    public async Task<bool> DeleteByNameAsync(string username)
+    public async Task DeleteByNameAsync(string username)
     {
         AppUser? userModel = await _userManager.FindByNameAsync(username);
-        
-        if(userModel is null) return false;
+        if(userModel is null) throw new UserNotFoundException("User does not exist on delete attempt.");
         
         await _userManager.DeleteAsync(userModel);
-        return true;
     }
 
+    /// <summary>
+    /// Retrieves the details of a user based on the provided username.
+    /// </summary>
+    /// <param name="username">The username of the user to retrieve.</param>
+    /// <returns>An <see cref="AppUserDto"/> object representing the user's details if found; otherwise, null.</returns>
     public async Task<AppUserDto?> GetUserAsync(string username)
     {
         AppUser? appUserModel = await _userManager.FindByNameAsync(username);
@@ -142,11 +151,11 @@ public class AuthService : IAuthService
 
         string currentPassword = updatedUserDto.CurrentPassword;
         string newPassword = updatedUserDto.NewPassword;
-        bool passwordIsChanged = currentPassword != String.Empty && newPassword != String.Empty;
+        bool passwordIsChanged = currentPassword != string.Empty && newPassword != string.Empty;
 
-        bool userNameIsChanged = updatedUserDto.UserName != String.Empty;
-        bool descriptionIsChanged = updatedUserDto.Description != String.Empty;
-        bool emailIsChanged = updatedUserDto.Email != String.Empty;
+        bool userNameIsChanged = updatedUserDto.UserName != string.Empty;
+        bool descriptionIsChanged = updatedUserDto.Description != string.Empty;
+        bool emailIsChanged = updatedUserDto.Email != string.Empty;
 
         if(passwordIsChanged)
         {
@@ -162,7 +171,9 @@ public class AuthService : IAuthService
 
     public async Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName)
     {
-        AppUser user = await _context.AppUser.FirstAsync(au => au.UserName == username);
+        AppUser? user = await _context.AppUser
+            .FirstOrDefaultAsync(au => au.UserName == username);
+        if(user is null) throw new UserNotFoundException("User does not exist on profile image update attempt.");
         
         string savedImage = await _imageService.SaveImageAsync(image, directoryName);
         
@@ -170,10 +181,25 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Deletes the profile image of a user from the specified directory.
+    /// </summary>
+    /// <param name="username">The username of the user whose profile image is to be deleted.</param>
+    /// <param name="directoryName">The name of the directory where the profile images are stored.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
+    /// <exception cref="UserNotFoundException">Thrown when the specified user does not exist.</exception>
+    /// <exception cref="FileNotFoundException">Thrown when the user's profile has no profile image.</exception>
     public async Task DeleteProfileImageAsync(string username, string directoryName)
     {
-        AppUser user = await _context.AppUser.FirstAsync(au => au.UserName == username);
+        AppUser? user = await _context.AppUser
+            .FirstOrDefaultAsync(au => au.UserName == username);
+        if(user is null) throw new UserNotFoundException("User does not exist on profile image delete attempt.");
 
+        if (string.IsNullOrEmpty(user.ProfileImage))
+        {
+            throw new FileNotFoundException("Profile image not found to delete.");
+        }
+        
         _imageService.DeleteImage(user.ProfileImage, directoryName);
 
         user.ProfileImage = string.Empty;
