@@ -60,7 +60,6 @@ public class AccountController : ControllerBase
     public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginUserDto loginUser)
     {
         string? token = await _authService.LoginAsync(loginUser);
-        _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
 
         if(token is null)
         {
@@ -68,6 +67,7 @@ public class AccountController : ControllerBase
             return BadRequest(ModelState);
         }
         
+        _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
         return Ok(new TokenResponse { Token = token }); 
     }
     

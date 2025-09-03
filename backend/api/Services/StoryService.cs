@@ -15,10 +15,12 @@ namespace api.Services;
 public class StoryService : IStoryService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public StoryService(ApplicationDbContext context)
+    public StoryService(ApplicationDbContext context, IDateTimeProvider dateTimeProvider)
     {
         _context = context;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<PagedKeysetStoryList<StoryMainInfoDto>> GetStoriesAsync(int? lastId = null, int pageSize = 15)
@@ -177,8 +179,9 @@ public class StoryService : IStoryService
         
         await _context.Story
             .Where(s => s.Id == storyId)
-            .ExecuteUpdateAsync(sp => 
-                sp.SetProperty(story => story.CurrentAuthorId, nextAuthorId)
+            .ExecuteUpdateAsync(sp => sp
+                .SetProperty(story => story.CurrentAuthorId, nextAuthorId)
+                .SetProperty(story => story.AuthorsMembershipChangeDate, _dateTimeProvider.UtcNow)
             );
         
         string newAuthorUsername = await _context.AppUser
@@ -252,7 +255,7 @@ public class StoryService : IStoryService
         {
             AuthorId = userId, 
             StoryId = storyId, 
-            EntryDate = DateTimeOffset.UtcNow 
+            EntryDate = _dateTimeProvider.UtcNow
         };
 
         await _context.AuthorInStory.AddAsync(authorInStory);

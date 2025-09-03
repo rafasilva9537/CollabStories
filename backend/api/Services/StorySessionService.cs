@@ -115,7 +115,8 @@ public class StorySessionService : IStorySessionService
             string newAuthorUsername = await storyService.ChangeToNextCurrentAuthorAsync(int.Parse(storyId));
                     
             session.TurnEndTime = _dateTimeProvider.UtcNow.AddSeconds(session.TurnDurationSeconds);
-                    
+             
+            _logger.LogDebug("Updated timer for group {StoryId} to {TurnEndTime}", storyId, session.TurnEndTime);
             await _hubContext.Clients.Group(storyId).ReceiveTurnChange(newAuthorUsername, session.TurnEndTime);
         }
     }
