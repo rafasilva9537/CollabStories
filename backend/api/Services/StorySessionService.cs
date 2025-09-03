@@ -10,12 +10,12 @@ namespace api.Services;
 public class SessionInfo
 {
     public readonly ConcurrentDictionary<string, byte> Connections = new();
-    public double TimerSeconds { get; set; }
+    public DateTimeOffset TurnEndTime { get; set; }
     public int TurnDurationSeconds { get; init; }
     
-    public SessionInfo(double timerSeconds, int turnDurationSeconds)
+    public SessionInfo(DateTimeOffset turnEndTime, int turnDurationSeconds)
     {
-        TimerSeconds = timerSeconds;
+        TurnEndTime = turnEndTime;
         TurnDurationSeconds = turnDurationSeconds;
     }
 }
@@ -60,22 +60,19 @@ public class StorySessionService : IStorySessionService
         }
 
         TimeSpan timeSinceUpdate = _dateTimeProvider.UtcNow - story.AuthorsMembershipChangeDate;
-
-        double remainingTimerSeconds = timeSinceUpdate.TotalSeconds;
-        if (remainingTimerSeconds > story.TurnDurationSeconds)
-        {
-            remainingTimerSeconds %= story.TurnDurationSeconds;
-        }
-        
         int turnDurationSeconds = story.TurnDurationSeconds;
+
+        double secondsIntoCurrentTurn = timeSinceUpdate.TotalSeconds % turnDurationSeconds;
+        double remainingSeconds = turnDurationSeconds - secondsIntoCurrentTurn;
+        DateTimeOffset turnEndTime = _dateTimeProvider.UtcNow.AddSeconds(remainingSeconds);
         
-        SessionInfo sessionInfo = new SessionInfo(remainingTimerSeconds, turnDurationSeconds);
+        SessionInfo sessionInfo = new SessionInfo(turnEndTime, turnDurationSeconds);
         _sessions.TryAdd(storyId, sessionInfo);
         
         _logger.LogInformation(
-            "Added session for group {StoryId}, with timer starting at {TimerSeconds} seconds and turn duration of {TurnDurationSeconds} seconds.",
+            "Added session for group {StoryId}, with turn ending at {TurnEndTime} and turn duration of {TurnDurationSeconds} seconds.",
             storyId,
-            remainingTimerSeconds,
+            turnEndTime,
             turnDurationSeconds);
     }
     
@@ -106,21 +103,20 @@ public class StorySessionService : IStorySessionService
         _logger.LogInformation("Removed all sessions");   
     }
 
-    public async Task UpdateAllTimersAsync(double deltaTimeSeconds)
+    public async Task UpdateAllTimersAsync()
     {
         foreach (string storyId in _sessions.Keys)
         {
-            if (_sessions[storyId].TimerSeconds <= 0)
-            {
-                using IServiceScope scope = _serviceScopeFactory.CreateScope();
-                IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
-                await storyService.ChangeToNextCurrentAuthorAsync(int.Parse(storyId));
-                
-                _sessions[storyId].TimerSeconds = _sessions[storyId].TurnDurationSeconds;
-            }
-            
-            await _hubContext.Clients.Group(storyId).ReceiveTimerSeconds(_sessions[storyId].TimerSeconds);
-            DecrementSessionTimer(storyId, deltaTimeSeconds);
+            if (!_sessions.TryGetValue(storyId, out SessionInfo? session)) continue;
+            if (_dateTimeProvider.UtcNow < session.TurnEndTime) continue;
+
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+            string newAuthorUsername = await storyService.ChangeToNextCurrentAuthorAsync(int.Parse(storyId));
+                    
+            session.TurnEndTime = _dateTimeProvider.UtcNow.AddSeconds(session.TurnDurationSeconds);
+                    
+            await _hubContext.Clients.Group(storyId).ReceiveTurnChange(newAuthorUsername, session.TurnEndTime);
         }
     }
 
@@ -129,16 +125,11 @@ public class StorySessionService : IStorySessionService
         return _sessions[storyId].TurnDurationSeconds;
     }
 
-    public double GetSessionTimerSeconds(string storyId)
+    public DateTimeOffset GetTurnEndTime(string storyId)
     {
-        return _sessions[storyId].TimerSeconds;
+        return _sessions[storyId].TurnEndTime;
     }
 
-    public void DecrementSessionTimer(string storyId, double seconds = 1)
-    {
-        _sessions[storyId].TimerSeconds -= seconds;
-    }
-    
     public void AddConnectionToSession(string storyId, string connectionId)
     {
         _sessions[storyId].Connections.TryAdd(connectionId, 0);

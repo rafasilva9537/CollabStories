@@ -12,10 +12,8 @@ public interface IStorySessionService : IDisposable
     void RemoveAllSessions();
     bool SessionIsActive(string storyId);
     bool SessionIsEmpty(string storyId);
-    Task UpdateAllTimersAsync(double deltaTimeSeconds);
-    public int GetSessionTurnDurationSeconds(string storyId);
-    public double GetSessionTimerSeconds(string storyId);
-    public void DecrementSessionTimer(string storyId, double seconds = 1);
+    Task UpdateAllTimersAsync();
+    DateTimeOffset GetTurnEndTime(string storyId);
     void AddConnectionToSession(string storyId, string connectionId);
     void RemoveConnectionFromSession(string storyId, string connectionId);
     
