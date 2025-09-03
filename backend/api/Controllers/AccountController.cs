@@ -59,17 +59,15 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginUserDto loginUser)
     {
-        // TODO: remove user
-        var user = await _authService.GetUserAsync(loginUser.UserName);
-        string? token = await _authService.LoginAsync(loginUser); // TODO: remove
+        string? token = await _authService.LoginAsync(loginUser);
+        _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
 
         if(token is null)
         {
             ModelState.AddModelError("Invalid Login", "Invalid username or password");
             return BadRequest(ModelState);
         }
-
-        // TODO: remove username
+        
         return Ok(new TokenResponse { Token = token }); 
     }
     
