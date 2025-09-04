@@ -6,7 +6,7 @@ public class AppUser : IdentityUser<int>
 {
     public override string UserName { get; set; } = string.Empty;
     public override string Email { get; set; } = string.Empty;
-    public string Nickname { get; set; } = string.Empty;
+    public string NickName { get; set; } = string.Empty;
     public DateTimeOffset CreatedDate { get; set; }
     public string Description { get; set; } = string.Empty;
     public string ProfileImage { get; set; } = string.Empty;

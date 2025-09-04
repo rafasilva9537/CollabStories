@@ -18,7 +18,7 @@ public static class SeedTestDatabase
             Email = adminEmail,
             NormalizedUserName = adminUserName.ToUpper(),
             NormalizedEmail = adminEmail.ToUpper(),
-            Nickname = "Test Admin",
+            NickName = "Test Admin",
             Description = "This is a test admin",
             CreatedDate = new DateTimeOffset(2022, 1, 1, 0, 0, 0, new TimeSpan(0)),
         };

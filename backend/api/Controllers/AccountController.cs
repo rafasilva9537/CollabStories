@@ -87,12 +87,27 @@ public class AccountController : ControllerBase
         return Ok(appUser);
     }
     
-    [HttpPut("{username}/update")]
-    public async Task<ActionResult<AppUserDto>> UpdateUser([FromBody] UpdateUserDto updateUserData)
+    [HttpGet("me")]
+    public async Task<ActionResult<AppUserDto>> GetLoggedUser()
     {
-        AppUserDto updatedUser = await _authService.UpdateUserAsync(updateUserData);
-        return CreatedAtAction(nameof(GetUser), new { username = updatedUser.UserName }, updatedUser);
-    } 
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if (loggedUser is null) return Forbid();
+        
+        AppUserDto? appUser = await _authService.GetUserAsync(loggedUser);
+        if(appUser is null) return NotFound();
+        
+        return Ok(appUser);
+    }
+    
+    [HttpPut("me")]
+    public async Task<ActionResult<AppUserDto>> UpdateUser([FromBody] UpdateUserFieldsDto updateUserData)
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null) return Forbid();
+        
+        await _authService.UpdateUserFieldsAsync(loggedUser, updateUserData);
+        return Ok();
+    }
 
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
     [HttpDelete("{username}/delete")]
@@ -110,7 +125,7 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpPut("profile-image")]
+    [HttpPut("me/profile-image")]
     public async Task<ActionResult> UpdateProfileImage(IFormFile image)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -124,7 +139,7 @@ public class AccountController : ControllerBase
         return Ok();
     }
     
-    [HttpDelete("profile-image")]
+    [HttpDelete("me/profile-image")]
     public async Task<ActionResult> DeleteProfileImage()
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);

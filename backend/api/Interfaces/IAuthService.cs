@@ -24,9 +24,11 @@ public interface IAuthService
     
     Task<AppUserDto?> GetUserAsync(string username);
     
-    Task<AppUserDto> UpdateUserAsync(UpdateUserDto updateUserDto);
-    
     Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName);
     
     Task DeleteProfileImageAsync(string username, string directoryName);
+    
+    Task<AppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto);
+    
+    Task ChangeUserPasswordAsync(string userName, ChangePasswordDto changePasswordDto);
 }

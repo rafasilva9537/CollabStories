@@ -68,7 +68,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         Assert.False(string.IsNullOrEmpty(createdUser.PasswordHash));
         Assert.Equal(expectedUserName, createdUser.UserName);
         Assert.Equal(expectedEmail, createdUser.Email);
-        Assert.Equal(string.Empty, createdUser.Nickname);
+        Assert.Equal(string.Empty, createdUser.NickName);
         Assert.Equal(dateTimeProvider.UtcNow, createdUser.CreatedDate);
         Assert.True(hasUserRole);
     }
@@ -201,7 +201,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         Assert.NotNull(actualUserDto);
         Assert.Equal(expectedUser.UserName, actualUserDto.UserName);
         Assert.Equal(expectedUser.Email, actualUserDto.Email);
-        Assert.Equal(expectedUser.Nickname, actualUserDto.Nickname);
+        Assert.Equal(expectedUser.NickName, actualUserDto.Nickname);
     }
     
     [Theory]

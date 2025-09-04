@@ -339,7 +339,6 @@ public class StoryService : IStoryService
         AppUser creatorUser = await _context.AppUser
             .Where(au => au.UserName == username)
             .FirstAsync();
-                                
         AuthorInStory? authorInStory = await _context.AuthorInStory
             .FirstOrDefaultAsync(ais => ais.AuthorId == creatorUser.Id && ais.StoryId == storyId);
 

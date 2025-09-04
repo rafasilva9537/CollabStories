@@ -56,7 +56,7 @@ public class AuthService : IAuthService
             UserRegistrationException exception = new("Unable to add user to role.", errors);
             throw exception; 
         }
-
+        
         string token = await _tokenService.GenerateToken(newUser);
         return token;
     }
@@ -144,29 +144,66 @@ public class AuthService : IAuthService
         if(appUserModel is null) return null;
         return appUserModel.ToAppUserDto();
     }
-
-    public async Task<AppUserDto> UpdateUserAsync(UpdateUserDto updatedUserDto)
+    
+    public async Task<AppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto)
     {
-        AppUser updatedUser = await _context.AppUser.FirstAsync(au => au.UserName == updatedUserDto.UserName);
+        AppUser? updatedUser = await _context.AppUser
+            .FirstOrDefaultAsync(au => au.UserName == userName);
+        if (updatedUser is null) throw new UserNotFoundException("User does not exist on update attempt.");
 
-        string currentPassword = updatedUserDto.CurrentPassword;
-        string newPassword = updatedUserDto.NewPassword;
-        bool passwordIsChanged = currentPassword != string.Empty && newPassword != string.Empty;
-
-        bool userNameIsChanged = updatedUserDto.UserName != string.Empty;
-        bool descriptionIsChanged = updatedUserDto.Description != string.Empty;
-        bool emailIsChanged = updatedUserDto.Email != string.Empty;
-
-        if(passwordIsChanged)
+        bool userNameIsNullOrEmpty = string.IsNullOrEmpty(updateUserFieldsDto.UserName);
+        bool nickNameIsNullOrEmpty = string.IsNullOrEmpty(updateUserFieldsDto.NickName);
+        bool emailIsNullOrEmpty = string.IsNullOrEmpty(updateUserFieldsDto.Email);
+        bool descriptionIsNullOrEmpty = string.IsNullOrEmpty(updateUserFieldsDto.Description);
+        
+        if (userNameIsNullOrEmpty && emailIsNullOrEmpty && descriptionIsNullOrEmpty && nickNameIsNullOrEmpty)
         {
-            await _userManager.ChangePasswordAsync(updatedUser, currentPassword, newPassword);
+            _logger.LogWarning("User {UserName} tried to update fields without any field to update.", userName);
+            throw new ArgumentException("At least one field must be updated.");
         }
-        if(userNameIsChanged) updatedUser.UserName = updatedUser.UserName;
-        if(descriptionIsChanged) updatedUser.Description = updatedUserDto.Description;
-        if(emailIsChanged) updatedUser.Email = updatedUserDto.Email;
+        
+        if (!userNameIsNullOrEmpty) updatedUser.UserName = updateUserFieldsDto.UserName!;
+        if (!emailIsNullOrEmpty) updatedUser.Email = updateUserFieldsDto.Email!;
+        if (!descriptionIsNullOrEmpty) updatedUser.Description = updateUserFieldsDto.Description!;
+        if(!nickNameIsNullOrEmpty) updatedUser.NickName = updateUserFieldsDto.NickName!;
+        
+        IdentityResult updateResult = await _userManager.UpdateAsync(updatedUser);
+        if (!updateResult.Succeeded)
+        {
+            var errors = updateResult.Errors.ToList();
+            UserRegistrationException exception = new("Unable to update user fields.", errors);
+            throw exception;
+        }
+        
+        AppUserDto appUserDto = updatedUser.ToAppUserDto();
+        return appUserDto;
+    }
 
-        await _userManager.UpdateAsync(updatedUser);
-        return updatedUser.ToAppUserDto();
+    public async Task ChangeUserPasswordAsync(string userName, ChangePasswordDto changePasswordDto)
+    {
+        AppUser? user = await _context.AppUser
+            .FirstOrDefaultAsync(au => au.UserName == userName);
+        if(user is null) throw new UserNotFoundException("User does not exist on password change attempt.");
+        
+        if (string.IsNullOrWhiteSpace(changePasswordDto.CurrentPassword) || 
+            string.IsNullOrWhiteSpace(changePasswordDto.NewPassword))
+        {
+            _logger.LogWarning("User {UserName} tried to change password without providing a password.", userName);
+            throw new ArgumentException("Passwords cannot be empty.");
+        }
+        
+        IdentityResult changePasswordResult = await _userManager.ChangePasswordAsync(
+            user,
+            changePasswordDto.CurrentPassword, 
+            changePasswordDto.NewPassword
+        );
+
+        if(!changePasswordResult.Succeeded)
+        {
+            var errors = changePasswordResult.Errors.ToList();
+            UserPasswordException exception = new("User password change failed.", errors);
+            throw exception;
+        }
     }
 
     public async Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName)
@@ -205,4 +242,5 @@ public class AuthService : IAuthService
         user.ProfileImage = string.Empty;
         await _context.SaveChangesAsync();
     }
+
 }

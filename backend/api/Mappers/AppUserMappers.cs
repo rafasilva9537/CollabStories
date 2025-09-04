@@ -12,7 +12,7 @@ public static class AppUserMappers
         return new AppUserDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.Nickname,
+            Nickname = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
             Email = appUser.Email,
             Description = appUser.Description,
@@ -24,7 +24,7 @@ public static class AppUserMappers
         return new UserMainInfoDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.Nickname,
+            Nickname = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
         };
     }
@@ -33,7 +33,7 @@ public static class AppUserMappers
         new UserMainInfoDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.Nickname,
+            Nickname = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
         };
 

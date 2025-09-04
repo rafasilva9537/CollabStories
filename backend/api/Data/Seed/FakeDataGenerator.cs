@@ -27,7 +27,7 @@ public class FakeDataGenerator
     {
         Faker<AppUser> fakeAppUser = new Faker<AppUser>()
             .UseSeed(_seed)
-            .RuleFor(au => au.Nickname, f => f.Name.FirstName())
+            .RuleFor(au => au.NickName, f => f.Name.FirstName())
             .RuleFor(au => au.UserName, (f, au) => f.Internet.UserName().ToLower())
             .RuleFor(au => au.NormalizedUserName, (f, au) => au.UserName.ToUpper())
             .RuleFor(au => au.Description, f => f.Lorem.Sentence(5, 15))
