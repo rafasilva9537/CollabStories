@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +34,7 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(typeof(PagedKeysetStoryList<UserMainInfoDto>),StatusCodes.Status200OK)]
-    public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers(
+    public async Task<ActionResult<PagedKeysetStoryList<UserMainInfoDto>>> GetUsers(
         [FromQuery] DateTimeOffset? lastDate, 
         [FromQuery] string? lastUserName)
     {
@@ -51,12 +52,12 @@ public class AccountController : ControllerBase
         try
         {
             string token = await _authService.RegisterAsync(registerUser);
-            _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
+            _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, _dateTimeProvider.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
         catch (UserRegistrationException ex)
         {
-            _logger.LogWarning(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
+            _logger.LogWarning(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, _dateTimeProvider.UtcNow);
             var errors = ex.Errors;
             
             if (errors is null) return ValidationProblem(ModelState);
@@ -78,7 +79,7 @@ public class AccountController : ControllerBase
 
             if(token is null) return Unauthorized();
         
-            _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
+            _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, _dateTimeProvider.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
         catch (UserNotFoundException ex)
@@ -137,7 +138,7 @@ public class AccountController : ControllerBase
     }
 
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
-    [HttpDelete("{username}/delete")]
+    [HttpDelete("{username}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -158,6 +159,7 @@ public class AccountController : ControllerBase
     [HttpPut("me/profile-image")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [Consumes(MediaTypeNames.Multipart.FormData)]
     public async Task<ActionResult> UpdateProfileImage(IFormFile image)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
