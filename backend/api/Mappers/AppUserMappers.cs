@@ -12,9 +12,8 @@ public static class AppUserMappers
         return new AppUserDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.NickName,
+            NickName = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
-            Email = appUser.Email,
             Description = appUser.Description,
         };
     }

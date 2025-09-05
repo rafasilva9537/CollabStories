@@ -48,7 +48,7 @@ public class AccountControllerTests : IClassFixture<AccountControllerFixture>
         AppUserDto? user = await response.Content.ReadFromJsonAsync<AppUserDto>();
         Assert.NotNull(user);
         Assert.Equal(expectedUser.UserName, user.UserName);
-        Assert.Equal(expectedUser.Email, user.Email);
+        Assert.Equal(expectedUser.NickName, user.NickName);
     }
     
     [Fact]

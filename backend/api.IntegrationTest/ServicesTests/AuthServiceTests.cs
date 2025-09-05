@@ -200,8 +200,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         // Assert
         Assert.NotNull(actualUserDto);
         Assert.Equal(expectedUser.UserName, actualUserDto.UserName);
-        Assert.Equal(expectedUser.Email, actualUserDto.Email);
-        Assert.Equal(expectedUser.NickName, actualUserDto.Nickname);
+        Assert.Equal(expectedUser.NickName, actualUserDto.NickName);
     }
     
     [Theory]

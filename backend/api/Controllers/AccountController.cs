@@ -7,6 +7,7 @@ using api.Dtos.HttpResponses;
 using api.Dtos.Pagination;
 using api.Exceptions;
 using api.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace api.Controllers;
 
@@ -31,6 +32,7 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
+    [ProducesResponseType(typeof(PagedKeysetStoryList<UserMainInfoDto>),StatusCodes.Status200OK)]
     public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers(
         [FromQuery] DateTimeOffset? lastDate, 
         [FromQuery] string? lastUserName)
@@ -42,6 +44,8 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("register")]
+    [ProducesResponseType(typeof(TokenResponse),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblem), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TokenResponse>> Register([FromBody] RegisterUserDto registerUser)
     {
         try
@@ -53,10 +57,18 @@ public class AccountController : ControllerBase
         catch (UserRegistrationException ex)
         {
             _logger.LogError(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
-            var errors = ex.Errors?.ToDictionary();
-
-            ValidationProblemDetails problemDetails = new(errors ?? []);
-            return ValidationProblem(problemDetails);
+            var errors = ex.Errors;
+            
+            if (errors is null) return ValidationProblem(ModelState);
+            foreach (var error in errors)
+            {
+                foreach (string description in error.Value)
+                {
+                    ModelState.AddModelError(error.Key, description);
+                }
+            }
+            
+            return ValidationProblem(ModelState);
         }
     }
 
@@ -64,19 +76,25 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginUserDto loginUser)
     {
-        string? token = await _authService.LoginAsync(loginUser);
-
-        if(token is null)
+        try
         {
-            ModelState.AddModelError("Invalid Login", "Invalid username or password");
-            return BadRequest(ModelState);
-        }
+            string? token = await _authService.LoginAsync(loginUser);
+
+            if(token is null)
+            {
+                ModelState.AddModelError("Invalid Login", "Invalid username or password");
+                return BadRequest(ModelState);
+            }
         
-        _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
-        return Ok(new TokenResponse { Token = token }); 
+            _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
+            return Ok(new TokenResponse { Token = token });
+        }
+        catch (UserNotFoundException ex)
+        {
+            return Forbid();
+        }
     }
     
-    // TODO: return less detailed user data if not the logged user or admin
     [HttpGet("{username}")]
     public async Task<ActionResult<AppUserDto>> GetUser([FromRoute] string username)
     {
