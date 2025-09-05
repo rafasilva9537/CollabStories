@@ -24,29 +24,29 @@ public interface IStoryService
     // TODO: possible addition of logged user parameter when service to controller validation is implemented
     Task<StoryDto> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
     
-    Task<bool> IsStoryOwner(string username, int storyId);
+    Task<bool> IsStoryOwner(string userName, int storyId);
     
     Task<string> ChangeToNextCurrentAuthorAsync(int storyId);
     
     Task<string?> GetCurrentAuthorUserNameAsync(int storyId);
     
-    Task ChangeCurrentStoryAuthorAsync(int storyId, string username);
+    Task ChangeCurrentStoryAuthorAsync(int storyId, string userName);
     
     Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId);
     
-    Task<bool> JoinStoryAsync(string username, int storyId);
+    Task<bool> JoinStoryAsync(string userName, int storyId);
     
-    Task<bool> LeaveStoryAsync(string username, int storyId);
+    Task<bool> LeaveStoryAsync(string userName, int storyId);
     
-    Task<bool> IsStoryAuthorAsync(string username, int storyId);
+    Task<bool> IsStoryAuthorAsync(string userName, int storyId);
     
     Task<bool> StoryExistsAsync(int storyId);
     
     Task<StoryInfoForSessionDto?> GetStoryInfoForSessionAsync(int storyId);
 
-    Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string username, CreateStoryPartDto storyPartDto);
+    Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string userName, CreateStoryPartDto storyPartDto);
     
     Task<bool> DeleteStoryPart(int storyId, int storyPartId);
     
-    Task<bool> IsStoryPartCreator(string username, int storyPartId);
+    Task<bool> IsStoryPartCreator(string userName, int storyPartId);
 }
