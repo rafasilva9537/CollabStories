@@ -45,7 +45,7 @@ public class AccountControllerTests : IClassFixture<AccountControllerFixture>
         Assert.Equal(MediaTypeNames.Application.Json, contentType.MediaType);
         Assert.Equal("utf-8", contentType.CharSet);
 
-        AppUserDto? user = await response.Content.ReadFromJsonAsync<AppUserDto>();
+        PublicAppUserDto? user = await response.Content.ReadFromJsonAsync<PublicAppUserDto>();
         Assert.NotNull(user);
         Assert.Equal(expectedUser.UserName, user.UserName);
         Assert.Equal(expectedUser.NickName, user.NickName);

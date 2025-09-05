@@ -69,16 +69,16 @@ public class AuthService : IAuthService
     /// <exception cref="UserNotFoundException">Thrown when the username does not exist.</exception>
     public async Task<string?> LoginAsync(LoginUserDto loginUserDto)
     {
-        AppUser? loggedUser = await _userManager.FindByNameAsync(loginUserDto.UserName);
-        if(loggedUser is null) throw new UserNotFoundException("User does not exist on login attempt.");
+        AppUser? user = await _userManager.FindByNameAsync(loginUserDto.UserName);
+        if(user is null) throw new UserNotFoundException("User does not exist on login attempt.");
 
         string password = loginUserDto.Password;
-        if(!await _userManager.CheckPasswordAsync(loggedUser, password))
+        if(!await _userManager.CheckPasswordAsync(user, password))
         {
             return null;
         }
         
-        string token = await _tokenService.GenerateToken(loggedUser);
+        string token = await _tokenService.GenerateToken(user);
         return token;
     }
     
@@ -125,27 +125,39 @@ public class AuthService : IAuthService
         return keySetUsersUserList;
     }
 
-    public async Task DeleteByNameAsync(string username)
+    public async Task DeleteByNameAsync(string userName)
     {
-        AppUser? userModel = await _userManager.FindByNameAsync(username);
+        AppUser? userModel = await _userManager.FindByNameAsync(userName);
         if(userModel is null) throw new UserNotFoundException("User does not exist on delete attempt.");
         
         await _userManager.DeleteAsync(userModel);
     }
 
     /// <summary>
-    /// Retrieves the details of a user based on the provided username.
+    /// Retrieves the public details of a user based on the provided username.
     /// </summary>
-    /// <param name="username">The username of the user to retrieve.</param>
-    /// <returns>An <see cref="AppUserDto"/> object representing the user's details if found; otherwise, null.</returns>
-    public async Task<AppUserDto?> GetUserAsync(string username)
+    /// <param name="userName">The username of the user to retrieve.</param>
+    /// <returns>An <see cref="PublicAppUserDto"/> object representing the user's public details if found, otherwise, null.</returns>
+    public async Task<PublicAppUserDto?> GetPublicUserAsync(string userName)
     {
-        AppUser? appUserModel = await _userManager.FindByNameAsync(username);
+        AppUser? appUserModel = await _userManager.FindByNameAsync(userName);
         if(appUserModel is null) return null;
-        return appUserModel.ToAppUserDto();
+        return appUserModel.ToPublicAppUserDto();
+    }
+
+    /// <summary>
+    /// Retrieves the private details of a user based on the provided username.
+    /// </summary>
+    /// <param name="userName">The username of the user whose private details are to be retrieved.</param>
+    /// <returns>A <see cref="PrivateAppUserDto"/> containing the public and private details of the user if found, otherwise, null.</returns>
+    public async Task<PrivateAppUserDto?> GetPrivateUserAsync(string userName)
+    {
+        AppUser? appUserModel = await _userManager.FindByNameAsync(userName);
+        if(appUserModel is null) return null;
+        return appUserModel.ToPrivateAppUserDto();
     }
     
-    public async Task<AppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto)
+    public async Task<PublicAppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto)
     {
         AppUser? updatedUser = await _context.AppUser
             .FirstOrDefaultAsync(au => au.UserName == userName);
@@ -175,7 +187,7 @@ public class AuthService : IAuthService
             throw exception;
         }
         
-        AppUserDto appUserDto = updatedUser.ToAppUserDto();
+        PublicAppUserDto appUserDto = updatedUser.ToPublicAppUserDto();
         return appUserDto;
     }
 
@@ -206,10 +218,10 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName)
+    public async Task UpdateProfileImageAsync(string userName, IFormFile image, string directoryName)
     {
         AppUser? user = await _context.AppUser
-            .FirstOrDefaultAsync(au => au.UserName == username);
+            .FirstOrDefaultAsync(au => au.UserName == userName);
         if(user is null) throw new UserNotFoundException("User does not exist on profile image update attempt.");
         
         string savedImage = await _imageService.SaveImageAsync(image, directoryName);
@@ -221,15 +233,15 @@ public class AuthService : IAuthService
     /// <summary>
     /// Deletes the profile image of a user from the specified directory.
     /// </summary>
-    /// <param name="username">The username of the user whose profile image is to be deleted.</param>
+    /// <param name="userName">The username of the user whose profile image is to be deleted.</param>
     /// <param name="directoryName">The name of the directory where the profile images are stored.</param>
     /// <returns>A Task representing the asynchronous operation.</returns>
     /// <exception cref="UserNotFoundException">Thrown when the specified user does not exist.</exception>
     /// <exception cref="FileNotFoundException">Thrown when the user's profile has no profile image.</exception>
-    public async Task DeleteProfileImageAsync(string username, string directoryName)
+    public async Task DeleteProfileImageAsync(string userName, string directoryName)
     {
         AppUser? user = await _context.AppUser
-            .FirstOrDefaultAsync(au => au.UserName == username);
+            .FirstOrDefaultAsync(au => au.UserName == userName);
         if(user is null) throw new UserNotFoundException("User does not exist on profile image delete attempt.");
 
         if (string.IsNullOrEmpty(user.ProfileImage))

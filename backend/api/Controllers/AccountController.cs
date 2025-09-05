@@ -74,31 +74,32 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
+    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginUserDto loginUser)
     {
         try
         {
             string? token = await _authService.LoginAsync(loginUser);
 
-            if(token is null)
-            {
-                ModelState.AddModelError("Invalid Login", "Invalid username or password");
-                return BadRequest(ModelState);
-            }
+            if(token is null) return Unauthorized();
         
             _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
         catch (UserNotFoundException ex)
         {
-            return Forbid();
+            return Unauthorized();
         }
     }
     
     [HttpGet("{username}")]
-    public async Task<ActionResult<AppUserDto>> GetUser([FromRoute] string username)
+    [ProducesResponseType(typeof(PublicAppUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PublicAppUserDto>> GetUser([FromRoute] string username)
     {
-        AppUserDto? appUser = await _authService.GetUserAsync(username);
+        PublicAppUserDto? appUser = await _authService.GetPublicUserAsync(username);
 
         if(appUser is null) return NotFound();
         
@@ -106,22 +107,27 @@ public class AccountController : ControllerBase
     }
     
     [HttpGet("me")]
-    public async Task<ActionResult<AppUserDto>> GetLoggedUser()
+    [ProducesResponseType(typeof(PrivateAppUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PrivateAppUserDto>> GetLoggedUser()
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
-        if (loggedUser is null) return Forbid();
+        if (loggedUser is null) return Unauthorized();
         
-        AppUserDto? appUser = await _authService.GetUserAsync(loggedUser);
+        PrivateAppUserDto? appUser = await _authService.GetPrivateUserAsync(loggedUser);
         if(appUser is null) return NotFound();
         
         return Ok(appUser);
     }
     
     [HttpPut("me")]
-    public async Task<ActionResult<AppUserDto>> UpdateUser([FromBody] UpdateUserFieldsDto updateUserData)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult> UpdateUser([FromBody] UpdateUserFieldsDto updateUserData)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
-        if(loggedUser is null) return Forbid();
+        if(loggedUser is null) return Unauthorized();
         
         await _authService.UpdateUserFieldsAsync(loggedUser, updateUserData);
         return Ok();
@@ -129,12 +135,15 @@ public class AccountController : ControllerBase
 
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
     [HttpDelete("{username}/delete")]
-    public async Task<ActionResult<MessageResponse>> DeleteUser([FromRoute] string username)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteUser([FromRoute] string username)
     {
         try
         {
             await _authService.DeleteByNameAsync(username);
-            return Ok(new MessageResponse { Message = "User was successfully deleted." });
+            return Ok();
         }
         catch (UserNotFoundException ex)
         {
@@ -144,12 +153,14 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("me/profile-image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> UpdateProfileImage(IFormFile image)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
         if(loggedUser is null)
         {
-            return Forbid();
+            return Unauthorized();
         }
 
         await _authService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
@@ -158,13 +169,15 @@ public class AccountController : ControllerBase
     }
     
     [HttpDelete("me/profile-image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> DeleteProfileImage()
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
 
         if(loggedUser is null)
         {
-            return Forbid();
+            return Unauthorized();
         }
 
         await _authService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);

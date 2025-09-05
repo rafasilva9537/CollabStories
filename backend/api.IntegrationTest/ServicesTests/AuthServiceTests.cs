@@ -195,7 +195,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         await dbContext.SaveChangesAsync();
         
         // Act
-        AppUserDto? actualUserDto = await authService.GetUserAsync(expectedUser.UserName);
+        PublicAppUserDto? actualUserDto = await authService.GetPublicUserAsync(expectedUser.UserName);
         
         // Assert
         Assert.NotNull(actualUserDto);
@@ -216,7 +216,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         (string nonExistingUserName, _) = UniqueDataCreation.CreateUniqueUserNameAndEmail(baseUserName, baseEmail);
         
         // Act
-        AppUserDto? actualUserDto = await authService.GetUserAsync(nonExistingUserName);
+        PublicAppUserDto? actualUserDto = await authService.GetPublicUserAsync(nonExistingUserName);
         
         // Assert
         Assert.Null(actualUserDto);

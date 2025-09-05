@@ -20,15 +20,33 @@ public interface IAuthService
     /// <exception cref="UserNotFoundException">Thrown when the user does not exist in the database.</exception>
     Task<string?> LoginAsync(LoginUserDto loginUserDto);
     
-    Task DeleteByNameAsync(string username);
+    Task DeleteByNameAsync(string userName);
+
+    /// <summary>
+    /// Retrieves the public user information for a given username.
+    /// </summary>
+    /// <param name="userName">The username of the user whose public information is to be retrieved.</param>
+    /// <returns>
+    /// An instance of <see cref="PublicAppUserDto"/> containing the user's public information, such as nickname,
+    /// or null if the user does not exist.
+    /// </returns>
+    Task<PublicAppUserDto?> GetPublicUserAsync(string userName);
+
+    /// <summary>
+    /// Retrieves private user details for a specified username.
+    /// </summary>
+    /// <param name="userName">The username of the user whose private details are being retrieved.</param>
+    /// <returns>
+    /// A <see cref="PrivateAppUserDto"/> object containing the private details of the user if found,
+    /// or null if the user does not exist.
+    /// </returns>
+    Task<PrivateAppUserDto?> GetPrivateUserAsync(string userName);
     
-    Task<AppUserDto?> GetUserAsync(string username);
+    Task UpdateProfileImageAsync(string userName, IFormFile image, string directoryName);
     
-    Task UpdateProfileImageAsync(string username, IFormFile image, string directoryName);
+    Task DeleteProfileImageAsync(string userName, string directoryName);
     
-    Task DeleteProfileImageAsync(string username, string directoryName);
-    
-    Task<AppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto);
+    Task<PublicAppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto);
     
     Task ChangeUserPasswordAsync(string userName, ChangePasswordDto changePasswordDto);
 }
