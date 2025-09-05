@@ -86,17 +86,19 @@ public class FakeDataGenerator
                     });
                 }
 
-                return newAuthors
+                List<AuthorInStory> authorInStories = newAuthors
                     .DistinctBy(a => (a.AuthorId, a.StoryId))
                     .ToList();
+                s.AuthorsInStory.AddRange(authorInStories);
+                return s.AuthorsInStory;
             });
         }
 
         List<Story> stories = fakeStory.Generate(quantity).ToList();
         return stories;
     }
-
-    public List<StoryPart> GenerateStoryParts(int quantity, List<Story> possibleStories, List<AppUser>? possibleUsers = null)
+    
+    public List<StoryPart> GenerateStoryParts(int quantity, List<Story> possibleStories)
     {
         Faker<StoryPart> fakeStoryPart = new Faker<StoryPart>()
             .UseSeed(_seed)
@@ -107,18 +109,24 @@ public class FakeDataGenerator
                 Story randomStory = f.PickRandom(possibleStories);
                 return randomStory.Id;
             })
-            .RuleFor(sp => sp.UserId, f =>
+            .RuleFor(sp => sp.UserId, (f, sp) =>
             {
-                if (possibleUsers.IsNullOrEmpty()) return null;
-                AppUser randomUser = f.PickRandom(possibleUsers);
-                return randomUser.Id;
+                List<int> authorsInStory = possibleStories
+                    .Where(story => story.Id == sp.StoryId)
+                    .SelectMany(story => story.AuthorsInStory)
+                    .Select(ais => ais.AuthorId)
+                    .ToList();
+                
+                if (authorsInStory.IsNullOrEmpty()) return null;
+                int randomAuthorId = f.PickRandom(authorsInStory);
+                return randomAuthorId;
             });
 
         List<StoryPart> storyParts = fakeStoryPart.Generate(quantity).ToList();
         return storyParts;
     }
 
-    public List<AuthorInStory> GenerateAuthorsInStory(int quantity, int storyId, List<AppUser> possibleAuthors)
+    private List<AuthorInStory> GenerateAuthorsInStory(int quantity, int storyId, List<AppUser> possibleAuthors)
     {
         int authorSeed = HashCode.Combine(_seed, storyId);
         

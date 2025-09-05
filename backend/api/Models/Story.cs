@@ -18,5 +18,5 @@ public class Story
     public ICollection<StoryPart> StoryParts { get; } = [];
     public AppUser? User { get; set; }
     public AppUser? CurrentAuthor { get; set; }
-    public IList<AuthorInStory> AuthorsInStory { get; } = [];
+    public List<AuthorInStory> AuthorsInStory { get; } = [];
 }
