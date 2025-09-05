@@ -16,11 +16,16 @@ public class UserRegistrationException : IdentityErrorsBaseException
     {
     }
     
-    public UserRegistrationException(string message, IReadOnlyCollection<IdentityError> identityErrors) : base(message)
+    public UserRegistrationException(
+        string message, 
+        IReadOnlyCollection<IdentityError> identityErrors) : base(message, identityErrors)
     {
     }
     
-    public UserRegistrationException(string message, IReadOnlyCollection<IdentityError> identityErrors, Exception innerException) : base(message, innerException)
+    public UserRegistrationException(
+        string message, 
+        IReadOnlyCollection<IdentityError> identityErrors, 
+        Exception innerException) : base(message, identityErrors,innerException)
     {
     }
 }

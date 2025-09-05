@@ -16,11 +16,16 @@ public class UserPasswordException : IdentityErrorsBaseException
     {
     }
     
-    public UserPasswordException(string message, IReadOnlyCollection<IdentityError> identityErrors) : base(message)
+    public UserPasswordException(
+        string message, 
+        IReadOnlyCollection<IdentityError> identityErrors) : base(message, identityErrors)
     {
     }
     
-    public UserPasswordException(string message, IReadOnlyCollection<IdentityError> identityErrors, Exception innerException) : base(message, innerException)
+    public UserPasswordException(
+        string message, 
+        IReadOnlyCollection<IdentityError> identityErrors, 
+        Exception innerException) : base(message, identityErrors, innerException)
     {
     }
 }
