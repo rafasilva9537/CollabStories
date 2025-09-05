@@ -59,27 +59,28 @@ public class StoryController : ControllerBase
     public async Task<ActionResult<StoryDto>> UpdateStory(int storyId, [FromBody] UpdateStoryDto updateStory)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
-        if(loggedUser is null)
+        
+        if(loggedUser is null) return Forbid();
+        if(!await _storyService.IsStoryOwner(loggedUser, storyId)) return Forbid();
+
+        if (string.IsNullOrEmpty(updateStory.Title) &&
+            updateStory.Description is null && 
+            updateStory.MaximumAuthors is null &&
+            updateStory.TurnDurationSeconds is null)
         {
-            return Forbid();
-        }
-
-        if(!await _storyService.IsStoryCreator(loggedUser, storyId))
-        {
-            return Forbid();
-        }
-
-        StoryDto? updatedStory = await _storyService.UpdateStoryAsync(storyId, updateStory);
-
-        if(updatedStory == null)
-        {
-            return NotFound();
-        }
-
-        return CreatedAtAction(nameof(this.GetStory), new { id = updatedStory.Id }, updatedStory);
+            ModelState.AddModelError("AllFieldsEmpty", "At least one field must be updated.");
+            return ValidationProblem(ModelState);
+        };
+        
+        StoryDto updatedStory = await _storyService.UpdateStoryAsync(storyId, updateStory);
+        return CreatedAtAction(nameof(GetStory), new { id = updatedStory.Id }, updatedStory);
     }
 
     [HttpDelete("{storyId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<MessageResponse>> DeleteStory([FromRoute] int storyId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
@@ -88,16 +89,15 @@ public class StoryController : ControllerBase
             return Forbid();
         }
 
-        if(!await _storyService.IsStoryCreator(loggedUser, storyId))
+        if(!await _storyService.IsStoryOwner(loggedUser, storyId))
         {
             return Forbid();
         }
 
         bool isDeleted = await _storyService.DeleteStoryAsync(storyId);
+        if(!isDeleted) return NotFound();
 
-        if(!isDeleted) return NotFound(new MessageResponse { Message = "Impossible to delete. Story doesn't exist." });
-
-        return Ok(new MessageResponse { Message = "Story was successfully deleted!" } );
+        return Ok();
     }
 
 
@@ -139,7 +139,7 @@ public class StoryController : ControllerBase
     {
         CompleteStoryDto? completeStory = await _storyService.GetCompleteStoryAsync(storyId);
 
-        if(completeStory == null) return NotFound();
+        if(completeStory is null) return NotFound();
 
         return Ok(completeStory);
     }

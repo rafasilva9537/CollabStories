@@ -11,14 +11,20 @@ public interface IStoryService
     
     Task<StoryDto?> GetStoryAsync(int id);
     
-    Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username);
+    Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string userName);
     
+    /// <summary>
+    /// Deletes a story by its id.
+    /// </summary>
+    /// <param name="id">The identifier of the story to be deleted.</param>
+    /// <returns>The task that has the boolean result indicating whether the story was successfully deleted.</returns>
+    /// <remarks>The story doesn't exist if that's the case.</remarks>
     Task<bool> DeleteStoryAsync(int id);
     
     // TODO: possible addition of logged user parameter when service to controller validation is implemented
-    Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
+    Task<StoryDto> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
     
-    Task<bool> IsStoryCreator(string username, int storyId);
+    Task<bool> IsStoryOwner(string username, int storyId);
     
     Task<string> ChangeToNextCurrentAuthorAsync(int storyId);
     

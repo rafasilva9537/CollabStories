@@ -68,7 +68,7 @@ public class FakeDataGenerator
 
         if (!possibleAuthors.IsNullOrEmpty())
         {
-            fakeStory = fakeStory.RuleFor(s => s.AuthorInStory, (f, s) =>
+            fakeStory = fakeStory.RuleFor(s => s.AuthorsInStory, (f, s) =>
             {
                 int authorsQuantity = f.Random.Int(1, 7);
                 

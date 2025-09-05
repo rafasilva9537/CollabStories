@@ -15,7 +15,7 @@ public class AuthorInStoryConfiguration : IEntityTypeConfiguration<AuthorInStory
             .WithMany(a => a.AuthorInStory)
             .HasForeignKey(ais => ais.AuthorId);
         builder.HasOne(ais => ais.Story)
-            .WithMany(s => s.AuthorInStory)
+            .WithMany(s => s.AuthorsInStory)
             .HasForeignKey(ais => ais.StoryId);
         
         builder.Property(ais => ais.EntryDate).IsRequired();

@@ -25,7 +25,7 @@ public class StoryService : IStoryService
 
     public async Task<PagedKeysetStoryList<StoryMainInfoDto>> GetStoriesAsync(int? lastId = null, int pageSize = 15)
     {
-        var storiesDto = await _context.Story
+        List<StoryMainInfoDto> storiesDto = await _context.Story
             .OrderByDescending(au => au.Id)
             .Where(u => !lastId.HasValue || u.Id <= lastId)
             .Take(pageSize + 1)
@@ -53,7 +53,8 @@ public class StoryService : IStoryService
 
     public async Task<StoryDto?> GetStoryAsync(int id)
     {
-        StoryDto? storyDto = await _context.Story.Where(s => s.Id == id)
+        StoryDto? storyDto = await _context.Story
+            .Where(s => s.Id == id)
             .Select(StoryMappers.ProjectToStoryDto)
             .AsNoTracking()
             .FirstOrDefaultAsync();
@@ -61,79 +62,84 @@ public class StoryService : IStoryService
         return storyDto;
     }
 
-    public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string username)
+    public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string userName)
     {
         IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
         
         Story storyModel = createStoryDto.ToCreateStoryModel();
 
-        AppUser creatorUser = await _context.AppUser.FirstAsync(au => au.UserName == username);
-        storyModel.UserId = creatorUser.Id;
-        storyModel.CurrentAuthorId = creatorUser.Id;
+        int creatorId = await _context.AppUser
+            .Where(au => au.UserName == userName)
+            .Select(au => au.Id)
+            .FirstOrDefaultAsync();
+        if(creatorId == 0) throw new UserNotFoundException("User does not exist.");
+        
+        storyModel.UserId = creatorId;
+        storyModel.CurrentAuthorId = creatorId;
+        
+        AuthorInStory authorInStory = new() 
+        {
+            AuthorId = creatorId, 
+            StoryId = storyModel.Id,
+            EntryDate = _dateTimeProvider.UtcNow
+        };
+        storyModel.AuthorsInStory.Add(authorInStory);
         
         await _context.AddAsync(storyModel);
         await _context.SaveChangesAsync();
-
-        AuthorInStory authorInStory = new AuthorInStory 
-        {
-            AuthorId = creatorUser.Id, 
-            StoryId = storyModel.Id, 
-            EntryDate = DateTimeOffset.UtcNow
-        };
-        await _context.AuthorInStory.AddAsync(authorInStory);
-        await _context.SaveChangesAsync();
         
         await transaction.CommitAsync();
-
-        StoryDto storyDto = storyModel.ToStoryDto();
+        
+        StoryDto storyDto = storyModel.ToStoryDto(userName);
         return storyDto;
     }
 
-    public async Task<StoryDto?> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto)
+    public async Task<StoryDto> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto)
     {
         Story? storyModel = await _context.Story.FirstOrDefaultAsync(s => s.Id == storyId);
         
-        if(storyModel == null) return null;
+        if(storyModel is null) throw new StoryNotFoundException("Story does not exist.");
 
-        storyModel.UpdatedDate = DateTimeOffset.UtcNow;
-        _context.Entry(storyModel).CurrentValues.SetValues(updateStoryDto);
+        storyModel.UpdatedDate = _dateTimeProvider.UtcNow;
+        
+        bool titleIsNullOrEmpty = string.IsNullOrEmpty(updateStoryDto.Title);
+        bool descriptionIsNull = updateStoryDto.Description is null;
+        bool maximumAuthorsIsNull = updateStoryDto.MaximumAuthors is null;
+        bool turnDurationSecondsIsNull = updateStoryDto.TurnDurationSeconds is null;
+        
+        if(!titleIsNullOrEmpty) storyModel.Title = updateStoryDto.Title!;
+        if(!descriptionIsNull) storyModel.Description = updateStoryDto.Description!;
+        if(!maximumAuthorsIsNull) storyModel.MaximumAuthors = (int)updateStoryDto.MaximumAuthors!;
+        if(!turnDurationSecondsIsNull) storyModel.TurnDurationSeconds = (int)updateStoryDto.TurnDurationSeconds!;
+        
         await _context.SaveChangesAsync();
 
         StoryDto storyDto = storyModel.ToStoryDto();
-        storyDto.UserName = _context.AppUser
+        storyDto.UserName = await _context.AppUser
             .Where(au => au.Id == storyModel.UserId)
             .Select(au => au.UserName)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         return storyDto;
     }
-
+    
     public async Task<bool> DeleteStoryAsync(int id)
     {
-        Story? deletedStory = await _context.Story.Where(story => story.Id == id).FirstOrDefaultAsync();
+        Story? storyToDelete = await _context.Story
+            .Where(story => story.Id == id)
+            .FirstOrDefaultAsync();
+        if (storyToDelete is null) return false;
 
-        if(deletedStory == null)
-        {
-            return false;
-        }
-
-        _context.Story.Remove(deletedStory);
+        _context.Story.Remove(storyToDelete);
         await _context.SaveChangesAsync();
         return true;
     }
-
-    // TODO: temporary solution, this method add unnecessary round trips to the database
-    // this is will be used until service to controller validation is implemented
-    public async Task<bool> IsStoryCreator(string username, int storyId)
+    
+    public async Task<bool> IsStoryOwner(string username, int storyId)
     {
-        int userId =  await _context.AppUser
-            .Where(au => au.UserName == username)
-            .Select(au => au.Id)
-            .FirstAsync();
-
         bool isStoryCreator = await _context.Story
-            .Where(s => s.Id == storyId)
-            .AnyAsync(s => s.UserId == userId);
+            .AnyAsync(s => s.User != null && s.User.UserName == username && s.Id == storyId);
+        
         return isStoryCreator;
     }
 
@@ -144,7 +150,7 @@ public class StoryService : IStoryService
             .Select(s => new
             {
                 CurrentAuthorId = s.CurrentAuthorId,
-                AuthorsInStoryIds = s.AuthorInStory
+                AuthorsInStoryIds = s.AuthorsInStory
                     .OrderBy(ais => ais.EntryDate)
                     .Select(ais => ais.AuthorId)
                     .ToList()
