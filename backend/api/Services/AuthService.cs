@@ -183,7 +183,7 @@ public class AuthService : IAuthService
         if (!updateResult.Succeeded)
         {
             var errors = updateResult.Errors.ToList();
-            UserRegistrationException exception = new("Unable to update user fields.", errors);
+            UserUpdateException exception = new("Unable to update user fields.", errors);
             throw exception;
         }
         
@@ -213,7 +213,7 @@ public class AuthService : IAuthService
         if(!changePasswordResult.Succeeded)
         {
             var errors = changePasswordResult.Errors.ToList();
-            UserPasswordException exception = new("User password change failed.", errors);
+            UserUpdateException exception = new("User password change failed.", errors);
             throw exception;
         }
     }

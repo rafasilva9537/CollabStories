@@ -2,27 +2,27 @@
 
 namespace api.Exceptions;
 
-public class UserPasswordException : IdentityErrorsBaseException
+public class UserUpdateException : IdentityErrorsBaseException
 {
-    public UserPasswordException()
+    public UserUpdateException()
     {
     }
     
-    public UserPasswordException(string message) : base(message)
+    public UserUpdateException(string message) : base(message)
     {
     }
 
-    public UserPasswordException(string message, Exception innerException) : base(message, innerException)
+    public UserUpdateException(string message, Exception innerException) : base(message, innerException)
     {
     }
     
-    public UserPasswordException(
+    public UserUpdateException(
         string message, 
         IReadOnlyCollection<IdentityError> identityErrors) : base(message, identityErrors)
     {
     }
     
-    public UserPasswordException(
+    public UserUpdateException(
         string message, 
         IReadOnlyCollection<IdentityError> identityErrors, 
         Exception innerException) : base(message, identityErrors, innerException)

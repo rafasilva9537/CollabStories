@@ -6,8 +6,8 @@ using System.Security.Claims;
 using api.Dtos.HttpResponses;
 using api.Dtos.Pagination;
 using api.Exceptions;
+using api.Helpers;
 using api.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace api.Controllers;
 
@@ -45,7 +45,7 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     [HttpPost("register")]
     [ProducesResponseType(typeof(TokenResponse),StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblem), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TokenResponse>> Register([FromBody] RegisterUserDto registerUser)
     {
         try
@@ -56,17 +56,11 @@ public class AccountController : ControllerBase
         }
         catch (UserRegistrationException ex)
         {
-            _logger.LogError(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
+            _logger.LogWarning(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
             var errors = ex.Errors;
             
             if (errors is null) return ValidationProblem(ModelState);
-            foreach (var error in errors)
-            {
-                foreach (string description in error.Value)
-                {
-                    ModelState.AddModelError(error.Key, description);
-                }
-            }
+            ControllerHelpers.AddErrorsToModelState(errors, ModelState);
             
             return ValidationProblem(ModelState);
         }
@@ -126,11 +120,20 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> UpdateUser([FromBody] UpdateUserFieldsDto updateUserData)
     {
-        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
-        if(loggedUser is null) return Unauthorized();
+        try
+        {
+            string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+            if(loggedUser is null) return Unauthorized();
         
-        await _authService.UpdateUserFieldsAsync(loggedUser, updateUserData);
-        return Ok();
+            await _authService.UpdateUserFieldsAsync(loggedUser, updateUserData);
+            return Ok();
+        }
+        catch (UserUpdateException ex)
+        {
+            if (ex.Errors is null) return ValidationProblem(ModelState);
+            ControllerHelpers.AddErrorsToModelState(ex.Errors, ModelState);
+            return ValidationProblem(ModelState);
+        }
     }
 
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
