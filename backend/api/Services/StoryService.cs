@@ -200,43 +200,44 @@ public class StoryService : IStoryService
 
     public async Task<CompleteStoryDto?> GetCompleteStoryAsync(int storyId)
     {
-        //TODO: improve, reduce roundtrips
-        Story? completeStory =  await _context.Story
+        CompleteStoryDto? completeStoryDto =  await _context.Story
+            .AsNoTracking()
             .Where(story => story.Id == storyId)
-            .Include(story => story.StoryParts)
+            .Select(s => new CompleteStoryDto()
+            {
+                Id = s.Id,
+                Title = s.Title,
+                Description = s.Description,
+                CreatedDate = s.CreatedDate,
+                UpdatedDate = s.UpdatedDate,
+                MaximumAuthors = s.MaximumAuthors,
+                TurnDurationSeconds = s.TurnDurationSeconds,
+                CurrentAuthor = s.CurrentAuthor != null ? s.CurrentAuthor.UserName : null,
+                StoryOwner = s.User != null ? s.User.UserName : null,
+                StoryAuthors = s.AuthorsInStory
+                    .OrderBy(ais => ais.EntryDate)
+                    .Select(ais => new AuthorFromStoryInListDto()
+                    {
+                        AuthorUserName = ais.Author.UserName,
+                        EntryDate = ais.EntryDate,
+                    })
+                    .ToList()
+            })
             .FirstOrDefaultAsync();
-        
-        if(completeStory is null) return null;
-
-        string currentAuthor = await _context.AppUser
-            .Where(au => au.Id == completeStory.CurrentAuthorId)
-            .Select(au => au.UserName)
-            .FirstAsync();
-        
-        CompleteStoryDto completeStoryDto = completeStory.ToCompleteStoryDto();
-        completeStoryDto.CurrentAuthor = currentAuthor;
-
-        IList<AuthorFromStoryInListDto> storyAuthors = await _context.AuthorInStory
-            .Where(ais => ais.StoryId == storyId)
-            .Include(ais => ais.Author)
-            .OrderBy(ais => ais.EntryDate)
-            .Select(AuthorInStoryMappers.ProjectToAuthorFromStoryInListDto)
-            .ToListAsync();
-        
-        completeStoryDto.StoryAuthors = storyAuthors;
 
         return completeStoryDto;
     }
 
-    public async Task<string> GetCurrentAuthorUserNameAsync(int storyId)
+    public async Task<string?> GetCurrentAuthorUserNameAsync(int storyId)
     {
-        string? currentAuthorUserName = await _context.Story
-            .Where(s => s.Id == storyId)
-            .Select(s => s.CurrentAuthor.UserName)
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
+        bool storyExists = await _context.Story.AnyAsync(s => s.Id == storyId);
+        if(!storyExists) throw new StoryNotFoundException("Story does not exist.");
         
-        if(currentAuthorUserName is null) throw new StoryNotFoundException("Story does not exists.");
+        string? currentAuthorUserName = await _context.Story
+            .AsNoTracking()
+            .Where(s => s.Id == storyId)
+            .Select(s => s.CurrentAuthor != null ? s.CurrentAuthor.UserName : null)
+            .FirstOrDefaultAsync();
         
         return currentAuthorUserName;
     }

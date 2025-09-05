@@ -3,16 +3,16 @@ using api.Dtos.StoryPart;
 
 namespace api.Dtos.Story;
 
-// TODO: replace set with init. Solve all the conflicts generated because of the change
 public record CompleteStoryDto
 {
-    public int Id { get; set; }
-    public required string Title { get; set; }
-    public string? Description { get; set; }
-    public DateTimeOffset CreatedDate { get; set; }
-    public DateTimeOffset UpdatedDate { get; set; }
-    public int MaximumAuthors { get; set; }
-    public int TurnDurationSeconds { get; set; }
-    public string CurrentAuthor { get; set; } = string.Empty;
-    public IList<AuthorFromStoryInListDto> StoryAuthors { get; set; } = [];
+    public required int Id { get; init; }
+    public required string Title { get; init; }
+    public required string? Description { get; init; }
+    public required DateTimeOffset CreatedDate { get; init; }
+    public required DateTimeOffset UpdatedDate { get; init; }
+    public required int MaximumAuthors { get; init; }
+    public required int TurnDurationSeconds { get; init; }
+    public required string? StoryOwner { get; init; }
+    public required string? CurrentAuthor { get; init; }
+    public IList<AuthorFromStoryInListDto> StoryAuthors { get; init; } = [];
 }

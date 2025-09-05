@@ -12,7 +12,7 @@ public interface IStoryClient
     Task MessageFailed(string message);
     Task UserDisconnected(string userName);
     Task UserConnected(string userName);
-    Task SetInitialState(string currentAuthorUsername, DateTimeOffset turnEndTime);
+    Task SetInitialState(string? currentAuthorUsername, DateTimeOffset turnEndTime);
     Task ReceiveTurnChange(string newAuthorUsername, DateTimeOffset turnEndTime);
 }
 
@@ -60,7 +60,7 @@ public class StoryHub : Hub<IStoryClient>
         }
         _storySessionService.AddConnectionToSession(storySessionId, Context.ConnectionId);
 
-        string currentAuthorUsername = await _storyService.GetCurrentAuthorUserNameAsync(storyId);
+        string? currentAuthorUsername = await _storyService.GetCurrentAuthorUserNameAsync(storyId);
         DateTimeOffset turnEndTime = _storySessionService.GetTurnEndTime(storySessionId);
         await Clients.Caller.SetInitialState(currentAuthorUsername, turnEndTime);
         

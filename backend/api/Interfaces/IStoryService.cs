@@ -28,7 +28,7 @@ public interface IStoryService
     
     Task<string> ChangeToNextCurrentAuthorAsync(int storyId);
     
-    Task<string> GetCurrentAuthorUserNameAsync(int storyId);
+    Task<string?> GetCurrentAuthorUserNameAsync(int storyId);
     
     Task ChangeCurrentStoryAuthorAsync(int storyId, string username);
     
