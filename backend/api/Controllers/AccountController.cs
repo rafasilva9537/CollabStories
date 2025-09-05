@@ -82,7 +82,7 @@ public class AccountController : ControllerBase
             _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, _dateTimeProvider.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
-        catch (UserNotFoundException ex)
+        catch (UserNotFoundException)
         {
             return Unauthorized();
         }
