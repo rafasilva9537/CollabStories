@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using api.Constants;
 using api.Interfaces;
 
@@ -5,8 +6,7 @@ namespace api.Services;
 
 public class ImageService : IImageService
 {
-    // TODO: change to some immutable collection
-    private readonly string[] _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
+    private readonly ImmutableArray<string> _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
     private readonly string _imagesPath = Path.Combine(DirectoryPathConstants.Media, DirectoryPathConstants.Images);
     private readonly IWebHostEnvironment _environment;
 
