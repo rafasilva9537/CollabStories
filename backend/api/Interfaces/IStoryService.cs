@@ -22,7 +22,13 @@ public interface IStoryService
     /// <remarks>The story doesn't exist if that's the case.</remarks>
     Task<bool> DeleteStoryAsync(int id);
     
-    // TODO: possible addition of logged user parameter when service to controller validation is implemented
+    /// <summary>
+    /// Updates the details of an existing story.
+    /// </summary>
+    /// <param name="storyId">The ID of the story to be updated.</param>
+    /// <param name="updateStoryDto">The data transfer object containing the updated properties of the story.</param>
+    /// <returns>A <see cref="StoryDto"/> representing the updated story.</returns>
+    /// <exception cref="StoryNotFoundException">Thrown when the story with the given ID does not exist.</exception>
     Task<StoryDto> UpdateStoryAsync(int storyId, UpdateStoryDto updateStoryDto);
     
     Task<bool> IsStoryOwner(string userName, int storyId);
