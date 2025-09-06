@@ -4,7 +4,7 @@ using api.Exceptions;
 
 namespace api.Interfaces;
 
-public interface IAuthService
+public interface IAccountService
 {
     Task<PagedKeysetUserList<UserMainInfoDto>> GetUsersAsync(DateTimeOffset? lastDate = null, string? lastUserName = null, int pageSize = 15);
     

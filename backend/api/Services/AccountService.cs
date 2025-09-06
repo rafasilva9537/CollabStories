@@ -11,21 +11,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
 
-public class AuthService : IAuthService
+public class AccountService : IAccountService
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IImageService _imageService;
-    private readonly ILogger<AuthService> _logger;
-    public AuthService(
+    private readonly ILogger<AccountService> _logger;
+    public AccountService(
         ApplicationDbContext context, 
         UserManager<AppUser> userManager, 
         ITokenService tokenService,
         IDateTimeProvider dateTimeProvider,
         IImageService imageService,
-        ILogger<AuthService> logger)
+        ILogger<AccountService> logger)
     {
         _context = context;
         _userManager = userManager;

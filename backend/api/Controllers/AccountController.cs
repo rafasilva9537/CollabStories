@@ -17,16 +17,16 @@ namespace api.Controllers;
 [Route("accounts")]
 public class AccountController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly IAccountService _accountService;
     private readonly ILogger<AccountController> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     
     public AccountController(
-        IAuthService authService, 
+        IAccountService accountService, 
         ILogger<AccountController> logger, 
         IDateTimeProvider dateTimeProvider)
     {
-        _authService = authService;
+        _accountService = accountService;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
     }
@@ -39,7 +39,7 @@ public class AccountController : ControllerBase
         [FromQuery] string? lastUserName)
     {
         const int pageSize = 15;
-        PagedKeysetUserList<UserMainInfoDto> pagedUsers = await _authService.GetUsersAsync(lastDate, lastUserName, pageSize);
+        PagedKeysetUserList<UserMainInfoDto> pagedUsers = await _accountService.GetUsersAsync(lastDate, lastUserName, pageSize);
         return Ok(pagedUsers);
     }
 
@@ -51,7 +51,7 @@ public class AccountController : ControllerBase
     {
         try
         {
-            string token = await _authService.RegisterAsync(registerUser);
+            string token = await _accountService.RegisterAsync(registerUser);
             _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, _dateTimeProvider.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
@@ -75,7 +75,7 @@ public class AccountController : ControllerBase
     {
         try
         {
-            string? token = await _authService.LoginAsync(loginUser);
+            string? token = await _accountService.LoginAsync(loginUser);
 
             if(token is null) return Unauthorized();
         
@@ -94,7 +94,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PublicAppUserDto>> GetUser([FromRoute] string username)
     {
-        PublicAppUserDto? appUser = await _authService.GetPublicUserAsync(username);
+        PublicAppUserDto? appUser = await _accountService.GetPublicUserAsync(username);
 
         if(appUser is null) return NotFound();
         
@@ -110,7 +110,7 @@ public class AccountController : ControllerBase
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
         if (loggedUser is null) return Unauthorized();
         
-        PrivateAppUserDto? appUser = await _authService.GetPrivateUserAsync(loggedUser);
+        PrivateAppUserDto? appUser = await _accountService.GetPrivateUserAsync(loggedUser);
         if(appUser is null) return NotFound();
         
         return Ok(appUser);
@@ -126,7 +126,7 @@ public class AccountController : ControllerBase
             string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
             if(loggedUser is null) return Unauthorized();
         
-            await _authService.UpdateUserFieldsAsync(loggedUser, updateUserData);
+            await _accountService.UpdateUserFieldsAsync(loggedUser, updateUserData);
             return Ok();
         }
         catch (UserUpdateException ex)
@@ -146,7 +146,7 @@ public class AccountController : ControllerBase
     {
         try
         {
-            await _authService.DeleteByNameAsync(username);
+            await _accountService.DeleteByNameAsync(username);
             return Ok();
         }
         catch (UserNotFoundException ex)
@@ -168,7 +168,7 @@ public class AccountController : ControllerBase
             return Unauthorized();
         }
 
-        await _authService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
+        await _accountService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
 
         return Ok();
     }
@@ -185,7 +185,7 @@ public class AccountController : ControllerBase
             return Unauthorized();
         }
 
-        await _authService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
+        await _accountService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
 
         return Ok();
     }
