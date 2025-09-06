@@ -85,6 +85,8 @@ public interface IStoryService
     /// <exception cref="StoryNotFoundException">Thrown when the specified story does not exist.</exception>
     Task<StoryPartDto?> CreateStoryPartAsync(int storyId, string userName, CreateStoryPartDto storyPartDto);
     
+    Task<PagedKeysetStoryList<StoryPartInListDto>> GetStoryPartsAsync(int storyId, int? lastId = null, int pageSize = 15);
+    
     Task<bool> DeleteStoryPart(int storyId, int storyPartId);
     
     Task<bool> IsStoryPartCreator(string userName, int storyPartId);

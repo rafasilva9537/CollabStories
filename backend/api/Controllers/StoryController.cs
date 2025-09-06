@@ -33,18 +33,31 @@ public class StoryController : ControllerBase
 
         return Ok(stories);
     }
-
+    
     [AllowAnonymous]
-    [HttpGet("{id:int}")]
+    [HttpGet("{storyId:int}/summary")]
     [ProducesResponseType(typeof(StoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<StoryDto>> GetStory(int id)
+    public async Task<ActionResult<StoryDto>> GetStory(int storyId)
     {
-        StoryDto? story = await _storyService.GetStoryAsync(id);
+        StoryDto? story = await _storyService.GetStoryAsync(storyId);
 
         if(story is null) return NotFound();
         
         return Ok(story);
+    }
+    
+    [AllowAnonymous]
+    [HttpGet("{storyId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]    
+    public async Task<ActionResult<CompleteStoryDto>> GetCompleteStory([FromRoute] int storyId)
+    {
+        CompleteStoryDto? completeStory = await _storyService.GetCompleteStoryAsync(storyId);
+
+        if(completeStory is null) return NotFound();
+
+        return Ok(completeStory);
     }
 
     [HttpPost]
@@ -191,18 +204,15 @@ public class StoryController : ControllerBase
             return NotFound();
         }
     }
-    
-    [AllowAnonymous]
+
     [HttpGet("{storyId:int}/story-parts")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]    
-    public async Task<ActionResult<CompleteStoryDto>> GetCompleteStory([FromRoute] int storyId)
+    public async Task<ActionResult<PagedKeysetStoryList<StoryPartInListDto>>> GetStoryParts(
+        [FromRoute] int storyId,
+        [FromQuery] int? lastId)
     {
-        CompleteStoryDto? completeStory = await _storyService.GetCompleteStoryAsync(storyId);
-
-        if(completeStory is null) return NotFound();
-
-        return Ok(completeStory);
+        PagedKeysetStoryList<StoryPartInListDto> storyParts = await _storyService.GetStoryPartsAsync(storyId, lastId);
+        
+        return Ok(storyParts);
     }
     
     [HttpDelete("{storyId:int}/story-parts/{storyPartId:int}")]

@@ -372,6 +372,35 @@ public class StoryService : IStoryService
         return newStoryPart.ToStoryPartDto();
     }
 
+    public async Task<PagedKeysetStoryList<StoryPartInListDto>> GetStoryPartsAsync(int storyId, int? lastId = null, int pageSize = 15)
+    {
+        List<StoryPartInListDto> storyParts = await _context.StoryPart
+            .AsNoTracking()
+            .Where(sp => sp.StoryId == storyId)
+            .OrderByDescending(sp => sp.Id)
+            .Where(sp => !lastId.HasValue || sp.Id <= lastId)
+            .Take(pageSize + 1)
+            .Select(StoryPartMappers.ProjectToStoryPartInListDto)
+            .ToListAsync();
+        
+        bool hasMore = storyParts.Count > pageSize;
+        int? nextId = null;
+        if (hasMore)
+        {
+            nextId = storyParts[^1].Id;
+            storyParts.RemoveAt(storyParts.Count - 1);
+        }
+
+        PagedKeysetStoryList<StoryPartInListDto> pagedStoryParts = new()
+        {
+            Items = storyParts,
+            HasMore = hasMore,
+            NextId = nextId
+        };
+
+        return pagedStoryParts;
+    }
+
     public async Task<bool> DeleteStoryPart(int storyId, int storyPartId)
     {
         StoryPart? storyPartToDelete = await _context.StoryPart.FirstOrDefaultAsync(storyPart => storyPart.Id == storyPartId);
