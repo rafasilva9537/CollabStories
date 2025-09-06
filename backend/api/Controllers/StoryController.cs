@@ -144,6 +144,7 @@ public class StoryController : ControllerBase
         return Ok(completeStory);
     }
 
+    [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
     [HttpPost("{storyId}/story-parts")]
     public async Task<ActionResult<StoryPartDto>> CreateStoryPart([FromRoute] int storyId, [FromBody] CreateStoryPartDto storyPartDto)
     {
@@ -164,20 +165,13 @@ public class StoryController : ControllerBase
     public async Task<ActionResult<MessageResponse>> DeleteStoryPart([FromRoute] int storyId, [FromRoute] int storyPartId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
-        if(loggedUser is null)
-        {
-            return Forbid();
-        }
+        if (loggedUser is null) return Unauthorized();
 
-        if(!await _storyService.IsStoryPartCreator(loggedUser, storyPartId))
-        {
-            return Forbid();
-        }
+        if (!await _storyService.IsStoryPartCreator(loggedUser, storyPartId)) return Forbid();
 
         bool isDeleted = await _storyService.DeleteStoryPart(storyId, storyPartId);
+        if (!isDeleted) return NotFound();
 
-        if(!isDeleted) return NotFound(new MessageResponse { Message = "Impossible to delete. Story part doesn't exist in specified Story." });
-
-        return Ok(new MessageResponse { Message = "Story part was successfully deleted!" } );
+        return Ok();
     }
 }

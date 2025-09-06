@@ -64,15 +64,15 @@ public class StoryService : IStoryService
 
     public async Task<StoryDto> CreateStoryAsync(CreateStoryDto createStoryDto, string userName)
     {
-        IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+        await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
         
         Story storyModel = createStoryDto.ToCreateStoryModel();
-
+        
         int creatorId = await _context.AppUser
             .Where(au => au.UserName == userName)
             .Select(au => au.Id)
             .FirstOrDefaultAsync();
-        if(creatorId == 0) throw new UserNotFoundException("User does not exist.");
+        if(creatorId == 0) throw new UserNotFoundException($"User does not exist with username: {userName}.");
         
         storyModel.UserId = creatorId;
         storyModel.CurrentAuthorId = creatorId;
@@ -241,17 +241,7 @@ public class StoryService : IStoryService
         
         return currentAuthorUserName;
     }
-
-    /// <summary>
-    /// Allows a user to join a story, registering them as an author for the specified story.
-    /// </summary>
-    /// <param name="userName">The username of the user attempting to join the story.</param>
-    /// <param name="storyId">The id of the story the user wants to join.</param>
-    /// <returns>
-    /// Returns true if the user successfully joined the story, otherwise, false if the user was already part of the story.
-    /// </returns>
-    /// <exception cref="UserNotFoundException">Thrown when the specified user does not exist.</exception>
-    /// <exception cref="StoryNotFoundException">Thrown when the specified story does not exist.</exception>
+    
     public async Task<bool> JoinStoryAsync(string userName, int storyId)
     {
         var userAndStory = await _context.AppUser
@@ -263,7 +253,7 @@ public class StoryService : IStoryService
             })
             .FirstOrDefaultAsync();
         
-        if(userAndStory is null) throw new UserNotFoundException("User does not exist.");
+        if(userAndStory is null) throw new UserNotFoundException($"User does not exist with username: {userName}.");
         if(!userAndStory.StoryExists) throw new StoryNotFoundException("Story does not exist.");
 
         int userId = userAndStory.UserId;
@@ -283,20 +273,22 @@ public class StoryService : IStoryService
 
         return true;
     }
-
+    
     public async Task<bool> LeaveStoryAsync(string userName, int storyId)
     {
-        // TODO: decrease roundtrips
-        int userId = await _context.AppUser
+        var userAndStory = await _context.AppUser
             .Where(au => au.UserName == userName)
-            .Select(au => au.Id)
-            .FirstAsync();
-
-        bool storyExists = await _context.Story
-            .Where(s => s.Id == storyId)
-            .AnyAsync();
-        if(!storyExists) return false;
-
+            .Select(au => new
+            {
+                UserId = au.Id,
+                StoryExists = _context.Story.Any(s => s.Id == storyId)
+            })
+            .FirstOrDefaultAsync();
+        
+        if(userAndStory is null) throw new UserNotFoundException($"User does not exist with username: {userName}.");
+        if(!userAndStory.StoryExists) throw new StoryNotFoundException("Story does not exist.");
+        
+        int userId = userAndStory.UserId;
         AuthorInStory? authorInStory = await _context.AuthorInStory 
             .FirstOrDefaultAsync(ais => ais.AuthorId == userId && ais.StoryId == storyId);
         if(authorInStory is null) return false;
@@ -309,12 +301,11 @@ public class StoryService : IStoryService
 
     public async Task<bool> IsStoryAuthorAsync(string userName, int storyId)
     {
-        int? userId = await _context.AppUser
+        int userId = await _context.AppUser
             .Where(au => au.UserName == userName)
             .Select(au => au.Id)
             .FirstOrDefaultAsync();
-
-        if(userId is null) return false;
+        if(userId <= 0) throw new UserNotFoundException($"User does not exist with username: {userName}.");
 
         bool isInStory = await _context.AuthorInStory
             .AnyAsync(ais => ais.StoryId == storyId && ais.AuthorId == userId);
@@ -330,9 +321,9 @@ public class StoryService : IStoryService
     public async Task<StoryInfoForSessionDto?> GetStoryInfoForSessionAsync(int storyId)
     {
         StoryInfoForSessionDto? storyInfo = await _context.Story
+            .AsNoTracking()
             .Where(s => s.Id == storyId)
             .Select(StoryMappers.ProjectToStoryInfoForSessionDto)
-            .AsNoTracking()
             .FirstOrDefaultAsync();
         
         return storyInfo;
@@ -340,12 +331,14 @@ public class StoryService : IStoryService
 
     public async Task ChangeCurrentStoryAuthorAsync(int storyId, string userName)
     {
-        Story story = await _context.Story.FirstAsync(s => s.Id == storyId);
+        Story? story = await _context.Story.FirstOrDefaultAsync(s => s.Id == storyId);
+        if(story is null) throw new StoryNotFoundException("Story does not exist.");
         
         int authorId = await _context.AppUser
             .Where(au => au.UserName == userName)
             .Select(au => au.Id)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
+        if(authorId <= 0) throw new UserNotFoundException($"User does not exist with username: {userName}.");
 
         story.CurrentAuthorId = authorId;
         await _context.SaveChangesAsync();
@@ -356,14 +349,23 @@ public class StoryService : IStoryService
         StoryPart newStoryPart = storyPartDto.ToStoryPartModel();
         newStoryPart.StoryId = storyId;
 
-        AppUser creatorUser = await _context.AppUser
+        AppUser? creatorUser = await _context.AppUser
             .Where(au => au.UserName == userName)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
+        if(creatorUser is null) throw new UserNotFoundException($"User does not exist with username: {userName}.");
+        
         AuthorInStory? authorInStory = await _context.AuthorInStory
             .FirstOrDefaultAsync(ais => ais.AuthorId == creatorUser.Id && ais.StoryId == storyId);
+        if(authorInStory is null) throw new UserNotInStoryException("User not part of story.");
 
-        if(authorInStory is null) return null;
-
+        int? currentStoryAuthorId = await _context.Story
+            .Where(s => s.Id == storyId)
+            .Select(s => s.CurrentAuthorId)
+            .FirstOrDefaultAsync();
+        if(currentStoryAuthorId is null) throw new StoryNotFoundException("Story does not exist.");
+        
+        if (currentStoryAuthorId != creatorUser.Id) return null;
+        
         newStoryPart.UserId = creatorUser.Id;
         await _context.AddAsync(newStoryPart);
         await _context.SaveChangesAsync();
@@ -372,23 +374,22 @@ public class StoryService : IStoryService
 
     public async Task<bool> DeleteStoryPart(int storyId, int storyPartId)
     {
-        StoryPart? deletedStoryPart = _context.StoryPart.FirstOrDefault(storyPart => storyPart.Id == storyPartId);
+        StoryPart? storyPartToDelete = await _context.StoryPart.FirstOrDefaultAsync(storyPart => storyPart.Id == storyPartId);
+        
+        if(storyPartToDelete is null || storyPartToDelete.StoryId != storyId) return false;
 
-        if(deletedStoryPart == null || deletedStoryPart.StoryId != storyId) return false;
-
-        _context.Remove(deletedStoryPart);
+        _context.Remove(storyPartToDelete);
         await _context.SaveChangesAsync();
         return true;
     }
-
-    // TODO: temporary solution, this method add unnecessary round trips to the database
-    // this is will be used until service to controller validation is implemeneted
+    
     public async Task<bool> IsStoryPartCreator(string userName, int storyPartId)
     {
         int userId =  await _context.AppUser
             .Where(au => au.UserName == userName)
             .Select(au => au.Id)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
+        if (userId <= 0) throw new UserNotFoundException($"User does not exist with username: {userName}.");
 
         bool isStoryPartCreator = await _context.StoryPart
             .Where(s => s.Id == storyPartId)

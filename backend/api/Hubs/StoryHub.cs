@@ -123,8 +123,8 @@ public class StoryHub : Hub<IStoryClient>
         StoryPartDto? createdStoryPart = await _storyService.CreateStoryPartAsync(storyId, userName, newStoryPart);
         if(createdStoryPart is null)
         {
-            await Clients.Caller.MessageFailed("Unable to send message. User isn't in story.");
-            _logger.LogWarning("User '{UserName}' tried to send message to story {StoryId} that he is not in.", userName, storyId);
+            await Clients.Caller.MessageFailed("Unable to send message. User isn't current author of story.");
+            _logger.LogWarning("User '{UserName}' tried to send message to story {StoryId} that he is not current author of.", userName, storyId);
             return;
         }
         
