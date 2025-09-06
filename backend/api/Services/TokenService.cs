@@ -49,7 +49,7 @@ public class TokenService : ITokenService
             Subject = new ClaimsIdentity(claims),
             Issuer = issuer,
             Audience = audience,
-            Expires = _dateTimeProvider.UtcNowDateTime.AddDays(7), // TODO: decrease time in production
+            Expires = _dateTimeProvider.UtcNowDateTime.AddDays(1),
             SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
             IssuedAt = _dateTimeProvider.UtcNowDateTime,
             NotBefore = _dateTimeProvider.UtcNowDateTime,
