@@ -25,6 +25,10 @@ public class GlobalExceptionHandler : IExceptionHandler
         int status = exception switch
         {
             StoryNotFoundException => StatusCodes.Status404NotFound,
+            UserNotFoundException => StatusCodes.Status404NotFound,
+            UserRegistrationException => StatusCodes.Status400BadRequest,
+            UserUpdateException => StatusCodes.Status400BadRequest,
+            UserNotInStoryException => StatusCodes.Status403Forbidden,
             _ => StatusCodes.Status500InternalServerError,
         };
         
