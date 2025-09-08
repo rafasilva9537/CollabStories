@@ -9,9 +9,11 @@ namespace api.Services;
 
 public class SessionInfo
 {
+    // ConcurrentDictionary is used like a concurrent set. The byte value is not used.
+    // That's an alternative because there's no ConcurrentHashSet in .NET.
     public readonly ConcurrentDictionary<string, byte> Connections = new();
     public DateTimeOffset TurnEndTime { get; set; }
-    public int TurnDurationSeconds { get; init; }
+    public int TurnDurationSeconds { get; set; }
     
     public SessionInfo(DateTimeOffset turnEndTime, int turnDurationSeconds)
     {
@@ -28,7 +30,7 @@ public class StorySessionService : IStorySessionService
 {
     /// <summary>
     /// A thread-safe dictionary that manages active session groups and their associated users' connection ids.
-    /// Story id need to be string to be compatible with signalr group names, which are string
+    /// Story id need to be string to be compatible with signalr group names, which are strings
     /// </summary>
     private readonly ConcurrentDictionary<string, SessionInfo> _sessions = new();
     private readonly ILogger<IStorySessionService> _logger;
