@@ -77,6 +77,11 @@ public class StoryService : IStoryService
         storyModel.UserId = creatorId;
         storyModel.CurrentAuthorId = creatorId;
         
+        DateTimeOffset dateNow = _dateTimeProvider.UtcNow;
+        storyModel.CreatedDate = dateNow;
+        storyModel.UpdatedDate = dateNow;
+        storyModel.AuthorsMembershipChangeDate = dateNow;
+        
         AuthorInStory authorInStory = new() 
         {
             AuthorId = creatorId, 
