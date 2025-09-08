@@ -156,7 +156,7 @@ public class StoryController : ControllerBase
         
             return Ok();
         }
-        catch (Exception ex) when (ex is UserNotFoundException || ex is StoryNotFoundException)
+        catch (Exception ex) when (ex is UserNotFoundException or StoryNotFoundException)
         {
             switch (ex)
             {
