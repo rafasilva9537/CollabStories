@@ -87,7 +87,7 @@ public class AccountService : IAccountService
         string? lastUserName = null,
         int pageSize = 15)
     {
-        var query = _context.AppUser.AsQueryable();
+        IQueryable<AppUser> query = _context.AppUser.AsQueryable();
         
         if (lastUserName != null && lastDate.HasValue)
         {
@@ -96,7 +96,7 @@ public class AccountService : IAccountService
                 (u.CreatedDate == lastDate && string.Compare(u.UserName, lastUserName) <= 0));
         }
 
-        var usersDto = await query
+        List<UserMainInfoDto> usersDto = await query
             .OrderByDescending(au => au.CreatedDate)
             .ThenByDescending(au => au.UserName)
             .Take(pageSize + 1)
