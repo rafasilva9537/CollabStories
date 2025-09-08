@@ -115,7 +115,12 @@ public class StoryService : IStoryService
         if(!titleIsNullOrEmpty) storyModel.Title = updateStoryDto.Title!;
         if(!descriptionIsNull) storyModel.Description = updateStoryDto.Description!;
         if(!maximumAuthorsIsNull) storyModel.MaximumAuthors = (int)updateStoryDto.MaximumAuthors!;
-        if(!turnDurationSecondsIsNull) storyModel.TurnDurationSeconds = (int)updateStoryDto.TurnDurationSeconds!;
+        if(!turnDurationSecondsIsNull)
+        {
+            storyModel.TurnDurationSeconds = (int)updateStoryDto.TurnDurationSeconds!;
+            // When turn duration is changed, the membership date should change because the story session timer uses that as a reference.
+            storyModel.AuthorsMembershipChangeDate = _dateTimeProvider.UtcNow;
+        }
         
         await _context.SaveChangesAsync();
 
