@@ -82,8 +82,9 @@ public class AccountController : ControllerBase
             _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, _dateTimeProvider.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
-        catch (UserNotFoundException)
+        catch (UserNotFoundException ex)
         {
+            _logger.LogWarning(ex, "User '{UserName}' was not found, login failed at {LoginTime}.", loginUser.UserName, _dateTimeProvider.UtcNow);
             return Unauthorized();
         }
     }
@@ -134,6 +135,39 @@ public class AccountController : ControllerBase
             if (ex.Errors is null) return ValidationProblem(ModelState);
             ControllerHelpers.AddErrorsToModelState(ex.Errors, ModelState);
             return ValidationProblem(ModelState);
+        }
+    }
+
+    [HttpPut("me/password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null) return Unauthorized();
+
+        try
+        {
+            await _accountService.ChangeUserPasswordAsync(loggedUser, changePasswordDto);
+            return Ok();
+        }
+        catch (UserUpdateException ex)
+        {
+            if (ex.Errors is null) return ValidationProblem(ModelState);
+            ControllerHelpers.AddErrorsToModelState(ex.Errors, ModelState);
+
+            _logger.LogWarning(ex, "User '{UserName}' password change failed at {ChangeTime}.", loggedUser, _dateTimeProvider.UtcNow);
+            return ValidationProblem(ModelState);
+        }
+        catch (UserNotFoundException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "User was not found '{UserName}', password change failed at {ChangeTime}.", 
+                loggedUser, 
+                _dateTimeProvider.UtcNow);
+            return Unauthorized();
         }
     }
 

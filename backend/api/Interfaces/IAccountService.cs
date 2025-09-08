@@ -48,5 +48,14 @@ public interface IAccountService
     
     Task<PublicAppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto);
     
+    /// <summary>
+    /// Changes the password of a specified user based on the provided current and new passwords.
+    /// </summary>
+    /// <param name="userName">The username of the user whose password is to be changed.</param>
+    /// <param name="changePasswordDto">An object containing the current password and the new password for the user.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="UserNotFoundException">Thrown when the specified user does not exist.</exception>
+    /// <exception cref="ArgumentException">Thrown when the current or new password is empty or null.</exception>
+    /// <exception cref="UserUpdateException">Thrown when the password change operation fails, containing details of the errors.</exception>
     Task ChangeUserPasswordAsync(string userName, ChangePasswordDto changePasswordDto);
 }

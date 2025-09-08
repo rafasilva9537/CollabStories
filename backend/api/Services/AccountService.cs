@@ -190,7 +190,7 @@ public class AccountService : IAccountService
         PublicAppUserDto appUserDto = updatedUser.ToPublicAppUserDto();
         return appUserDto;
     }
-
+    
     public async Task ChangeUserPasswordAsync(string userName, ChangePasswordDto changePasswordDto)
     {
         AppUser? user = await _context.AppUser
