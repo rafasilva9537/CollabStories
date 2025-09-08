@@ -72,7 +72,7 @@ public class StoryController : ControllerBase
 
             StoryDto newStory = await _storyService.CreateStoryAsync(createStory, userName);
 
-            return CreatedAtAction(nameof(GetStory), new { id = newStory.Id }, newStory);
+            return CreatedAtAction(nameof(GetCompleteStory), new { storyId = newStory.Id }, newStory);
         }
         catch (UserNotFoundException ex)
         {

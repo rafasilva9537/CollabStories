@@ -124,11 +124,11 @@ public class StoryService : IStoryService
         
         await _context.SaveChangesAsync();
 
-        StoryDto storyDto = storyModel.ToStoryDto();
-        storyDto.UserName = await _context.AppUser
+        string? userName = await _context.AppUser
             .Where(au => au.Id == storyModel.UserId)
             .Select(au => au.UserName)
             .FirstOrDefaultAsync();
+        StoryDto storyDto = storyModel.ToStoryDto(userName);
 
         return storyDto;
     }
