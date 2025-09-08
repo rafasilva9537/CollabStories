@@ -44,7 +44,7 @@ public class AccountService : IAccountService
         IdentityResult resultUser = await _userManager.CreateAsync(newUser, registerUserDto.Password);
         if(!resultUser.Succeeded)
         {
-            var errors = resultUser.Errors.ToList();
+            List<IdentityError> errors = resultUser.Errors.ToList();
             UserRegistrationException exception = new("Invalid username, email or password.", errors);
             throw exception;
         }
@@ -52,7 +52,7 @@ public class AccountService : IAccountService
         IdentityResult resultRole = await _userManager.AddToRoleAsync(newUser, RoleConstants.User);
         if(!resultRole.Succeeded)
         {
-            var errors = resultUser.Errors.ToList();
+            List<IdentityError> errors = resultUser.Errors.ToList();
             UserRegistrationException exception = new("Unable to add user to role.", errors);
             throw exception; 
         }
@@ -182,7 +182,7 @@ public class AccountService : IAccountService
         IdentityResult updateResult = await _userManager.UpdateAsync(updatedUser);
         if (!updateResult.Succeeded)
         {
-            var errors = updateResult.Errors.ToList();
+            List<IdentityError> errors = updateResult.Errors.ToList();
             UserUpdateException exception = new("Unable to update user fields.", errors);
             throw exception;
         }
@@ -212,7 +212,7 @@ public class AccountService : IAccountService
 
         if(!changePasswordResult.Succeeded)
         {
-            var errors = changePasswordResult.Errors.ToList();
+            List<IdentityError> errors = changePasswordResult.Errors.ToList();
             UserUpdateException exception = new("User password change failed.", errors);
             throw exception;
         }
