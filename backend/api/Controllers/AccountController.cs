@@ -191,11 +191,21 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("me/profile-image")]
+    
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Consumes(MediaTypeNames.Multipart.FormData)]
     public async Task<ActionResult> UpdateProfileImage(IFormFile image)
     {
+        if (image.Length > 1024 * 1024 * 2)
+        {
+            ModelState.AddModelError("ImageSize", "Image size must be less than or equal to 2MB.");
+            
+            return ValidationProblem(
+                modelStateDictionary: ModelState, 
+                statusCode: StatusCodes.Status413PayloadTooLarge);
+        }
+        
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
         if(loggedUser is null)
         {
@@ -205,6 +215,48 @@ public class AccountController : ControllerBase
         await _accountService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
 
         return Ok();
+    }
+
+    [HttpGet("me/profile-image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> GetProfileImage()
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null) return Unauthorized();
+        try
+        {
+            FileStream imageStream = await _accountService
+                .GetProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
+        
+            string imageExtension = Path.GetExtension(imageStream.Name);
+            string contentType = imageExtension switch
+            {
+                ".jpg" => MediaTypeNames.Image.Jpeg,
+                ".png" => MediaTypeNames.Image.Png,
+                _ => "",
+            };
+            if (string.IsNullOrWhiteSpace(contentType)) return BadRequest();
+        
+            return File(imageStream, contentType);
+        }
+        catch (Exception ex) when (ex is UserNotFoundException or FileNotFoundException or DirectoryNotFoundException)
+        {
+            switch (ex)
+            {
+                case UserNotFoundException notFoundEx:
+                    _logger.LogWarning(notFoundEx, "User '{UserName}' not found at profile image retrieval", loggedUser);
+                    break;
+                case FileNotFoundException fileNotFoundEx:
+                    _logger.LogWarning(fileNotFoundEx, "File path of user {UserName} profile image not found at profile image retrieval", loggedUser);
+                    break;
+                case DirectoryNotFoundException dirNotFoundEx:
+                    _logger.LogWarning(dirNotFoundEx, "Directory path of user {UserName} profile image not found at profile image retrieval", loggedUser);
+                    break;
+            }
+            
+            return NotFound();
+        }
     }
     
     [HttpDelete("me/profile-image")]

@@ -41,9 +41,19 @@ public interface IAccountService
     /// or null if the user does not exist.
     /// </returns>
     Task<PrivateAppUserDto?> GetPrivateUserAsync(string userName);
+
+    Task<FileStream> GetProfileImageAsync(string userName, string directoryName);
     
     Task UpdateProfileImageAsync(string userName, IFormFile image, string directoryName);
     
+    /// <summary>
+    /// Deletes the profile image of a user from the specified directory.
+    /// </summary>
+    /// <param name="userName">The username of the user whose profile image is to be deleted.</param>
+    /// <param name="directoryName">The name of the directory where the profile images are stored.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
+    /// <exception cref="UserNotFoundException">Thrown when the specified user does not exist.</exception>
+    /// <exception cref="FileNotFoundException">Thrown when the user's profile has no profile image.</exception>
     Task DeleteProfileImageAsync(string userName, string directoryName);
     
     Task<PublicAppUserDto> UpdateUserFieldsAsync(string userName, UpdateUserFieldsDto updateUserFieldsDto);

@@ -223,21 +223,26 @@ public class AccountService : IAccountService
         AppUser? user = await _context.AppUser
             .FirstOrDefaultAsync(au => au.UserName == userName);
         if(user is null) throw new UserNotFoundException("User does not exist on profile image update attempt.");
-        
+
+        string oldImage = user.ProfileImage;
         string savedImage = await _imageService.SaveImageAsync(image, directoryName);
         
         user.ProfileImage = savedImage;
         await _context.SaveChangesAsync();
+        
+        if (!string.IsNullOrWhiteSpace(oldImage)) _imageService.DeleteImage(oldImage, directoryName);
     }
+    
+    public async Task<FileStream> GetProfileImageAsync(string userName, string directoryName)
+    {
+        AppUser? user = await _context.AppUser.
+            FirstOrDefaultAsync(au => au.UserName == userName);
+        if (user is null) throw new UserNotFoundException("User does not exist on profile image retrieval attempt.");
 
-    /// <summary>
-    /// Deletes the profile image of a user from the specified directory.
-    /// </summary>
-    /// <param name="userName">The username of the user whose profile image is to be deleted.</param>
-    /// <param name="directoryName">The name of the directory where the profile images are stored.</param>
-    /// <returns>A Task representing the asynchronous operation.</returns>
-    /// <exception cref="UserNotFoundException">Thrown when the specified user does not exist.</exception>
-    /// <exception cref="FileNotFoundException">Thrown when the user's profile has no profile image.</exception>
+        FileStream imageStream = _imageService.GetImage(user.ProfileImage, directoryName);
+        return imageStream;
+    }
+    
     public async Task DeleteProfileImageAsync(string userName, string directoryName)
     {
         AppUser? user = await _context.AppUser
