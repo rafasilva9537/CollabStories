@@ -1,5 +1,6 @@
 using api.Constants;
 using api.Models;
+using api.Services;
 using Bogus;
 using Microsoft.IdentityModel.Tokens;
 
@@ -35,12 +36,11 @@ public class FakeDataGenerator
             .RuleFor(au => au.NormalizedEmail, (f, au) => au.Email.ToUpper())
             .RuleFor(au => au.CreatedDate, f => f.Date.BetweenOffset(_userStartDate, _userEndDate))
             .RuleFor(
-                au => au.ProfileImage, f => Path.Combine(
-                    DirectoryPathConstants.Media,
-                    DirectoryPathConstants.Images,
-                    DirectoryPathConstants.ProfileImages,
-                    f.Random.Guid().ToString()
-                )
+                au => au.ProfileImage, f =>
+                {
+                    string imageExtension = f.PickRandom(ImageService.ImgExtensions.ToArray());
+                    return $"{Guid.NewGuid()}{imageExtension}";
+                }
             );
 
         List<AppUser> appUsers = fakeAppUser.Generate(quantity).ToList();
