@@ -146,6 +146,19 @@ public class StoryHub : Hub<IStoryClient>
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
+        foreach (string storySession in _storySessionService.GetSessionIds())
+        {
+            IReadOnlySet<string> connections = _storySessionService.GetSessionConnections(storySession);
+            if (connections.Contains(Context.ConnectionId))
+            {
+                _storySessionService.RemoveConnectionFromSession(storySession, Context.ConnectionId);
+                if (_storySessionService.SessionIsEmpty(storySession))
+                {
+                    _storySessionService.RemoveSession(storySession);
+                }
+            }
+        }
+        
         _logger.LogInformation("Connection disconnected. ConnectionId: {ConnectionId}, User: {UserName}, Error: {Error}.", Context.ConnectionId, Context.User?.Identity?.Name, exception?.Message);
         await base.OnDisconnectedAsync(exception);
     }

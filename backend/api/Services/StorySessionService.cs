@@ -68,7 +68,7 @@ public class StorySessionService : IStorySessionService
         double remainingSeconds = turnDurationSeconds - secondsIntoCurrentTurn;
         DateTimeOffset turnEndTime = _dateTimeProvider.UtcNow.AddSeconds(remainingSeconds);
         
-        SessionInfo sessionInfo = new SessionInfo(turnEndTime, turnDurationSeconds);
+        SessionInfo sessionInfo = new (turnEndTime, turnDurationSeconds);
         _sessions.TryAdd(storyId, sessionInfo);
         
         _logger.LogInformation(
