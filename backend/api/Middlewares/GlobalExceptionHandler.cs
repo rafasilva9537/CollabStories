@@ -26,6 +26,8 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             StoryNotFoundException => StatusCodes.Status404NotFound,
             UserNotFoundException => StatusCodes.Status404NotFound,
+            DirectoryNotFoundException => StatusCodes.Status404NotFound,
+            FileNotFoundException => StatusCodes.Status404NotFound,
             UserRegistrationException => StatusCodes.Status400BadRequest,
             UserUpdateException => StatusCodes.Status400BadRequest,
             UserNotInStoryException => StatusCodes.Status403Forbidden,
