@@ -3,5 +3,6 @@
 public interface IImageService
 {
     Task<string> SaveImageAsync(IFormFile image, string directoryName);
+    FileStream GetImage(string imageName, string directoryName);
     void DeleteImage(string imageName, string directoryName);
 }

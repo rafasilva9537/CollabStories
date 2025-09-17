@@ -24,7 +24,7 @@ public static class DependenciesConfig
     {
         services.AddScoped<IStoryService, StoryService>();
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IImageService, ImageService>();
         
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();

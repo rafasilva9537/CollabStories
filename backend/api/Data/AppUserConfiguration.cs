@@ -11,10 +11,14 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.ToTable("AppUser");
         
         builder.Property(au => au.UserName).IsRequired();
+        builder.HasIndex(au => au.UserName);
+        
         builder.Property(au => au.Email).IsRequired();
 
-        builder.Property(au => au.Nickname).HasMaxLength(70);
+        builder.Property(au => au.NickName).HasMaxLength(70);
+        
         builder.Property(au => au.Description).HasMaxLength(200);
+        
         builder.Property(au => au.ProfileImage).HasMaxLength(400);
     }
 }

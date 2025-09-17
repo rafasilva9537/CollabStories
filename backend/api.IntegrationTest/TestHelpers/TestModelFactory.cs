@@ -82,7 +82,7 @@ internal static class TestModelFactory
             Email = email,
             NormalizedUserName = userName.ToUpper(),
             NormalizedEmail = email.ToUpper(),
-            Nickname = nickname,
+            NickName = nickname,
             Description = description,
             ProfileImage = profileImage,
             CreatedDate = createdDate.Value,

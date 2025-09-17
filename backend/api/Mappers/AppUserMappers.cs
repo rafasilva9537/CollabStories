@@ -7,14 +7,25 @@ namespace api.Mappers;
 public static class AppUserMappers
 {
     // Model to Dto
-    public static AppUserDto ToAppUserDto(this AppUser appUser)
+    public static PublicAppUserDto ToPublicAppUserDto(this AppUser appUser)
     {
-        return new AppUserDto
+        return new PublicAppUserDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.Nickname,
+            NickName = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
+            Description = appUser.Description,
+        };
+    }    
+    
+    public static PrivateAppUserDto ToPrivateAppUserDto(this AppUser appUser)
+    {
+        return new PrivateAppUserDto
+        {
+            UserName = appUser.UserName,
+            NickName = appUser.NickName,
             Email = appUser.Email,
+            CreatedDate = appUser.CreatedDate,
             Description = appUser.Description,
         };
     }
@@ -24,7 +35,7 @@ public static class AppUserMappers
         return new UserMainInfoDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.Nickname,
+            Nickname = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
         };
     }
@@ -33,7 +44,7 @@ public static class AppUserMappers
         new UserMainInfoDto
         {
             UserName = appUser.UserName,
-            Nickname = appUser.Nickname,
+            Nickname = appUser.NickName,
             CreatedDate = appUser.CreatedDate,
         };
 

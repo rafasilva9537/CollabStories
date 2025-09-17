@@ -12,7 +12,7 @@ public interface IStoryClient
     Task MessageFailed(string message);
     Task UserDisconnected(string userName);
     Task UserConnected(string userName);
-    Task SetInitialState(string currentAuthorUsername, DateTimeOffset turnEndTime);
+    Task SetInitialState(string? currentAuthorUsername, DateTimeOffset turnEndTime);
     Task ReceiveTurnChange(string newAuthorUsername, DateTimeOffset turnEndTime);
 }
 
@@ -34,7 +34,7 @@ public class StoryHub : Hub<IStoryClient>
         string? userName = Context.User?.Identity?.Name;
         if (userName is null)
         {
-            _logger.LogWarning("Non logged user tried to join story {StoryId}.", userName);
+            _logger.LogWarning("Unauthenticated user tried to join story {StoryId}.", storyId);
             return;
         }
         
@@ -48,7 +48,7 @@ public class StoryHub : Hub<IStoryClient>
         bool isStoryAuthor = await _storyService.IsStoryAuthorAsync(userName, storyId);
         if (!isStoryAuthor)
         {
-            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that he is not a author of.", userName, storyId);
+            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} but they are not an author of it.", userName, storyId);
             return;
         }
         
@@ -60,7 +60,7 @@ public class StoryHub : Hub<IStoryClient>
         }
         _storySessionService.AddConnectionToSession(storySessionId, Context.ConnectionId);
 
-        string currentAuthorUsername = await _storyService.GetCurrentAuthorUserNameAsync(storyId);
+        string? currentAuthorUsername = await _storyService.GetCurrentAuthorUserNameAsync(storyId);
         DateTimeOffset turnEndTime = _storySessionService.GetTurnEndTime(storySessionId);
         await Clients.Caller.SetInitialState(currentAuthorUsername, turnEndTime);
         
@@ -72,7 +72,7 @@ public class StoryHub : Hub<IStoryClient>
         string? userName = Context.User?.Identity?.Name;
         if (userName is null)
         {
-            _logger.LogWarning("Non logged user tried to leave story {StoryId}.", userName);
+            _logger.LogWarning("Unauthenticated user tried to leave story {StoryId}.", storyId);
             return;       
         }
         
@@ -86,7 +86,7 @@ public class StoryHub : Hub<IStoryClient>
         bool isStoryAuthor = await _storyService.IsStoryAuthorAsync(userName, storyId);
         if (!isStoryAuthor)
         {
-            _logger.LogWarning("User '{UserName}' tried to join story {StoryId} that he is not a author of.", userName, storyId);
+            _logger.LogWarning("User '{UserName}' tried to leave story {StoryId} but they are not an author of it.", userName, storyId);
             return;
         }
         
@@ -106,6 +106,13 @@ public class StoryHub : Hub<IStoryClient>
     
     public async Task SendStoryPart(int storyId, string storyPartText)
     {
+        if (string.IsNullOrWhiteSpace(storyPartText))
+        {
+            await Clients.Caller.MessageFailed("Unable to send message. The story part text is empty.");
+            _logger.LogInformation("User attempted to send empty story part to story {StoryId}.", storyId);
+            return;
+        }
+
         CreateStoryPartDto newStoryPart = new()
         {
             Text = storyPartText
@@ -115,29 +122,44 @@ public class StoryHub : Hub<IStoryClient>
 
         if(userName is null)
         {
-            await Clients.Caller.MessageFailed("Unable to send message. It wasn't possible to get logged user.");
-            _logger.LogWarning("Non logged user tried to send message to story {StoryId}.", storyId);
+            await Clients.Caller.MessageFailed("Unable to send message. It wasn't possible to get the logged-in user.");
+            _logger.LogWarning("Unauthenticated user tried to send message to story {StoryId}.", storyId);
             return;
         }
 
         StoryPartDto? createdStoryPart = await _storyService.CreateStoryPartAsync(storyId, userName, newStoryPart);
         if(createdStoryPart is null)
         {
-            await Clients.Caller.MessageFailed("Unable to send message. User isn't in story.");
-            _logger.LogWarning("User '{UserName}' tried to send message to story {StoryId} that he is not in.", userName, storyId);
+            await Clients.Caller.MessageFailed("Unable to send message. User isn't the current author of the story.");
+            _logger.LogWarning("User '{UserName}' tried to send message to story {StoryId} but they are not the current author.", userName, storyId);
             return;
         }
         
         await Clients.Group(storyId.ToString()).ReceiveStoryPart(storyId, createdStoryPart);
     }
-
-    public async Task OnConnectedAsync(int storyId)
+    
+    public override async Task OnConnectedAsync()
     {
+        _logger.LogInformation("Connection established. ConnectionId: {ConnectionId}, User: {UserName}.", Context.ConnectionId, Context.User?.Identity?.Name);
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
+        foreach (string storySession in _storySessionService.GetSessionIds())
+        {
+            IReadOnlySet<string> connections = _storySessionService.GetSessionConnections(storySession);
+            if (connections.Contains(Context.ConnectionId))
+            {
+                _storySessionService.RemoveConnectionFromSession(storySession, Context.ConnectionId);
+                if (_storySessionService.SessionIsEmpty(storySession))
+                {
+                    _storySessionService.RemoveSession(storySession);
+                }
+            }
+        }
+        
+        _logger.LogInformation("Connection disconnected. ConnectionId: {ConnectionId}, User: {UserName}, Error: {Error}.", Context.ConnectionId, Context.User?.Identity?.Name, exception?.Message);
         await base.OnDisconnectedAsync(exception);
     }
 }

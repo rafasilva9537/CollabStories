@@ -6,11 +6,20 @@ using api.Models;
 namespace api.Mappers;
 
 // EF Core need to receive expressions, it's not able to translate methods to SQL
-// So, every mapper inside a select need to have it's expression version
+// So, every mapper inside a select needs to have its expression version
 public static class StoryMappers
 {
     // Model to Dto
-    public static StoryDto ToStoryDto(this Story storyModel)
+    
+    /// <summary>
+    /// Maps a <see cref="Story"/> model to a <see cref="StoryDto"/> data transfer object.
+    /// </summary>
+    /// <param name="storyModel">The <see cref="Story"/> model to be mapped.</param>
+    /// <param name="userName">The username to include in the <see cref="StoryDto"/>.
+    /// If null, the username associated with the <see cref="Story.User"/> will be used.
+    /// If <see cref="Story.User"/> is null, the username will be null.</param>
+    /// <returns>A <see cref="StoryDto"/> object containing the mapped data from the <see cref="Story"/> model.</returns>
+    public static StoryDto ToStoryDto(this Story storyModel, string? userName = null)
     {
         return new StoryDto
         {
@@ -21,7 +30,7 @@ public static class StoryMappers
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
             TurnDurationSeconds = storyModel.TurnDurationSeconds,
-            UserName = storyModel.User?.UserName
+            UserName = userName ?? storyModel.User?.UserName
         };
     }
 
@@ -33,11 +42,19 @@ public static class StoryMappers
         CreatedDate = storyModel.CreatedDate,
         UpdatedDate = storyModel.UpdatedDate,
         MaximumAuthors = storyModel.MaximumAuthors,
-        UserName = storyModel.User.UserName,
+        UserName = storyModel.User!.UserName,
         TurnDurationSeconds = storyModel.TurnDurationSeconds,
     };
 
-    public static StoryMainInfoDto ToStoryMainInfoDto(this Story storyModel)
+    /// <summary>
+    /// Maps a <see cref="Story"/> model to a <see cref="StoryMainInfoDto"/> data transfer object.
+    /// </summary>
+    /// <param name="storyModel">The <see cref="Story"/> model to be mapped.</param>
+    /// <param name="userName">The username to include in the <see cref="StoryMainInfoDto"/>.
+    /// If null, the username associated with the <see cref="Story.User"/> will be used.
+    /// If <see cref="Story.User"/> is null, the username will be null.</param>
+    /// <returns>A <see cref="StoryMainInfoDto"/> object containing the mapped data from the <see cref="Story"/> model.</returns>
+    public static StoryMainInfoDto ToStoryMainInfoDto(this Story storyModel, string? userName = null)
     {
         return new StoryMainInfoDto
         {
@@ -47,7 +64,7 @@ public static class StoryMappers
             CreatedDate = storyModel.CreatedDate,
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
-            UserName = storyModel?.User?.UserName,
+            UserName = userName ?? storyModel.User?.UserName,
         };
     }
 
@@ -60,7 +77,7 @@ public static class StoryMappers
             CreatedDate = storyModel.CreatedDate,
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
-            UserName = storyModel.User.UserName,
+            UserName = storyModel.User!.UserName,
         };
 
     public static readonly Expression<Func<Story, StoryInfoForSessionDto>> ProjectToStoryInfoForSessionDto =
@@ -81,6 +98,8 @@ public static class StoryMappers
             UpdatedDate = storyModel.UpdatedDate,
             MaximumAuthors = storyModel.MaximumAuthors,
             TurnDurationSeconds = storyModel.TurnDurationSeconds,
+            CurrentAuthor = storyModel.CurrentAuthor?.UserName,
+            StoryOwner = storyModel.User?.UserName
         };
     }
 

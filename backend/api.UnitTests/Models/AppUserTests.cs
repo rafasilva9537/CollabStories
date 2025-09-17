@@ -12,7 +12,7 @@ public class AppUserTests
         AppUser actualUser = new AppUser();
 
         Assert.Equal(0, actualUser.Id);
-        Assert.Equal(string.Empty, actualUser.Nickname);
+        Assert.Equal(string.Empty, actualUser.NickName);
         Assert.Equal(string.Empty, actualUser.Email);
         Assert.Equal(string.Empty, actualUser.ProfileImage);
         Assert.Equal(string.Empty, actualUser.Description);

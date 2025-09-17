@@ -24,7 +24,7 @@ public static class SeedDatabase
         dbContext.SaveChanges();
         newStories = dbContext.Story.ToList();
 
-        List<StoryPart> storyParts = fakeData.GenerateStoryParts(totalStoryParts, newStories, newUsers);
+        List<StoryPart> storyParts = fakeData.GenerateStoryParts(totalStoryParts, newStories);
         dbContext.StoryPart.AddRange(storyParts);
         dbContext.SaveChanges();
         

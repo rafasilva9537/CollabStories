@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using api.Constants;
 using api.Interfaces;
 
@@ -5,8 +6,7 @@ namespace api.Services;
 
 public class ImageService : IImageService
 {
-    // TODO: change to some immutable collection
-    private readonly string[] _imgExtensions = [ ".jpg", ".png", ".jpeg" ];
+    public static readonly ImmutableArray<string> ImgExtensions = [ ".jpg", ".png", ".jpeg" ];
     private readonly string _imagesPath = Path.Combine(DirectoryPathConstants.Media, DirectoryPathConstants.Images);
     private readonly IWebHostEnvironment _environment;
 
@@ -29,9 +29,9 @@ public class ImageService : IImageService
         string untrustedFileName = image.FileName;
         string extension = Path.GetExtension(untrustedFileName);
 
-        if(!_imgExtensions.Contains(extension))
+        if(!ImgExtensions.Contains(extension))
         {
-            throw new ArgumentOutOfRangeException($"Only files with extensions {string.Join(", ", _imgExtensions)}are allowed");
+            throw new ArgumentOutOfRangeException($"Only files with extensions {string.Join(", ", ImgExtensions)}are allowed");
         }
 
         string imageName = $"{Guid.NewGuid()}{extension}";
@@ -43,16 +43,24 @@ public class ImageService : IImageService
         return imageName;
     }
 
-    public void DeleteImage(string imageName, string directoryName)
+    public FileStream GetImage(string imageName, string directoryName)
     {
         string rootPath = _environment.ContentRootPath;
         string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
         string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
+        
+        FileStream imageStream = File.OpenRead(imageNameWithPath);
+        return imageStream;
+    }
 
-        if(!File.Exists(imageNameWithPath))
-        {
-            throw new FileNotFoundException($"File does not exists. Unable to delete.");
-        }
+    public void DeleteImage(string imageName, string directoryName)
+    {
+        string rootPath = _environment.ContentRootPath;
+        string imageDirectoryPath = Path.Combine(rootPath, _imagesPath, directoryName);
+        if(!Directory.Exists(imageDirectoryPath)) throw new DirectoryNotFoundException("Directory does not exist. Unable to delete.");
+        
+        string imageNameWithPath = Path.Combine(imageDirectoryPath, imageName);
+        if(!File.Exists(imageNameWithPath)) throw new FileNotFoundException("File does not exist. Unable to delete.");
         
         File.Delete(imageNameWithPath);
     }

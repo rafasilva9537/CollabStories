@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using api.Dtos.AppUser;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 using api.Dtos.HttpResponses;
 using api.Dtos.Pagination;
 using api.Exceptions;
+using api.Helpers;
 using api.Interfaces;
 
 namespace api.Controllers;
@@ -15,93 +17,171 @@ namespace api.Controllers;
 [Route("accounts")]
 public class AccountController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly IAccountService _accountService;
     private readonly ILogger<AccountController> _logger;
     private readonly IDateTimeProvider _dateTimeProvider;
     
     public AccountController(
-        IAuthService authService, 
+        IAccountService accountService, 
         ILogger<AccountController> logger, 
         IDateTimeProvider dateTimeProvider)
     {
-        _authService = authService;
+        _accountService = accountService;
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
     }
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IList<UserMainInfoDto>>> GetUsers(
+    [ProducesResponseType(typeof(PagedKeysetStoryList<UserMainInfoDto>),StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedKeysetStoryList<UserMainInfoDto>>> GetUsers(
         [FromQuery] DateTimeOffset? lastDate, 
         [FromQuery] string? lastUserName)
     {
         const int pageSize = 15;
-        PagedKeysetUserList<UserMainInfoDto> pagedUsers = await _authService.GetUsersAsync(lastDate, lastUserName, pageSize);
+        PagedKeysetUserList<UserMainInfoDto> pagedUsers = await _accountService.GetUsersAsync(lastDate, lastUserName, pageSize);
         return Ok(pagedUsers);
     }
 
     [AllowAnonymous]
     [HttpPost("register")]
+    [ProducesResponseType(typeof(TokenResponse),StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TokenResponse>> Register([FromBody] RegisterUserDto registerUser)
     {
         try
         {
-            string token = await _authService.RegisterAsync(registerUser);
-            _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
+            string token = await _accountService.RegisterAsync(registerUser);
+            _logger.LogInformation("User '{UserName}' registered at {RegisterTime}", registerUser.UserName, _dateTimeProvider.UtcNow);
             return Ok(new TokenResponse { Token = token });
         }
         catch (UserRegistrationException ex)
         {
-            _logger.LogError(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, DateTimeOffset.UtcNow);
-            var errors = ex.Errors?.ToDictionary();
-
-            ValidationProblemDetails problemDetails = new(errors ?? []);
-            return ValidationProblem(problemDetails);
+            _logger.LogWarning(ex, "User '{UserName}' registration failed at {RegisterTime}", registerUser.UserName, _dateTimeProvider.UtcNow);
+            var errors = ex.Errors;
+            
+            if (errors is null) return ValidationProblem(ModelState);
+            ControllerHelpers.AddErrorsToModelState(errors, ModelState);
+            
+            return ValidationProblem(ModelState);
         }
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
+    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginUserDto loginUser)
     {
-        string? token = await _authService.LoginAsync(loginUser);
-
-        if(token is null)
+        try
         {
-            ModelState.AddModelError("Invalid Login", "Invalid username or password");
-            return BadRequest(ModelState);
-        }
+            string? token = await _accountService.LoginAsync(loginUser);
+
+            if(token is null) return Unauthorized();
         
-        _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, DateTimeOffset.UtcNow);
-        return Ok(new TokenResponse { Token = token }); 
+            _logger.LogInformation("User '{UserName}' logged in at {LoginTime}", loginUser.UserName, _dateTimeProvider.UtcNow);
+            return Ok(new TokenResponse { Token = token });
+        }
+        catch (UserNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "User '{UserName}' was not found, login failed at {LoginTime}.", loginUser.UserName, _dateTimeProvider.UtcNow);
+            return Unauthorized();
+        }
     }
     
-    // TODO: return less detailed user data if not the logged user or admin
     [HttpGet("{username}")]
-    public async Task<ActionResult<AppUserDto>> GetUser([FromRoute] string username)
+    [ProducesResponseType(typeof(PublicAppUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PublicAppUserDto>> GetUser([FromRoute] string username)
     {
-        AppUserDto? appUser = await _authService.GetUserAsync(username);
+        PublicAppUserDto? appUser = await _accountService.GetPublicUserAsync(username);
 
         if(appUser is null) return NotFound();
         
         return Ok(appUser);
     }
     
-    [HttpPut("{username}/update")]
-    public async Task<ActionResult<AppUserDto>> UpdateUser([FromBody] UpdateUserDto updateUserData)
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(PrivateAppUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PrivateAppUserDto>> GetLoggedUser()
     {
-        AppUserDto updatedUser = await _authService.UpdateUserAsync(updateUserData);
-        return CreatedAtAction(nameof(GetUser), new { username = updatedUser.UserName }, updatedUser);
-    } 
-
-    [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
-    [HttpDelete("{username}/delete")]
-    public async Task<ActionResult<MessageResponse>> DeleteUser([FromRoute] string username)
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if (loggedUser is null) return Unauthorized();
+        
+        PrivateAppUserDto? appUser = await _accountService.GetPrivateUserAsync(loggedUser);
+        if(appUser is null) return NotFound();
+        
+        return Ok(appUser);
+    }
+    
+    [HttpPut("me")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult> UpdateUser([FromBody] UpdateUserFieldsDto updateUserData)
     {
         try
         {
-            await _authService.DeleteByNameAsync(username);
-            return Ok(new MessageResponse { Message = "User was successfully deleted." });
+            string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+            if(loggedUser is null) return Unauthorized();
+        
+            await _accountService.UpdateUserFieldsAsync(loggedUser, updateUserData);
+            return Ok();
+        }
+        catch (UserUpdateException ex)
+        {
+            if (ex.Errors is null) return ValidationProblem(ModelState);
+            ControllerHelpers.AddErrorsToModelState(ex.Errors, ModelState);
+            return ValidationProblem(ModelState);
+        }
+    }
+
+    [HttpPut("me/password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null) return Unauthorized();
+
+        try
+        {
+            await _accountService.ChangeUserPasswordAsync(loggedUser, changePasswordDto);
+            return Ok();
+        }
+        catch (UserUpdateException ex)
+        {
+            if (ex.Errors is null) return ValidationProblem(ModelState);
+            ControllerHelpers.AddErrorsToModelState(ex.Errors, ModelState);
+
+            _logger.LogWarning(ex, "User '{UserName}' password change failed at {ChangeTime}.", loggedUser, _dateTimeProvider.UtcNow);
+            return ValidationProblem(ModelState);
+        }
+        catch (UserNotFoundException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "User was not found '{UserName}', password change failed at {ChangeTime}.", 
+                loggedUser, 
+                _dateTimeProvider.UtcNow);
+            return Unauthorized();
+        }
+    }
+
+    [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
+    [HttpDelete("{username}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteUser([FromRoute] string username)
+    {
+        try
+        {
+            await _accountService.DeleteByNameAsync(username);
+            return Ok();
         }
         catch (UserNotFoundException ex)
         {
@@ -110,31 +190,88 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpPut("profile-image")]
+    [HttpPut("me/profile-image")]
+    
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [Consumes(MediaTypeNames.Multipart.FormData)]
     public async Task<ActionResult> UpdateProfileImage(IFormFile image)
     {
+        if (image.Length > 1024 * 1024 * 2)
+        {
+            ModelState.AddModelError("ImageSize", "Image size must be less than or equal to 2MB.");
+            
+            return ValidationProblem(
+                modelStateDictionary: ModelState, 
+                statusCode: StatusCodes.Status413PayloadTooLarge);
+        }
+        
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
         if(loggedUser is null)
         {
-            return Forbid();
+            return Unauthorized();
         }
 
-        await _authService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
+        await _accountService.UpdateProfileImageAsync(loggedUser, image, DirectoryPathConstants.ProfileImages);
 
         return Ok();
     }
+
+    [HttpGet("me/profile-image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> GetProfileImage()
+    {
+        string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
+        if(loggedUser is null) return Unauthorized();
+        try
+        {
+            FileStream imageStream = await _accountService
+                .GetProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
+        
+            string imageExtension = Path.GetExtension(imageStream.Name);
+            string contentType = imageExtension switch
+            {
+                ".jpg" => MediaTypeNames.Image.Jpeg,
+                ".png" => MediaTypeNames.Image.Png,
+                _ => "",
+            };
+            if (string.IsNullOrWhiteSpace(contentType)) return BadRequest();
+        
+            return File(imageStream, contentType);
+        }
+        catch (Exception ex) when (ex is UserNotFoundException or FileNotFoundException or DirectoryNotFoundException)
+        {
+            switch (ex)
+            {
+                case UserNotFoundException notFoundEx:
+                    _logger.LogWarning(notFoundEx, "User '{UserName}' not found at profile image retrieval", loggedUser);
+                    break;
+                case FileNotFoundException fileNotFoundEx:
+                    _logger.LogWarning(fileNotFoundEx, "File path of user {UserName} profile image not found at profile image retrieval", loggedUser);
+                    break;
+                case DirectoryNotFoundException dirNotFoundEx:
+                    _logger.LogWarning(dirNotFoundEx, "Directory path of user {UserName} profile image not found at profile image retrieval", loggedUser);
+                    break;
+            }
+            
+            return NotFound();
+        }
+    }
     
-    [HttpDelete("profile-image")]
+    [HttpDelete("me/profile-image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> DeleteProfileImage()
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
 
         if(loggedUser is null)
         {
-            return Forbid();
+            return Unauthorized();
         }
 
-        await _authService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
+        await _accountService.DeleteProfileImageAsync(loggedUser, DirectoryPathConstants.ProfileImages);
 
         return Ok();
     }

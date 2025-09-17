@@ -1,5 +1,6 @@
 using api.Constants;
 using api.Models;
+using api.Services;
 using Bogus;
 using Microsoft.IdentityModel.Tokens;
 
@@ -27,7 +28,7 @@ public class FakeDataGenerator
     {
         Faker<AppUser> fakeAppUser = new Faker<AppUser>()
             .UseSeed(_seed)
-            .RuleFor(au => au.Nickname, f => f.Name.FirstName())
+            .RuleFor(au => au.NickName, f => f.Name.FirstName())
             .RuleFor(au => au.UserName, (f, au) => f.Internet.UserName().ToLower())
             .RuleFor(au => au.NormalizedUserName, (f, au) => au.UserName.ToUpper())
             .RuleFor(au => au.Description, f => f.Lorem.Sentence(5, 15))
@@ -35,12 +36,11 @@ public class FakeDataGenerator
             .RuleFor(au => au.NormalizedEmail, (f, au) => au.Email.ToUpper())
             .RuleFor(au => au.CreatedDate, f => f.Date.BetweenOffset(_userStartDate, _userEndDate))
             .RuleFor(
-                au => au.ProfileImage, f => Path.Combine(
-                    DirectoryPathConstants.Media,
-                    DirectoryPathConstants.Images,
-                    DirectoryPathConstants.ProfileImages,
-                    f.Random.Guid().ToString()
-                )
+                au => au.ProfileImage, f =>
+                {
+                    string imageExtension = f.PickRandom(ImageService.ImgExtensions.ToArray());
+                    return $"{Guid.NewGuid()}{imageExtension}";
+                }
             );
 
         List<AppUser> appUsers = fakeAppUser.Generate(quantity).ToList();
@@ -68,7 +68,7 @@ public class FakeDataGenerator
 
         if (!possibleAuthors.IsNullOrEmpty())
         {
-            fakeStory = fakeStory.RuleFor(s => s.AuthorInStory, (f, s) =>
+            fakeStory = fakeStory.RuleFor(s => s.AuthorsInStory, (f, s) =>
             {
                 int authorsQuantity = f.Random.Int(1, 7);
                 
@@ -86,17 +86,19 @@ public class FakeDataGenerator
                     });
                 }
 
-                return newAuthors
+                List<AuthorInStory> authorInStories = newAuthors
                     .DistinctBy(a => (a.AuthorId, a.StoryId))
                     .ToList();
+                s.AuthorsInStory.AddRange(authorInStories);
+                return s.AuthorsInStory;
             });
         }
 
         List<Story> stories = fakeStory.Generate(quantity).ToList();
         return stories;
     }
-
-    public List<StoryPart> GenerateStoryParts(int quantity, List<Story> possibleStories, List<AppUser>? possibleUsers = null)
+    
+    public List<StoryPart> GenerateStoryParts(int quantity, List<Story> possibleStories)
     {
         Faker<StoryPart> fakeStoryPart = new Faker<StoryPart>()
             .UseSeed(_seed)
@@ -107,18 +109,24 @@ public class FakeDataGenerator
                 Story randomStory = f.PickRandom(possibleStories);
                 return randomStory.Id;
             })
-            .RuleFor(sp => sp.UserId, f =>
+            .RuleFor(sp => sp.UserId, (f, sp) =>
             {
-                if (possibleUsers.IsNullOrEmpty()) return null;
-                AppUser randomUser = f.PickRandom(possibleUsers);
-                return randomUser.Id;
+                List<int> authorsInStory = possibleStories
+                    .Where(story => story.Id == sp.StoryId)
+                    .SelectMany(story => story.AuthorsInStory)
+                    .Select(ais => ais.AuthorId)
+                    .ToList();
+                
+                if (authorsInStory.IsNullOrEmpty()) return null;
+                int randomAuthorId = f.PickRandom(authorsInStory);
+                return randomAuthorId;
             });
 
         List<StoryPart> storyParts = fakeStoryPart.Generate(quantity).ToList();
         return storyParts;
     }
 
-    public List<AuthorInStory> GenerateAuthorsInStory(int quantity, int storyId, List<AppUser> possibleAuthors)
+    private List<AuthorInStory> GenerateAuthorsInStory(int quantity, int storyId, List<AppUser> possibleAuthors)
     {
         int authorSeed = HashCode.Combine(_seed, storyId);
         

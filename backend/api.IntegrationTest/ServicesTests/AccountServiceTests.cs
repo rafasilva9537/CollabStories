@@ -16,11 +16,11 @@ using NSubstitute;
 namespace api.IntegrationTests.ServicesTests;
 
 [Collection(CollectionConstants.IntegrationTestsDatabase)]
-public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
+public class AccountServiceTests : IClassFixture<CustomWebAppFactory>
 {
     private readonly CustomWebAppFactory _factory;
 
-    public AuthServiceTests(CustomWebAppFactory factory)
+    public AccountServiceTests(CustomWebAppFactory factory)
     {
         _factory = factory;
     }
@@ -44,7 +44,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         });
         
         using IServiceScope scope = customFactory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         
         (expectedUserName, expectedEmail) = UniqueDataCreation.CreateUniqueUserNameAndEmail(expectedUserName, expectedEmail); // Avoid duplicated values
@@ -56,7 +56,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         };
         
         // Act
-        string token = await authService.RegisterAsync(registerUserDto);
+        string token = await accountService.RegisterAsync(registerUserDto);
 
         // Assert
         Assert.False(string.IsNullOrEmpty(token));
@@ -68,7 +68,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         Assert.False(string.IsNullOrEmpty(createdUser.PasswordHash));
         Assert.Equal(expectedUserName, createdUser.UserName);
         Assert.Equal(expectedEmail, createdUser.Email);
-        Assert.Equal(string.Empty, createdUser.Nickname);
+        Assert.Equal(string.Empty, createdUser.NickName);
         Assert.Equal(dateTimeProvider.UtcNow, createdUser.CreatedDate);
         Assert.True(hasUserRole);
     }
@@ -81,7 +81,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         
         RegisterUserDto registerUserDto = new()
         {
@@ -91,7 +91,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         };
         
         // Act/Assert
-        await Assert.ThrowsAsync<UserRegistrationException>(() => authService.RegisterAsync(registerUserDto));
+        await Assert.ThrowsAsync<UserRegistrationException>(() => accountService.RegisterAsync(registerUserDto));
     }
     
     [Theory]
@@ -103,7 +103,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         
         (userName, email) = UniqueDataCreation.CreateUniqueUserNameAndEmail(userName, email);
         RegisterUserDto registerUserDto = new()
@@ -114,7 +114,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         };
         
         // Act/Assert
-        await Assert.ThrowsAsync<UserRegistrationException>(() => authService.RegisterAsync(registerUserDto));
+        await Assert.ThrowsAsync<UserRegistrationException>(() => accountService.RegisterAsync(registerUserDto));
     }
     
     [Theory]
@@ -125,7 +125,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         
         AppUser newUser = TestModelFactory.CreateAppUserModel(baseUserName, baseEmail);
@@ -134,7 +134,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         LoginUserDto loginUserDto = new() { UserName = newUser.UserName, Password = password };
         
         // Act
-        string? loginToken = await authService.LoginAsync(loginUserDto);
+        string? loginToken = await accountService.LoginAsync(loginUserDto);
         
         // Assert
         Assert.False(string.IsNullOrWhiteSpace(loginToken));
@@ -146,7 +146,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         
         AppUser newUser = TestModelFactory.CreateAppUserModel(baseUserName, baseEmail);
@@ -155,7 +155,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         LoginUserDto loginUserDto = new() { UserName = newUser.UserName, Password = invalidPassword };
         
         // Act
-        string? loginToken = await authService.LoginAsync(loginUserDto);
+        string? loginToken = await accountService.LoginAsync(loginUserDto);
         
         // Assert
         Assert.Null(loginToken);
@@ -168,7 +168,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         
         string suffix = Guid.NewGuid().ToString();
         userName = $"{userName}_{suffix}";
@@ -176,7 +176,7 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         LoginUserDto loginUserDto = new() { UserName = userName, Password = password };
         
         // Act/Assert
-        await Assert.ThrowsAsync<UserNotFoundException>(() => authService.LoginAsync(loginUserDto));
+        await Assert.ThrowsAsync<UserNotFoundException>(() => accountService.LoginAsync(loginUserDto));
     }
 
     [Theory]
@@ -188,20 +188,19 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         
         AppUser expectedUser = TestModelFactory.CreateAppUserModel(baseUserName, baseEmail);
         await dbContext.Users.AddAsync(expectedUser);
         await dbContext.SaveChangesAsync();
         
         // Act
-        AppUserDto? actualUserDto = await authService.GetUserAsync(expectedUser.UserName);
+        PublicAppUserDto? actualUserDto = await accountService.GetPublicUserAsync(expectedUser.UserName);
         
         // Assert
         Assert.NotNull(actualUserDto);
         Assert.Equal(expectedUser.UserName, actualUserDto.UserName);
-        Assert.Equal(expectedUser.Email, actualUserDto.Email);
-        Assert.Equal(expectedUser.Nickname, actualUserDto.Nickname);
+        Assert.Equal(expectedUser.NickName, actualUserDto.NickName);
     }
     
     [Theory]
@@ -212,12 +211,12 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
     {
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         
         (string nonExistingUserName, _) = UniqueDataCreation.CreateUniqueUserNameAndEmail(baseUserName, baseEmail);
         
         // Act
-        AppUserDto? actualUserDto = await authService.GetUserAsync(nonExistingUserName);
+        PublicAppUserDto? actualUserDto = await accountService.GetPublicUserAsync(nonExistingUserName);
         
         // Assert
         Assert.Null(actualUserDto);
@@ -229,16 +228,16 @@ public class AuthServiceTests : IClassFixture<CustomWebAppFactory>
         // Arrange
         using IServiceScope scope = _factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        IAuthService authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        IAccountService accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
         const int expectedPageSize = 15;
 
         var newUsers = TestModelFactory.CreateMultipleAppUserModels(expectedPageSize * 2);
         TestDataSeeder.SeedMultipleUsers(dbContext, newUsers);
         
         // Act
-        var firstPaginatedUsers = await authService.GetUsersAsync(pageSize: expectedPageSize);
+        var firstPaginatedUsers = await accountService.GetUsersAsync(pageSize: expectedPageSize);
         
-        var secondPaginatedUsers = await authService.GetUsersAsync(
+        var secondPaginatedUsers = await accountService.GetUsersAsync(
             firstPaginatedUsers.NextDate, firstPaginatedUsers.NextUserName, expectedPageSize);
 
         // Assert
