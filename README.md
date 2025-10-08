@@ -1,36 +1,42 @@
 # 📔 CollabStories
-Web platform to write collaborative stories in real time using ASP.NET Core Web API and JavaScript, HTML, CSS for the frontend.
+A web platform for real-time collaborative storytelling, built with ASP.NET Core Web API for the backend and React for the frontend.
 
 ---
 
 ## ✨ Features
-### Stories
-- Actors
-  - Owner Author
-  - Collaborative Authors  
-- Real-time collaborative stories
-### Authentication
-- JWT authentication
-  - Login and register
-### Testing
-- Unit tests
-- Integration tests
+- **Story Creation and Collaboration**
+    - Authors can create new stories and write together in real-time.
+- **Story Participants**
+    - Each story session has a **user owner** who manages the session and **authors** who contribute to the story. The owner is always the first author.
+- **Turn-Based Writing**
+    - Each author has a limited time per turn, and the next user continues writing after the turn ends.
+    - Each session has it own timer validated on the backend.
+- **Session Rules Management**
+    - Owners can define session parameters: duration, maximum authors, etc.
+- **Authentication**
+    - Users can register and log in securely using **JWT authentication**.
+- **Testing**
+    - The backend includes **unit tests** to validate individual components and **integration tests** to ensure end-to-end functionality.
 
 ---
 
-## 📸 Screenshots
+## 📸 Images
 ### Backend
 <details>
     <summary><b>Account Endpoints</b></summary>
-    <img src="./media/account-endpoints.png" alt="Account Endpoints">
+    <img src="./docs/images/account-endpoints.png" alt="Account Endpoints">
 </details>
 <details>
     <summary><b>Story Endpoints</b></summary>
-    <img src="./media/story-endpoints.png" alt="Story Endpoints">
+    <img src="./docs/images/story-endpoints.png" alt="Story Endpoints">
+</details>
+<details>
+    <summary><b>Data Flow Diagram</b></summary>
+    <img src="docs/images/data-flow-diagram.png" alt="Database Diagram">
 </details>
 <details>
     <summary><b>Database Diagram</b></summary>
-    <img src="./media/database-diagram.png" alt="Database Diagram">
+    <img src="./docs/images/database-diagram.png" alt="Database Diagram">
 </details>
 
 ### Frontend
@@ -39,17 +45,8 @@ Building ...
 ---
 
 ## 🚀 Future Features
-### Stories
-- Turns
-  - Every author has a limited amout of time per turn
-  - The other authors continue where the story left
-- Owner defines the session rules
-  - Duration
-  - Maximum players, turns and rounds
-  - Optional:
-    - Start and End are pre-defined, players need to reach the goal in a concise way  
 ### Homepage
-- Latest stories and most popular
+- Latest stories
 - Infinite scrolling navigation
 
 ---
