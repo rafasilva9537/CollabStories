@@ -46,7 +46,11 @@ Change `DefaultConnection`, `DbTestConnection` and `JwtConfig Secret` passwords.
 ```
 Building ...
 
-## Technologies
+## ⚙ Technologies
 - APS.NET Core Web API: C# Web Framework
 - SQL Server: Relational Database
 - HTML, CSS and JavaScript: Frontend
+
+## 🙋‍♂️ Authors
+- API and Database: [Rafael Silva](https://www.linkedin.com/in/rafa-silva-v/)
+- Frontend: [Pedro Sousa](https://www.linkedin.com/in/dsousr/)
