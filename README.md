@@ -59,9 +59,8 @@ Building ...
 5. Configure User Secrets (optional)
    - **You may skip this step if API will be running only inside container and not locally.**
    - Navigate to `backend/api` inside the terminal.
-   - Set the required secrets using the following commands:
+   - Set the required secrets using the following commands (you can change the password in the first three commands, just like in the .env file, seen in step 2):
      ```bash
-     # You can change the password in the first three commands, just like in the .env file (see step 2)
      dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1434; Database=CollabStoriesDB; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
      dotnet user-secrets set "ConnectionStrings:DbTestConnection" "Server=localhost,1434; Database=CollabStoriesDBTest; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
      dotnet user-secrets set "JwtConfig:Secret" "a-string-secret-at-least-256-bits-long"
