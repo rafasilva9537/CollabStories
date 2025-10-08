@@ -81,7 +81,7 @@ Building ...
         dotnet run
         ```
 7. Access the API documentation:
-   - Open your browser and navigate to `http://localhost:5014/swagger` to view the Swagger API documentation.
+   - Open your browser and navigate to http://localhost:5014/swagger to view the Swagger API documentation.
 
 ---
 
