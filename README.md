@@ -1,7 +1,9 @@
-# CollabStories
+# 📔 CollabStories
 Web platform to write collaborative stories in real time using ASP.NET Core Web API and JavaScript, HTML, CSS for the frontend.
 
-## Features
+---
+
+## ✨ Features
 ### Stories
 - Actors
   - Owner Author
@@ -14,7 +16,16 @@ Web platform to write collaborative stories in real time using ASP.NET Core Web 
 - Unit tests
 - Integration tests
 
-## Future Features
+---
+
+## 📸 Screenshots
+Building ...
+### Backend
+### Frontend
+
+---
+
+## 🚀 Future Features
 ### Stories
 - Turns
   - Every author has a limited amout of time per turn
@@ -28,8 +39,18 @@ Web platform to write collaborative stories in real time using ASP.NET Core Web 
 - Latest stories and most popular
 - Infinite scrolling navigation
 
-## Setup
-### User Secrets
+---
+
+## 🛠 Setup
+### Prerequisites
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [Docker](https://www.docker.com/get-started/)
+- [Node.js](https://nodejs.org/en/download)
+
+### Steps
+1. Clone repository
+2. 
+#### User Secrets
 Change `DefaultConnection`, `DbTestConnection` and `JwtConfig Secret` passwords.
 ```json
 {
@@ -46,11 +67,28 @@ Change `DefaultConnection`, `DbTestConnection` and `JwtConfig Secret` passwords.
 ```
 Building ...
 
+---
+
 ## ⚙ Technologies
-- APS.NET Core Web API: C# Web Framework
-- SQL Server: Relational Database
-- HTML, CSS and JavaScript: Frontend
+### Backend
+- **Language**: C#  
+- **Framework**: ASP.NET Core Web API 8  
+- **Database**: SQL Server 2022  
+- **ORM**: Entity Framework Core 8  
+- **Authentication**: JWT with ASP.NET Identity  
+- **Real-time Communication**: SignalR  
+- **Containerization**: Docker  
+- **Testing**: xUnit  
+- **Fake Data**: Bogus  
+- **API Documentation**: Swagger  
+
+### Frontend
+- **Languages**: JavaScript, HTML, CSS  
+- **Frameworks**: React, Vue  
+- **Real-time Communication**: SignalR Client  
+
+---
 
 ## 🙋‍♂️ Authors
-- API and Database: [Rafael Silva](https://www.linkedin.com/in/rafa-silva-v/)
-- Frontend: [Pedro Sousa](https://www.linkedin.com/in/dsousr/)
+- **Rafael Silva** - API & Database ([LinkedIn](https://www.linkedin.com/in/rafa-silva-v/))
+- **Pedro Sousa** - Frontend ([LinkedIn](https://www.linkedin.com/in/dsousr/))
