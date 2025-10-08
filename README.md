@@ -74,12 +74,14 @@ Building ...
         ```
         docker compose up --build
         ```
+      - ⚠️ Note: On the first run, the application will seed the database. Wait until you see the confirmation in the console before making API requests.        
    2. **Locally**
       - In the `backend/api/` directory.
       - Run the application:
         ```bash
         dotnet run
         ```
+      - ⚠️ Note: On the first run, the application will seed the database. Wait until you see the confirmation in the console before making API requests.
 7. Access the API documentation:
    - Open your browser and navigate to http://localhost:5014/swagger to view the Swagger API documentation.
 
