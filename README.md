@@ -19,9 +19,22 @@ Web platform to write collaborative stories in real time using ASP.NET Core Web 
 ---
 
 ## 📸 Screenshots
-Building ...
 ### Backend
+<details>
+    <summary><b>Account Endpoints</b></summary>
+    <img src="./media/account-endpoints.png" alt="Account Endpoints">
+</details>
+<details>
+    <summary><b>Story Endpoints</b></summary>
+    <img src="./media/story-endpoints.png" alt="Story Endpoints">
+</details>
+<details>
+    <summary><b>Database Diagram</b></summary>
+    <img src="./media/database-diagram.png" alt="Database Diagram">
+</details>
+
 ### Frontend
+Building ...
 
 ---
 
