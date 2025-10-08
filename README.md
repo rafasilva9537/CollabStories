@@ -43,29 +43,46 @@ Building ...
 
 ## 🛠 Setup
 ### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (Not needed if API will be running only inside docker container).
 - [Docker](https://www.docker.com/get-started/)
 - [Node.js](https://nodejs.org/en/download)
 
-### Steps
-1. Clone repository
-2. 
-#### User Secrets
-Change `DefaultConnection`, `DbTestConnection` and `JwtConfig Secret` passwords.
-```json
-{
-    "ConnectionStrings": {
-        "DefaultConnection": "Server=localhost,1434; Database=CollabStoriesDB; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;",
-        "DbTestConnection": "Server=localhost,1434; Database=CollabStoriesDBTest; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
-    },
-    "JwtConfig": {
-        "Secret": "a-string-secret-at-least-256-bits-long",
-        "ValidIssuer": "http://localhost:5014/",
-        "ValidAudiences": "http://localhost:5014/"
-    }
-}
-```
-Building ...
+### Steps (Backend)
+1. Clone the repository.
+2. Inside `backend/`, copy `.env.example` to `.env`.
+   - In `.env`, update the passwords for `MSSQL_PASSWORD`, `MSSQL_CONNECTION_STRING` and `JWT_SECRET`, if you want to change the default values.
+3. Open a terminal and navigate to the `backend/` directory.
+4. Run the following command to initialize database inside container.
+   ```bash
+   docker compose up db --build
+   ```
+5. Configure User Secrets (optional)
+   - **You may skip this step if API will be running only inside container and not locally.**
+   - Navigate to `backend/api` inside the terminal.
+   - Set the required secrets using the following commands:
+     ```bash
+     # You can change the password in the first three commands, just like in the .env file (see step 2)
+     dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1434; Database=CollabStoriesDB; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
+     dotnet user-secrets set "ConnectionStrings:DbTestConnection" "Server=localhost,1434; Database=CollabStoriesDBTest; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
+     dotnet user-secrets set "JwtConfig:Secret" "a-string-secret-at-least-256-bits-long"
+     dotnet user-secrets set "JwtConfig:ValidIssuer" "http://localhost:5014/"
+     dotnet user-secrets set "JwtConfig:ValidAudiences" "http://localhost:5014/"
+     ```
+6. Run the API:
+   1. **Using Docker**
+      - Navigate to the `backend/` directory.
+      - Run the docker command:
+        ```
+        docker compose up --build
+        ```
+   2. **Locally**
+      - In the `backend/api/` directory.
+      - Run the application:
+        ```bash
+        dotnet run
+        ```
+7. Access the API documentation:
+   - Open your browser and navigate to `http://localhost:5014/swagger` to view the Swagger API documentation.
 
 ---
 
