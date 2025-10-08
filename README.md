@@ -61,8 +61,8 @@ Building ...
    - Navigate to `backend/api` inside the terminal.
    - Set the required secrets using the following commands (you can change the password in the first three commands, just like in the .env file, seen in step 2):
      ```bash
-     dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1434; Database=CollabStoriesDB; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
-     dotnet user-secrets set "ConnectionStrings:DbTestConnection" "Server=localhost,1434; Database=CollabStoriesDBTest; MultipleActiveResultSets=True;User ID=sa;Password='example-password'; Encrypt=False;"
+     dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1434; Database=CollabStoriesDB; MultipleActiveResultSets=True;User ID=sa;Password='examplePassword1234'; Encrypt=False;"
+     dotnet user-secrets set "ConnectionStrings:DbTestConnection" "Server=localhost,1434; Database=CollabStoriesDBTest; MultipleActiveResultSets=True;User ID=sa;Password='examplePassword1234'; Encrypt=False;"
      dotnet user-secrets set "JwtConfig:Secret" "a-string-secret-at-least-256-bits-long"
      dotnet user-secrets set "JwtConfig:ValidIssuer" "http://localhost:5014/"
      dotnet user-secrets set "JwtConfig:ValidAudiences" "http://localhost:5014/"
