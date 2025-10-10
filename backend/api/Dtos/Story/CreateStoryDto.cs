@@ -15,6 +15,6 @@ public record CreateStoryDto
     [Range(1,8, ErrorMessage = "Authors quantity should be at least 1 and less or equal 8")]
     public int MaximumAuthors { get; init; }
     
-    [Range(30,3600, ErrorMessage = "Turn duration should be at least 30 seconds and at maximum 1 hour")]
+    [Range(10,3600, ErrorMessage = "Turn duration should be at least 10 seconds and at maximum 1 hour")]
     public int TurnDurationSeconds { get; init; }
 }
