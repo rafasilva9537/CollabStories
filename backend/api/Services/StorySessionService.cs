@@ -116,7 +116,10 @@ public class StorySessionService : IStorySessionService
             IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
             string newAuthorUsername = await storyService.ChangeToNextCurrentAuthorAsync(int.Parse(storyId));
                     
-            session.TurnEndTime = _dateTimeProvider.UtcNow.AddSeconds(session.TurnDurationSeconds);
+            // Update the timer for the next turn. Ceiling is used to round up to the nearest second.
+            DateTimeOffset now = _dateTimeProvider.UtcNow;
+            DateTimeOffset nextFullSecond = now.AddMilliseconds(1000 - now.Millisecond);
+            session.TurnEndTime = nextFullSecond.AddSeconds(session.TurnDurationSeconds);
              
             _logger.LogDebug("Updated timer for group {StoryId} to {TurnEndTime}", storyId, session.TurnEndTime);
             await _hubContext.Clients.Group(storyId).ReceiveTurnChange(newAuthorUsername, session.TurnEndTime);
