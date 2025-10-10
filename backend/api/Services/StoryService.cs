@@ -179,9 +179,14 @@ public class StoryService : IStoryService
         {
             throw new InvalidOperationException("Cannot change author: no current author is set.");
         }
+        
         if(storyAuthorsIds.AuthorsInStoryIds.Count <= 1) 
         {
-            throw new InvalidOperationException("Cannot change author: story must have at least 2 authors.");
+            string currentAuthorUsername = await _context.AppUser
+                .Where(au => au.Id == currentAuthorId)
+                .Select(au => au.UserName!)
+                .FirstAsync();
+            return currentAuthorUsername;
         }
         
         int currentAuthorIndex = authorsIds.IndexOf(currentAuthorId.Value);
