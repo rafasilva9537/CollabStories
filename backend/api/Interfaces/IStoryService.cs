@@ -33,7 +33,7 @@ public interface IStoryService
     
     Task<bool> IsStoryOwner(string userName, int storyId);
     
-    Task<string> ChangeToNextCurrentAuthorAsync(int storyId);
+    Task<string> ChangeToNextCurrentAuthorAsync(int storyId, int turnChanges = 1);
     
     Task<string?> GetCurrentAuthorUserNameAsync(int storyId);
     

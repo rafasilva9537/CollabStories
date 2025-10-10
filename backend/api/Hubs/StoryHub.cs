@@ -159,7 +159,7 @@ public class StoryHub : Hub<IStoryClient>
             }
         }
         
-        _logger.LogInformation("Connection disconnected. ConnectionId: {ConnectionId}, User: {UserName}, Error: {Error}.", Context.ConnectionId, Context.User?.Identity?.Name, exception?.Message);
+        _logger.LogInformation("Connection disconnected. ConnectionId: {ConnectionId}, User: {UserName}, Error: {Error}", Context.ConnectionId, Context.User?.Identity?.Name, exception?.Message);
         await base.OnDisconnectedAsync(exception);
     }
 }

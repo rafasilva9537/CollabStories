@@ -253,4 +253,106 @@ public class StoryServiceTests : IClassFixture<StoryServiceFixture>
         Assert.Equal(storyOwner.Id, afterThirdChange.CurrentAuthorId);
         Assert.Equal(storyOwner.UserName, returnedOwnerName);
     }
+    
+    [Fact]
+    public async Task ChangeToNextCurrentAuthorAsync_WhenTimePassedAfterInactiveStorySession_ShiftsToActualCurrentAuthor()
+    {
+        // Arrange 
+        using IServiceScope scope = _fixture.Factory.Services.CreateScope();
+        IStoryService storyService = scope.ServiceProvider.GetRequiredService<IStoryService>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        AppUser storyOwner = TestModelFactory.CreateAppUserModel(
+            baseUserName: "storyowner",
+            baseEmail: "owner@example.com",
+            nickname: "StoryOwner");
+        TestDataSeeder.SeedUser(dbContext, storyOwner);
+        
+        AppUser secondAuthor = TestModelFactory.CreateAppUserModel(
+            baseUserName: "secondauthor", 
+            baseEmail: "second@example.com",
+            nickname: "SecondAuthor");
+        TestDataSeeder.SeedUser(dbContext, secondAuthor);
+        
+        AppUser thirdAuthor = TestModelFactory.CreateAppUserModel(
+            baseUserName: "thirdauthor", 
+            baseEmail: "third@example.com",
+            nickname: "ThirdAuthor");
+        TestDataSeeder.SeedUser(dbContext, thirdAuthor);
+        
+        AppUser fourthAuthor = TestModelFactory.CreateAppUserModel(
+            baseUserName: "fourthauthor", 
+            baseEmail: "fourth@example.com",
+            nickname: "FourthAuthor");
+        TestDataSeeder.SeedUser(dbContext, fourthAuthor);
+        
+        const int turnDurationSeconds = 30;
+        Story testStory = TestModelFactory.CreateStoryModel(
+            title: "Test Story with Multiple Authors",
+            description: "A story to test if story author will shift to actual current author",
+            userId: storyOwner.Id,
+            currentAuthorId: storyOwner.Id,
+            turnDurationSeconds: turnDurationSeconds,
+            createdDate: new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            updatedDate: new DateTimeOffset(2025, 1, 15, 0, 0, 0, TimeSpan.Zero));
+        TestDataSeeder.SeedStory(dbContext, testStory);
+        
+        DateTimeOffset baseTime = testStory.UpdatedDate;
+        AuthorInStory ownerAsAuthor = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: storyOwner.Id,
+            entryDate: baseTime);
+        TestDataSeeder.SeedAuthorInStory(dbContext, ownerAsAuthor);
+
+        AuthorInStory secondAuthorInStory = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: secondAuthor.Id,
+            entryDate: baseTime.AddMinutes(5));
+        TestDataSeeder.SeedAuthorInStory(dbContext, secondAuthorInStory);
+
+        AuthorInStory thirdAuthorInStory = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: thirdAuthor.Id,
+            entryDate: baseTime.AddMinutes(10));
+        TestDataSeeder.SeedAuthorInStory(dbContext, thirdAuthorInStory);
+        
+        AuthorInStory fourthAuthorInStory = TestModelFactory.CreateAuthorInStory(
+            storyId: testStory.Id,
+            userId: fourthAuthor.Id,
+            entryDate: baseTime.AddMinutes(15));
+        TestDataSeeder.SeedAuthorInStory(dbContext, fourthAuthorInStory);
+        
+        
+        // Act/Assert
+        // Initially the current author should be the story owner
+        Story? initialStory = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(initialStory);
+        Assert.Equal(storyOwner.Id, initialStory.CurrentAuthorId);
+        
+        string currentAuthorName = await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id, turnChanges: 3);
+        Story? storyAfterAuthorChange = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(storyAfterAuthorChange);
+        Assert.Equal(fourthAuthor.UserName, currentAuthorName);
+        Assert.Equal(fourthAuthor.Id, storyAfterAuthorChange.CurrentAuthorId);        
+        
+        currentAuthorName = await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id, turnChanges: 12);
+        storyAfterAuthorChange = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(storyAfterAuthorChange);
+        Assert.Equal(fourthAuthor.UserName, currentAuthorName);
+        Assert.Equal(fourthAuthor.Id, storyAfterAuthorChange.CurrentAuthorId);
+        
+        currentAuthorName = await storyService.ChangeToNextCurrentAuthorAsync(testStory.Id, turnChanges: 34);
+        storyAfterAuthorChange = await dbContext.Story
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == testStory.Id);
+        Assert.NotNull(storyAfterAuthorChange);
+        Assert.Equal(secondAuthor.UserName, currentAuthorName);
+        Assert.Equal(secondAuthor.Id, storyAfterAuthorChange.CurrentAuthorId);
+    }
 }
