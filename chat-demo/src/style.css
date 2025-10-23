@@ -16,6 +16,7 @@ fieldset {
 
 input[type="text"],
 input[type="number"],
+input[type="password"],
 textarea {
   width: 100%;
   max-width: 700px;

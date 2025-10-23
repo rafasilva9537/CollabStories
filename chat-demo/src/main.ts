@@ -18,6 +18,7 @@ const els = {
   disconnectBtn: document.getElementById("disconnectBtn") as HTMLButtonElement,
   connectionState: document.getElementById("connectionState") as HTMLElement,
   reconnectInfo: document.getElementById("reconnectInfo") as HTMLElement,
+  loggedUser: document.getElementById("loggedUser") as HTMLElement,
 
   storyId: document.getElementById("storyId") as HTMLInputElement,
   joinBtn: document.getElementById("joinBtn") as HTMLButtonElement,
@@ -59,6 +60,10 @@ function setUiConnected(connected: boolean) {
   els.joinBtn.disabled = !connected;
   els.leaveBtn.disabled = !connected;
   els.sendBtn.disabled = !connected;
+}
+
+function setLoggedUser(text: string) {
+  els.loggedUser.textContent = text;
 }
 
 function getStoryId(): number | null {
@@ -117,6 +122,7 @@ async function connect() {
   setConnectionState("connecting");
   setUiConnected(false);
   els.reconnectInfo.textContent = "";
+  setLoggedUser("-");
 
   const hubUrl = `${baseUrl.replace(/\/+$/, "")}/story-hub`;
 
@@ -201,6 +207,9 @@ async function connect() {
     setConnectionState("connected");
     setUiConnected(true);
     logLine("Connected.", "ok");
+
+    // Fetch and display the logged-in user from the API
+    await fetchAndShowLoggedUser(baseUrl, token);
   } catch (e: any) {
     setConnectionState("disconnected");
     setUiConnected(false);
@@ -223,6 +232,7 @@ async function disconnect() {
     turnEndTimeUtc = null;
     stopTurnCountdown();
     els.turnCountdown.textContent = "-";
+    setLoggedUser("-");
     logLine("Disconnected.", "warn");
   }
 }
@@ -298,3 +308,35 @@ els.sendBtn.addEventListener("click", sendStoryPart);
 els.baseUrl.value = "http://localhost:5014";
 setConnectionState("disconnected");
 setUiConnected(false);
+
+// Helpers
+async function fetchAndShowLoggedUser(baseUrl: string, token: string) {
+  try {
+    const url = `${baseUrl.replace(/\/+$/, "")}/accounts/me`;
+    const resp = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (resp.status === 401) {
+      setLoggedUser("unauthorized");
+      logLine("accounts/me returned 401 Unauthorized", "warn");
+      return;
+    }
+    if (!resp.ok) {
+      setLoggedUser("-");
+      logLine(`accounts/me failed: ${resp.status} ${resp.statusText}`, "err");
+      return;
+    }
+
+    const data: any = await resp.json();
+    const name =
+      data?.userName ?? data?.username ?? data?.name ?? "(unknown)";
+    setLoggedUser(String(name));
+    logLine(`Logged user: ${name}`, "ok");
+  } catch (err: any) {
+    setLoggedUser("-");
+    logLine(`accounts/me error: ${err?.message ?? err}`, "err");
+  }
+}
