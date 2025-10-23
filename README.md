@@ -24,19 +24,19 @@ A web platform for real-time collaborative storytelling, built with ASP.NET Core
 ### Backend
 <details>
     <summary><b>Account Endpoints</b></summary>
-    <img src="./docs/images/account-endpoints.png" alt="Account Endpoints">
+    <img src="docs/images/account-endpoints.png" alt="Account Endpoints">
 </details>
 <details>
     <summary><b>Story Endpoints</b></summary>
-    <img src="./docs/images/story-endpoints.png" alt="Story Endpoints">
+    <img src="docs/images/story-endpoints.png" alt="Story Endpoints">
 </details>
 <details>
     <summary><b>Data Flow Diagram</b></summary>
-    <img src="./docs/images/data-flow-diagram.png" alt="Dataflow Diagram">
+    <img src="docs/images/data-flow-diagram.png" alt="Dataflow Diagram">
 </details>
 <details>
     <summary><b>Database Diagram</b></summary>
-    <img src="./docs/images/database-diagram.png" alt="Database Diagram">
+    <img src="docs/images/database-diagram.png" alt="Database Diagram">
 </details>
 
 ### Chat Demo (temporary)
