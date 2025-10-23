@@ -87,7 +87,7 @@ public interface IStoryService
     
     Task<PagedKeysetStoryList<StoryPartInListDto>> GetStoryPartsAsync(int storyId, int? lastId = null, int pageSize = 15);
     
-    Task<bool> DeleteStoryPart(int storyId, int storyPartId);
+    Task<bool> DeleteStoryPart(int storyPartId);
     
     Task<bool> IsStoryPartCreator(string userName, int storyPartId);
 }

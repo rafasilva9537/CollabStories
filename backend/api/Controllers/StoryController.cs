@@ -215,18 +215,18 @@ public class StoryController : ControllerBase
         return Ok(storyParts);
     }
     
-    [HttpDelete("{storyId:int}/story-parts/{storyPartId:int}")]
+    [HttpDelete("story-parts/{storyPartId:int}")]
     [Authorize(Policy = PolicyConstants.RequiredAdminRole)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<MessageResponse>> DeleteStoryPart([FromRoute] int storyId, [FromRoute] int storyPartId)
+    public async Task<ActionResult<MessageResponse>> DeleteStoryPart([FromRoute] int storyPartId)
     {
         string? loggedUser = User.FindFirstValue(ClaimTypes.Name);
         if (loggedUser is null) return Unauthorized();
 
-        bool isDeleted = await _storyService.DeleteStoryPart(storyId, storyPartId);
+        bool isDeleted = await _storyService.DeleteStoryPart(storyPartId);
         if (!isDeleted) return NotFound();
 
         return Ok();

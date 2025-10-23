@@ -418,11 +418,11 @@ public class StoryService : IStoryService
         return pagedStoryParts;
     }
 
-    public async Task<bool> DeleteStoryPart(int storyId, int storyPartId)
+    public async Task<bool> DeleteStoryPart(int storyPartId)
     {
         StoryPart? storyPartToDelete = await _context.StoryPart.FirstOrDefaultAsync(storyPart => storyPart.Id == storyPartId);
         
-        if(storyPartToDelete is null || storyPartToDelete.StoryId != storyId) return false;
+        if(storyPartToDelete is null) return false;
 
         _context.Remove(storyPartToDelete);
         await _context.SaveChangesAsync();
