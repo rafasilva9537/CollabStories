@@ -20,7 +20,7 @@ A web platform for real-time collaborative storytelling, built with ASP.NET Core
 
 ---
 
-## 📸 Images
+## 📸 Media
 ### Backend
 <details>
     <summary><b>Account Endpoints</b></summary>
@@ -32,12 +32,18 @@ A web platform for real-time collaborative storytelling, built with ASP.NET Core
 </details>
 <details>
     <summary><b>Data Flow Diagram</b></summary>
-    <img src="docs/images/data-flow-diagram.png" alt="Database Diagram">
+    <img src="./docs/images/data-flow-diagram.png" alt="Dataflow Diagram">
 </details>
 <details>
     <summary><b>Database Diagram</b></summary>
     <img src="./docs/images/database-diagram.png" alt="Database Diagram">
 </details>
+
+### Chat Demo (temporary)
+*Will be removed after frontend completion, this is just a prototype.*
+
+https://github.com/user-attachments/assets/fa2e6b93-ff57-4c7e-a7df-92b3dd01da19
+
 
 ### Frontend
 Building ...
