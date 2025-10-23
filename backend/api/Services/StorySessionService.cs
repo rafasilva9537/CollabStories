@@ -63,12 +63,19 @@ public class StorySessionService : IStorySessionService
 
         TimeSpan timeSinceUpdate = _dateTimeProvider.UtcNow - story.AuthorsMembershipChangeDate;
         int turnDurationSeconds = story.TurnDurationSeconds;
+        int turnsPassed = (int)(timeSinceUpdate.TotalSeconds / turnDurationSeconds);
 
+        if (turnsPassed > 0)
+        {
+            await storyService.ChangeToNextCurrentAuthorAsync(int.Parse(storyId), turnsPassed);
+        }
+        
         double secondsIntoCurrentTurn = timeSinceUpdate.TotalSeconds % turnDurationSeconds;
+        
         double remainingSeconds = turnDurationSeconds - secondsIntoCurrentTurn;
         DateTimeOffset turnEndTime = _dateTimeProvider.UtcNow.AddSeconds(remainingSeconds);
         
-        SessionInfo sessionInfo = new (turnEndTime, turnDurationSeconds);
+        SessionInfo sessionInfo = new(turnEndTime, turnDurationSeconds);
         _sessions.TryAdd(storyId, sessionInfo);
         
         _logger.LogInformation(
