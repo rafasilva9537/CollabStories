@@ -153,8 +153,10 @@ public class StoryService : IStoryService
         return isStoryCreator;
     }
 
-    public async Task<string> ChangeToNextCurrentAuthorAsync(int storyId)
+    public async Task<string> ChangeToNextCurrentAuthorAsync(int storyId, int turnChanges = 1)
     {
+        if(turnChanges < 1) throw new ArgumentException("Turn changes must be greater than 0.");
+        
         var storyAuthorsIds = await _context.Story
             .Where(s => s.Id == storyId)
             .Select(s => new
@@ -179,9 +181,14 @@ public class StoryService : IStoryService
         {
             throw new InvalidOperationException("Cannot change author: no current author is set.");
         }
+        
         if(storyAuthorsIds.AuthorsInStoryIds.Count <= 1) 
         {
-            throw new InvalidOperationException("Cannot change author: story must have at least 2 authors.");
+            string currentAuthorUsername = await _context.AppUser
+                .Where(au => au.Id == currentAuthorId)
+                .Select(au => au.UserName!)
+                .FirstAsync();
+            return currentAuthorUsername;
         }
         
         int currentAuthorIndex = authorsIds.IndexOf(currentAuthorId.Value);
@@ -190,7 +197,7 @@ public class StoryService : IStoryService
             throw new InvalidOperationException("Cannot change author: current author is not in story.");
         }
         
-        int nextAuthorIndex = (currentAuthorIndex + 1) % authorsIds.Count;
+        int nextAuthorIndex = (currentAuthorIndex + turnChanges) % authorsIds.Count;
         int nextAuthorId = authorsIds[nextAuthorIndex];
         
         await _context.Story

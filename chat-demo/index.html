@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Story Session SignalR Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <h1>Story Session SignalR Demo</h1>
+
+  <fieldset>
+    <legend>Connection</legend>
+    <div class="row">
+      <label>Base URL:
+        <input id="baseUrl" type="text" placeholder="https://localhost:5001" />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>JWT Token:
+        <input id="jwtToken" type="password" placeholder="eyJhbGciOi..." />
+      </label>
+    </div>
+    
+    <div class="row">
+      <button id="connectBtn">Connect</button>
+      <button id="disconnectBtn" disabled>Disconnect</button>
+      <span id="connectionState" class="badge">disconnected</span>
+      <span id="reconnectInfo" class="badge"></span>
+    </div>
+      
+    <div class="row">
+        <span class="status">Logged user: <strong id="loggedUser">-</strong></span>
+    </div>
+      
+  </fieldset>
+
+  </fieldset>
+
+  <fieldset>
+    <legend>Story Session</legend>
+    <div class="row">
+      <label>Story ID:
+        <input id="storyId" type="number" placeholder="e.g. 1" />
+      </label>
+    </div>
+    <div class="row">
+      <button id="joinBtn" disabled>Join Session</button>
+      <button id="leaveBtn" disabled>Leave Session</button>
+      <span class="status">Current Author: <strong id="currentAuthor">-</strong></span>
+      <span class="status">Turn ends in: <strong id="turnCountdown">-</strong></span>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Send Story Part</legend>
+    <div class="row">
+      <textarea id="storyPartText" rows="3" placeholder="Type a story part..."></textarea>
+    </div>
+    <div class="row">
+      <button id="sendBtn" disabled>Send Story Part</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Events Log</legend>
+    <div class="log" id="log"></div>
+  </fieldset>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

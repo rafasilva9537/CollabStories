@@ -176,8 +176,7 @@ public static class DependenciesConfig
         //TODO: improve security
         CorsPolicy corsPolicy = new CorsPolicyBuilder()
             .WithOrigins(
-                "http://localhost:5500", 
-                "http://localhost:3001", 
+                "http://localhost:3001",
                 "http://localhost:3000"
             )
             .AllowAnyHeader()
