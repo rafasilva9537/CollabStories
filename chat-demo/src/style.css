@@ -1,0 +1,55 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 1rem;
+}
+
+fieldset {
+  margin-bottom: 1rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  width: 100%;
+  max-width: 700px;
+}
+
+.log {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  height: 240px;
+  overflow: auto;
+  background: #fafafa;
+}
+
+.status {
+  margin: 0.25rem 0;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  background: #eee;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  margin-right: 0.4rem;
+}
+
+.ok {
+  color: #1b7f1b;
+}
+
+.warn {
+  color: #a15f00;
+}
+
+.err {
+  color: #a00000;
+}
