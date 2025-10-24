@@ -50,13 +50,6 @@ Building ...
 
 ---
 
-## 🚀 Future Features
-### Homepage
-- Latest stories
-- Infinite scrolling navigation
-
----
-
 ## 🛠 Setup
 ### Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (Not needed if API will be running only inside docker container).
