@@ -79,7 +79,6 @@ public static class DependenciesConfig
                 throw new ApplicationException("Jwt is not set in the configuration");
             }
 
-            options.SaveToken = true;
             options.RequireHttpsMetadata = false; // TODO: change back to true in deploy
             options.TokenValidationParameters = new TokenValidationParameters()
             {
